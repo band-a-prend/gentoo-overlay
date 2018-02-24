@@ -71,14 +71,12 @@ diff -Naur old/m4/acinclude.m4 new/m4/acinclude.m4
 diff -Naur old/src/plugins/contrib/FortranProject/Makefile.am new/src/plugins/contrib/FortranProject/Makefile.am
 --- /dev/null	1970-01-01 03:00:00.000000000 +0300
 +++ new/src/plugins/contrib/FortranProject/Makefile.am	2018-02-22 10:32:29.000000000 +0300
-@@ -0,0 +1,124 @@
+@@ -0,0 +1,122 @@
 +SUBDIRS = images
 +
 +AM_CPPFLAGS = $(WX_CXXFLAGS) \
 +		-I$(top_srcdir)/src/include \
-+		-I$(top_srcdir)/src/include/tinyxml \
-+		-I$(top_srcdir)/src/sdk/wxscintilla/include \
-+		-I../FortranProject
++		-I$(top_srcdir)/src/sdk/wxscintilla/include
 +
 +pluginlibdir = $(pkglibdir)/plugins
 +
