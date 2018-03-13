@@ -136,5 +136,21 @@ src_test() {
 }
 
 src_install() {
-	escons install prefix="${D}/usr"
+	escons install prefix="${D%/}/usr"
+}
+
+pkg_preinst() {
+	## Replace scons-'prefix' "${D}/usr" sandbox paths in configuration files 
+	## with normal "/usr"-prefix before installation to live filesystem
+	pushd ${D%/}
+		find ./ ! -name '*.pyc' -type f -exec sed -i "s:${D%/}::g" {} +
+	popd
+	## Rebuild bytecode .pyc files with relative paths instead of scons-'prefix' "${D}/usr" absolute paths
+	## Currently for python 2.7 and 3.5. This action seems is not nessessary. So temporary commented
+	#pushd ${D%/}/usr/lib64/python2.7
+	#	python2 -m compileall .
+	#popd
+	#pushd ${D%/}/usr/lib64/python3.5
+	#	python3.5 -m compileall .
+	#popd
 }
