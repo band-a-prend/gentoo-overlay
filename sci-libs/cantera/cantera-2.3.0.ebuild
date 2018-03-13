@@ -79,6 +79,26 @@ src_prepare() {
 ## to "python?" USE-conditional statement as they both are requeried 
 ## to build Python part of Cantera package.
 
+scons_vars=()
+set_scons_vars() {
+	scons_vars=(
+## temporary commented ##
+#		cc="$(tc-getCC)"
+#		cxx="$(tc-getCXX)"
+#		ccflags="${CXXFLAGS}"
+#		linkflags="${LDFLAGS}"
+
+		cxx_flags="-std=c++11"
+		debug=$(usex debug)
+		use_pch=$(usex pch)
+## in some cases other order could break the right location of Boost ##
+		system_fmt="y"
+		system_sundials="y"
+		system_eigen="y"
+		extra_inc_dirs="/usr/include/eigen3"
+	)
+}
+
 scons_targets=()
 set_scons_targets() {
 	scons_targets=(
@@ -103,25 +123,6 @@ set_scons_targets() {
 	fi
 }
 
-scons_vars=()
-set_scons_vars() {
-	scons_vars=(
-## temporary commented ##
-#		cc="$(tc-getCC)"
-#		cxx="$(tc-getCXX)"
-#		ccflags="${CXXFLAGS}"
-#		linkflags="${LDFLAGS}"
-
-		debug=$(usex debug)
-		use_pch=$(usex pch)
-## in some cases other order could break the right location of Boost ##
-		system_fmt="y"
-		system_sundials="y"
-		system_eigen="y"
-		extra_inc_dirs="/usr/include/eigen3"
-	)
-}
-
 src_compile() {
 	set_scons_targets
 	set_scons_vars
@@ -135,7 +136,5 @@ src_test() {
 }
 
 src_install() {
-	set_scons_targets
-	set_scons_vars
-	escons prefix="${D}/usr" install
+	escons install prefix="${D}/usr"
 }
