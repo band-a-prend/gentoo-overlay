@@ -13,7 +13,8 @@ LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
-	https://github.com/google/googletest/archive/release-1.7.0.tar.gz -> googletest-1.7.0.tar.gz"
+	test? ( https://github.com/google/googletest/archive/release-1.7.0.tar.gz -> googletest-1.7.0.tar.gz )
+	"
 
 IUSE="debug doxygen_docs fmt4 fortran -matlab pch python samples -sphinx_docs test"
 
@@ -64,8 +65,9 @@ DEPEND="
 "
 
 src_prepare() {
+	epatch "${FILESDIR}/${PN}_select_is_googletest.patch"
 	use fmt4 && epatch "${FILESDIR}/${PN}_fmt4.patch"
-	mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/
+	use test && mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/
 	eapply_user
 }
 
@@ -97,6 +99,7 @@ set_scons_vars() {
 		system_eigen="y"
 		extra_inc_dirs="/usr/include/eigen3"
 	)
+	use test || scons_vars+=( googletest="n" )
 }
 
 scons_targets=()
