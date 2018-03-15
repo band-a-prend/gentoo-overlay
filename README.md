@@ -24,9 +24,11 @@ Homepage and documentation: http://cantera.org
 Currently there is no switching between python3 in ebuild and autodetection of current system python3 branch is used by cantera build system. Python3 branch could be managed by 'python_cmd' cantera scons configuration option.
 
 **TODO**:
-* implement some additional USE-flags
-* try to write patch that disable dependence of 'google-test' at all
-* add switch to build python3_{4,6} bindings
+* Implement some additional USE-flags
+* Write patch that optionaly disable dependence of 'google-test' (ready?)
+* Add switch to build python3_{4,6} bindings
+* Replace USE_flags `doxygen_docs` and  `sphinx_docs` to compile documentations from source by `doc` that will install already compiled sphinx and doxygen documentation from additional official tarball. The reason is that `sphinx_docs` depend on package that is absent in portage tree and sphinx documentation contains referenses to doxygen documentation so it's rationally to provide them together.
+* Add .desktop entry to sphinx and doxygen documentation index.html files
 
 **UNTESTED**:  
 * Builing of `matlab` bindings and `sphinx_docs`
