@@ -28,14 +28,16 @@ IUSE="debug doxygen_docs fmt4 fortran -matlab pch python samples -sphinx_docs te
 ## Python3 automatic detection is used by cantera before compilling
 ## if python3_package is not set no "n".
 
-REQUIRED_USE="${PYTHON_REQUIRED_USE}
-	^^ ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 )"
+REQUIRED_USE="
+	python? ( || ( python_targets_python2_7 python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 ) )
+	python_targets_python3_4? ( !python_targets_python3_5 !python_targets_python3_6 )
+	python_targets_python3_5? ( !python_targets_python3_4 !python_targets_python3_6 )
+	python_targets_python3_6? ( !python_targets_python3_4 !python_targets_python3_5 )
+	"
 
 DEPEND="
 	dev-cpp/eigen
 	dev-libs/boost
-	dev-python/cython
-	dev-python/numpy
 	dev-util/scons
 	fmt4? (
 		>=dev-libs/libfmt-4.0.0
@@ -51,6 +53,7 @@ DEPEND="
 	python? (
 		dev-python/3to2
 		dev-python/cython
+		dev-python/numpy
 		dev-python/pip
 	)
 	doxygen_docs? (
@@ -111,10 +114,22 @@ set_scons_targets() {
 		sphinx_docs=$(usex sphinx_docs)
 		f90_interface=$(usex fortran y n)
 	)
-	use python && scons_targets+=( python_package="full" )
-	use python && scons_targets+=( python3_package="$(usex python_targets_python3_5 y n)" )
-	use python || scons_targets+=( python_package="minimal" )
-	use python_targets_python2_7 || scons_targets+=( python_package="none" )
+
+	if use python ; then
+		use python_targets_python2_7 && scons_targets+=( python_package="full" )
+		use python_targets_python2_7 || scons_targets+=( python_package="none" )
+		use python_targets_python3_4 && scons_targets+=( python3_package="y" python3_cmd="python3.4" )
+		use python_targets_python3_5 && scons_targets+=( python3_package="y" python3_cmd="python3.5" )
+		use python_targets_python3_6 && scons_targets+=( python3_package="y" python3_cmd="python3.6" )
+	else
+		use python_targets_python2_7 && scons_targets+=( python_package="minimal" python3_package="n")
+		use python_targets_python2_7 || scons_targets+=( python_package="none" )
+	fi
+
+	use python_targets_python3_4 || use python_targets_python3_5 || \
+					use python_targets_python3_6 || \
+					scons_targets+=( python3_package="n" )
+
 	use matlab && scons_targets+=( matlab_toolbox="y" )
 	if use matlab; then
 		MATLAB_DIR="/opt/MATLAB"
@@ -154,3 +169,12 @@ src_install() {
 	#	python3.5 -m compileall .
 	#popd
 #}
+
+pkg_postinst() {
+	if ! use python && use python_targets_python2_7 ; then
+		elog "You just install cantera python=\"minimal\" configuration"
+		elog "If you are planning to process CTI files and use \"ck2cti\" utility"
+		elog "then you need additionaly to install dev-python/numpy[python_targets_python2_7]"
+		elog "or install this package via pip for python2.7"
+	fi
+}
