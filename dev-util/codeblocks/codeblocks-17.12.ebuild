@@ -29,13 +29,13 @@ RDEPEND="app-arch/zip
 		app-text/hunspell
 		dev-libs/boost:=
 		dev-libs/libgamin
-	)
-	fortran? (
-		sys-devel/autoconf:2.69
-		sys-devel/automake
 	)"
 
 DEPEND="${RDEPEND}
+	fortran? (
+		sys-devel/autoconf:2.69
+		sys-devel/automake
+	)
 	virtual/pkgconfig"
 
 src_prepare() {
