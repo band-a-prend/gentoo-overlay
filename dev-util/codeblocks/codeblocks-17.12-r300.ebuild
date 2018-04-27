@@ -32,27 +32,21 @@ RDEPEND="app-arch/zip
 	)"
 
 DEPEND="${RDEPEND}
-	fortran? (
-		sys-devel/autoconf:2.69
-		sys-devel/automake
-	)
+	sys-devel/autoconf:2.69
+	sys-devel/automake
 	virtual/pkgconfig"
 
 src_prepare() {
-	if ! use fortran ; then
-		default
-	else
-		epatch "${FILESDIR}/FortranProject_autotools_build.diff"
-		eapply_user
-		# Rerun autotools
-		einfo "Regenerating autotools files..."
-		WANT_AUTOCONF=2.69 eautoconf
-		# codeblocks tarball makefile.in files were generated with automake 1.13
-		# but after patching for FortranProject plugin the rebuild of tree is successful
-		# also with automake:1.15 so dependence of =automake:1.13 isn't obligatory
-		# there will be only warning:
-		WANT_AUTOMAKE=1.13 eautomake
-	fi
+	default
+	epatch "${FILESDIR}/FortranProject_autotools_build.diff"
+	# Rerun autotools
+	einfo "Regenerating autotools files..."
+	WANT_AUTOCONF=2.69 eautoconf
+	# codeblocks tarball makefile.in files were generated with automake 1.13
+	# but after patching for FortranProject plugin the rebuild of tree is successful
+	# also with automake:1.15, 1.16 and 1.16.1 so dependence of =automake:1.13 isn't obligatory
+	# there will be only warning:
+	WANT_AUTOMAKE=1.13 eautomake
 }
 
 src_configure() {
@@ -62,7 +56,7 @@ src_configure() {
 	append-cxxflags $(test-flags-CXX -fno-delete-null-pointer-checks)
 
 	# set --with-contrib-plugins or --without-contrib-plugins
-	use fortran || CONF_WITH_LST=$(use_with contrib contrib-plugins all)
+	use fortran || CONF_WITH_LST=$(use_with contrib contrib-plugins all,-FortranProject)
 	use fortran && CONF_WITH_LST=$(use_with contrib contrib-plugins all)
 	use contrib || CONF_WITH_LST=$(use_with fortran contrib-plugins FortranProject)
 
