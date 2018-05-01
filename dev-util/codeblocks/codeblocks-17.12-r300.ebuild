@@ -46,9 +46,11 @@ src_configure() {
 
 	append-cxxflags $(test-flags-CXX -fno-delete-null-pointer-checks)
 
-	# set --with-contrib-plugins or --without-contrib-plugins
+	# USE="contrib -fortran" setup:
 	use fortran || CONF_WITH_LST=$(use_with contrib contrib-plugins all,-FortranProject)
+	# USE="contrib fortran" setup:
 	use fortran && CONF_WITH_LST=$(use_with contrib contrib-plugins all)
+	# USE="-contrib fortran" setup:
 	use contrib || CONF_WITH_LST=$(use_with fortran contrib-plugins FortranProject)
 
 	econf \
