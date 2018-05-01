@@ -38,18 +38,10 @@ PATCHES=( "${FILESDIR}/FortranProject_autotools_build.diff" )
 
 src_prepare() {
 	default
-	# Rerun autotools
-	einfo "Regenerating autotools files..."
-	eautoconf
-	# codeblocks tarball makefile.in files were generated with automake 1.13
-	# but after patching for FortranProject plugin the rebuild of tree is successful
-	# also with automake:1.15, 1.16 and 1.16.1 so dependence of =automake:1.13 isn't obligatory
-	# there will be only warning:
-	eautomake
+	eautoreconf
 }
 
 src_configure() {
-	touch "${S}"/revision.m4 -r "${S}"/m4/acinclude.m4
 	setup-wxwidgets
 
 	append-cxxflags $(test-flags-CXX -fno-delete-null-pointer-checks)
