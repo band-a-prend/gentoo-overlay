@@ -5,7 +5,7 @@ EAPI=6
 
 WX_GTK_VER="3.0-gtk3"
 
-inherit autotools flag-o-matic wxwidgets xdg-utils
+inherit autotools flag-o-matic gnome2-utils wxwidgets xdg-utils
 
 DESCRIPTION="The open source, cross platform, free C++ IDE"
 HOMEPAGE="http://www.codeblocks.org/"
@@ -70,9 +70,11 @@ pkg_postinst() {
 
 	xdg_desktop_database_update
 	xdg_mimeinfo_database_update
+	gnome2_icon_cache_update
 }
 
 pkg_postrm() {
 	xdg_desktop_database_update
 	xdg_mimeinfo_database_update
+	gnome2_icon_cache_update
 }
