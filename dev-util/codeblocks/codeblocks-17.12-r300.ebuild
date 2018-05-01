@@ -5,7 +5,7 @@ EAPI=6
 
 WX_GTK_VER="3.0-gtk3"
 
-inherit autotools eutils flag-o-matic wxwidgets xdg-utils
+inherit autotools flag-o-matic wxwidgets xdg-utils
 
 DESCRIPTION="The open source, cross platform, free C++ IDE"
 HOMEPAGE="http://www.codeblocks.org/"
