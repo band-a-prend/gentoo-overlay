@@ -21,8 +21,6 @@ SRC_URI="mirror://sourceforge/codeblocks/${P/-/_}.tar.xz"
 
 IUSE="contrib debug fortran pch static-libs"
 
-S="${WORKDIR}/${P}"
-
 RDEPEND="app-arch/zip
 	x11-libs/wxGTK:${WX_GTK_VER}[X]
 	contrib? (
@@ -36,17 +34,18 @@ DEPEND="${RDEPEND}
 	sys-devel/automake
 	virtual/pkgconfig"
 
+PATCHES=( "${FILESDIR}/FortranProject_autotools_build.diff" )
+
 src_prepare() {
 	default
-	epatch "${FILESDIR}/FortranProject_autotools_build.diff"
 	# Rerun autotools
 	einfo "Regenerating autotools files..."
-	WANT_AUTOCONF=2.69 eautoconf
+	eautoconf
 	# codeblocks tarball makefile.in files were generated with automake 1.13
 	# but after patching for FortranProject plugin the rebuild of tree is successful
 	# also with automake:1.15, 1.16 and 1.16.1 so dependence of =automake:1.13 isn't obligatory
 	# there will be only warning:
-	WANT_AUTOMAKE=1.13 eautomake
+	eautomake
 }
 
 src_configure() {
