@@ -12,7 +12,7 @@ HOMEPAGE="http://www.codeblocks.org/"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~ppc ~x86 ~x86-fbsd"
-SRC_URI="mirror://sourceforge/codeblocks/${P/-/_}.tar.xz"
+SRC_URI="mirror://sourceforge/${PN}/${P/-/_}.tar.xz"
 
 # USE="fortran" enable FortranProject plugin (v1.5)
 # that is delivered with Code::Blocks 17.12 source code.
