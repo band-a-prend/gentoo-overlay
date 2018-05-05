@@ -35,6 +35,7 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig"
 
 PATCHES=( "${FILESDIR}/codeblocks-17.12-nodebug.diff"
+	"${FILESDIR}/FortranProject_fix_build_gcc7_failed.patch"
 	"${FILESDIR}/FortranProject_autotools_build.diff" )
 
 src_prepare() {
