@@ -19,7 +19,7 @@ SRC_URI="mirror://sourceforge/${PN}/${P/-/_}.tar.xz"
 # https://sourceforge.net/projects/fortranproject
 # http://cbfortran.sourceforge.net
 
-IUSE="contrib debug fortran pch static-libs"
+IUSE="contrib debug fortran pch"
 
 RDEPEND="app-arch/zip
 	x11-libs/wxGTK:${WX_GTK_VER}[X]
@@ -55,9 +55,9 @@ src_configure() {
 
 	econf \
 		--with-wx-config="${WX_CONFIG}" \
+		--disable-static \
 		$(use_enable debug) \
 		$(use_enable pch) \
-		$(use_enable static-libs static) \
 		${CONF_WITH_LST}
 }
 
