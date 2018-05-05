@@ -34,7 +34,8 @@ DEPEND="${RDEPEND}
 	sys-devel/automake
 	virtual/pkgconfig"
 
-PATCHES=( "${FILESDIR}/FortranProject_autotools_build.diff" )
+PATCHES=( "${FILESDIR}/codeblocks-17.12-nodebug.diff"
+	"${FILESDIR}/FortranProject_autotools_build.diff" )
 
 src_prepare() {
 	default
