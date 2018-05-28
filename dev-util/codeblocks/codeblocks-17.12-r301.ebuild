@@ -11,7 +11,7 @@ DESCRIPTION="The open source, cross platform, free C, C++ and Fortran IDE"
 HOMEPAGE="http://www.codeblocks.org/"
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ppc ~x86 ~x86-fbsd"
+KEYWORDS="~amd64 ~ppc ~x86 ~x86-fbsd"
 SRC_URI="mirror://sourceforge/${PN}/${P/-/_}.tar.xz"
 
 # USE="fortran" enables FortranProject plugin (v1.5)
@@ -31,6 +31,7 @@ RDEPEND="app-arch/zip
 
 DEPEND="${RDEPEND}
 	>=dev-libs/tinyxml-2.6.2-r3
+	>=dev-util/astyle-3.0.1-r1:0=
 	virtual/pkgconfig"
 
 PATCHES=(
@@ -38,6 +39,10 @@ PATCHES=(
 	"${FILESDIR}"/FortranProject_fix_build_gcc7_failed.patch
 	"${FILESDIR}"/FortranProject_autotools_build.diff
 	)
+
+if [ -f /usr/lib/libastyle.so.3.1.0 ]; then
+	PATCHES+=( "${FILESDIR}"/codeblocks-17.12_astyle-3.1_compat.diff )
+fi
 
 src_prepare() {
 	default
