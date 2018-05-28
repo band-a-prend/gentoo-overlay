@@ -41,7 +41,7 @@ PATCHES=(
 	)
 
 if [ -f /usr/lib/libastyle.so.3.1.0 ]; then
-	PATCHES+=( "${FILESDIR}"/codeblocks-17.12_astyle-3.1_compat.diff )
+	PATCHES+=( "${FILESDIR}"/codeblocks-17.12_update_astyle_plugin_to_v3.1.patch )
 fi
 
 src_prepare() {
