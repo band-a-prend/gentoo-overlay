@@ -40,12 +40,11 @@ PATCHES=(
 	"${FILESDIR}"/FortranProject_autotools_build.diff
 	)
 
-if [ -f /usr/lib/libastyle.so.3.1.0 ]; then
-	PATCHES+=( "${FILESDIR}"/codeblocks-17.12_update_astyle_plugin_to_v3.1.patch )
-fi
-
 src_prepare() {
 	default
+	if has_version "~dev-util/astyle-3.1" ; then
+		epatch "${FILESDIR}"/codeblocks-17.12_update_astyle_plugin_to_v3.1.patch
+	fi
 	eautoreconf
 }
 
