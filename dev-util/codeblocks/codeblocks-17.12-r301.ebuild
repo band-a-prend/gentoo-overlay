@@ -42,7 +42,7 @@ PATCHES=(
 
 src_prepare() {
 	default
-	if has_version "~dev-util/astyle-3.1" ; then
+	if has_version ">=dev-util/astyle-3.1" ; then
 		epatch "${FILESDIR}"/codeblocks-17.12_update_astyle_plugin_to_v3.1.patch
 	fi
 	eautoreconf
