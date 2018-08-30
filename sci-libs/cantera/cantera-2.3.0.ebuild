@@ -68,6 +68,7 @@ DEPEND="
 "
 
 src_prepare() {
+	epatch "${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
 	epatch "${FILESDIR}/${PN}_select_is_googletest.patch"
 	use fmt4 && epatch "${FILESDIR}/${PN}_fmt4.patch"
 	use test && mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/

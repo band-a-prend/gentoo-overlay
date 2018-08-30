@@ -1,0 +1,14 @@
+# Patch from upstream: 
+# https://github.com/Cantera/cantera/commit/405750f61de396efb09f64897a445cc03f58b2cf
+# that fixes build fail for GCC Version >= 7.0 due to absence header for std::function declaration
+diff -Naur old/include/cantera/base/FactoryBase.h new/include/cantera/base/FactoryBase.h
+--- old/include/cantera/base/FactoryBase.h	2017-01-13 06:28:53.000000000 +0300
++++ new/include/cantera/base/FactoryBase.h	2018-08-24 23:42:34.000000000 +0300
+@@ -12,6 +12,7 @@
+ #include <vector>
+ #include <mutex>
+ #include <unordered_map>
++#include <functional>
+ #include "cantera/base/ctexceptions.h"
+ 
+ namespace Cantera
