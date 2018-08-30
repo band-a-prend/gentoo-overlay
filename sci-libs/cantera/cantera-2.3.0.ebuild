@@ -159,6 +159,9 @@ src_test() {
 
 src_install() {
 	escons install
+	if use doxygen_docs ; then
+		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
+	fi
 }
 
 #pkg_preinst() {
