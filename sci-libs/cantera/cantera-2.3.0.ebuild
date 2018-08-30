@@ -62,15 +62,18 @@ DEPEND="
 	)
 "
 
-src_prepare() {
-	epatch "${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
-	epatch "${FILESDIR}/${PN}_${PV}_googletest_option.patch"
 	# fix compability only with libfmt 4.x as
 	# fixing compability with 5.y requires too many changes
 	# and fixed in cantera 2.4.0
-	epatch "${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
+PATCHES=(
+	"${FILESDIR}/${PN}_${PV}_googletest_option.patch"
+	"${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
+	"${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
+	)
+
+src_prepare() {
+	default
 	use test && mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/
-	eapply_user
 }
 
 ## Full list of configuration options of Cantera is presented here: 
