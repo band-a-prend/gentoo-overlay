@@ -16,7 +16,7 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
 	test? ( https://github.com/google/googletest/archive/release-1.7.0.tar.gz -> googletest-1.7.0.tar.gz )
 	"
 
-IUSE="debug doxygen_docs fmt4 fortran -matlab pch python samples -sphinx_docs test"
+IUSE="debug doxygen_docs fortran -matlab pch python samples -sphinx_docs test"
 
 ## USE-flags INFO: 
 ## "matlab" and "sphinx_docs" require MATLAB and matlabdomain package installed
@@ -39,12 +39,7 @@ DEPEND="
 	dev-cpp/eigen
 	dev-libs/boost
 	dev-util/scons
-	fmt4? (
-		>=dev-libs/libfmt-4.0.0
-	)
-	!fmt4? (
-		<=dev-libs/libfmt-3.0.2
-	)
+	dev-libs/libfmt:0/4
 	sci-libs/sundials
 	fortran? (
 		sci-libs/sundials[fortran]
@@ -70,7 +65,10 @@ DEPEND="
 src_prepare() {
 	epatch "${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
 	epatch "${FILESDIR}/${PN}_${PV}_googletest_option.patch"
-	use fmt4 && epatch "${FILESDIR}/${PN}_fmt4.patch"
+	# fix compability only with libfmt 4.x as
+	# fixing compability with 5.y requires too many changes
+	# and fixed in cantera 2.4.0
+	epatch "${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
 	use test && mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/
 	eapply_user
 }

@@ -1,0 +1,23 @@
+# Upstream changes in fmt.h since Cantera 2.3.0 release until commit
+# https://github.com/Cantera/cantera/commit/ea69a014a54ac0fb5199c63b4b673af0b3eff23d
+# that fix compability with fmt library for versions 4.0
+diff -Naur old/include/cantera/base/fmt.h new/include/cantera/base/fmt.h
+--- old/include/cantera/base/fmt.h	2017-01-13 06:28:53.000000000 +0300
++++ new/include/cantera/base/fmt.h	2018-08-28 00:15:49.000000000 +0300
+@@ -1,10 +1,16 @@
+ //! @file fmt.h Wrapper for either system-installed or local headers for fmt
+ #include "ct_defs.h"
+ 
+ #if CT_USE_SYSTEM_FMT
+   #include "fmt/format.h"
++  #if defined(FMT_VERSION) && FMT_VERSION >= 40000
++    #include "fmt/printf.h"
++  #endif
+   #include "fmt/ostream.h"
+ #else
+   #include "cantera/ext/fmt/format.h"
++  #if defined(FMT_VERSION) && FMT_VERSION >= 40000
++    #include "cantera/ext/fmt/printf.h"
++  #endif
+   #include "cantera/ext/fmt/ostream.h"
+ #endif
