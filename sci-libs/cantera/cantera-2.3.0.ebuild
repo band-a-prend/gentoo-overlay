@@ -5,7 +5,7 @@ EAPI=6
 
 PYTHON_COMPAT=( python{2_7,3_{4,5,6}} )
 
-inherit eutils python-r1 scons-utils
+inherit eutils python-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="http://www.cantera.org"
@@ -70,6 +70,7 @@ PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_doxygen_docs_installation.patch"
+	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
 
 src_prepare() {
@@ -91,11 +92,9 @@ scons_vars=()
 set_scons_vars() {
 	scons_vars=(
 ## temporary commented ##
-#		cc="$(tc-getCC)"
-#		cxx="$(tc-getCXX)"
-#		ccflags="${CXXFLAGS}"
-#		linkflags="${LDFLAGS}"
-
+		CC="$(tc-getCC)"
+		CXX="$(tc-getCXX)"
+		cc_flags="${CXXFLAGS}"
 		cxx_flags="-std=c++11"
 		debug=$(usex debug)
 		use_pch=$(usex pch)

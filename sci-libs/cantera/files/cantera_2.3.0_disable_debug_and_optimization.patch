@@ -1,0 +1,23 @@
+diff -Naur old/SConstruct new/SConstruct
+--- old/SConstruct	2017-01-13 06:28:53.000000000 +0300
++++ new/SConstruct	2018-08-31 01:52:06.000000000 +0300
+@@ -240,8 +240,8 @@
+ defaults.cxxFlags = ''
+ defaults.ccFlags = ''
+ defaults.noOptimizeCcFlags = '-O0'
+-defaults.optimizeCcFlags = '-O3'
+-defaults.debugCcFlags = '-g'
++defaults.optimizeCcFlags = ''  # disable default '-O3' to set system flags
++defaults.debugCcFlags = ''     # disable default '-g'
+ defaults.noDebugCcFlags = ''
+ defaults.debugLinkFlags = ''
+ defaults.noDebugLinkFlags = ''
+@@ -255,7 +255,7 @@
+         # See http://stackoverflow.com/questions/18784112
+         defaults.cxxFlags = '-std=gnu++0x'
+     else:
+-        defaults.cxxFlags = '-std=c++0x'
++        defaults.cxxFlags = '' # disable default '-std=c++0x'
+     defaults.buildPch = True
+     env['pch_flags'] = ['-include', 'src/pch/system.h']
+ 
