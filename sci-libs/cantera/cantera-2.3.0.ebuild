@@ -69,7 +69,7 @@ DEPEND="
 
 src_prepare() {
 	epatch "${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
-	epatch "${FILESDIR}/${PN}_select_is_googletest.patch"
+	epatch "${FILESDIR}/${PN}_${PV}_googletest_option.patch"
 	use fmt4 && epatch "${FILESDIR}/${PN}_fmt4.patch"
 	use test && mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/
 	eapply_user
@@ -103,7 +103,7 @@ set_scons_vars() {
 		system_eigen="y"
 		extra_inc_dirs="/usr/include/eigen3"
 	)
-	use test || scons_vars+=( googletest="n" )
+	use test || scons_vars+=( googletest="none" )
 }
 
 scons_targets=()
