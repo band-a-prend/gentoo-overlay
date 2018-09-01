@@ -52,7 +52,7 @@ DEPEND="
 		dev-python/pip
 	)
 	doxygen_docs? (
-		app-doc/doxygen
+		app-doc/doxygen[dot]
 	)
 	sphinx_docs? (
 		dev-python/pygments
