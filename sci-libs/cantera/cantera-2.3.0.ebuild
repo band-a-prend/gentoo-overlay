@@ -153,7 +153,6 @@ src_compile() {
 }
 
 src_test() {
-	cd "${WORKDIR}/${P}" || die "Can't change directory before run test"
 	use test && escons test
 }
 

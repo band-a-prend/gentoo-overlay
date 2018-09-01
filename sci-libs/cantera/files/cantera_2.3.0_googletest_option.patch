@@ -122,7 +122,7 @@ diff -Naur old/test/SConscript new/test/SConscript
 -    env['testNames'].append(progName)
 +    if env['googletest'] != 'none':
 +        run_program = testenv.Command(passedFile, program, gtestRunner)
-+        env.Depends(run_program, env['build_targets'])
++        env.Depends(run_program, testenv.get('cantera_shlib', ()))
 +        env.Depends(env['test_results'], run_program)
 +        Alias('test-%s' % progName, run_program)
 +        env['testNames'].append(progName)
