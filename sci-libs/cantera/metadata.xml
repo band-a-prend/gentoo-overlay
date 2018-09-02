@@ -16,7 +16,6 @@
     <flag name="debug">Enable compiler debugging symbols</flag>
     <flag name="doxygen_docs">Build HTML documentation for the Cantera C++ interface using Doxygen</flag>
     <flag name="matlab">Add optional support/bindings for the Matlab language. Matlab must be already installed</flag>
-    <flag name="samples">Compile the C++ and Fortran samples</flag>
     <flag name="sphinx_docs">Build HTML documentation for Cantera using Sphinx</flag>
     <flag name="test">Perfom libraries testing after compilation</flag>
   </use>

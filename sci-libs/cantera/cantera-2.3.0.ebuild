@@ -16,7 +16,7 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
 	test? ( https://github.com/google/googletest/archive/release-1.7.0.tar.gz -> googletest-1.7.0.tar.gz )
 	"
 
-IUSE="debug doxygen_docs fortran -matlab pch python samples -sphinx_docs test"
+IUSE="debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 
 ## USE-flags INFO: 
 ## "matlab" and "sphinx_docs" require MATLAB and matlabdomain package installed
@@ -149,7 +149,6 @@ src_compile() {
 	set_scons_targets
 	set_scons_vars
 	escons build "${scons_vars[@]}" "${scons_targets[@]}"
-	use samples && escons samples
 }
 
 src_test() {
@@ -175,6 +174,11 @@ src_install() {
 #}
 
 pkg_postinst() {
+	if ! use fortran ; then
+		elog "C++ samples are installed to '/usr/share/cantera/samples/' directory"
+	else
+		elog "C++ and Fortran are samples installed to '/usr/share/cantera/samples/' directory"
+	fi
 	if ! use python && use python_targets_python2_7 ; then
 		elog "You just install cantera python=\"minimal\" configuration"
 		elog "If you are planning to process CTI files and use \"ck2cti\" utility"
