@@ -1,0 +1,50 @@
+diff -Naur old/doc/sphinx/_templates/layout.html new/doc/sphinx/_templates/layout.html
+--- old/doc/sphinx/_templates/layout.html	2018-08-24 16:24:45.000000000 +0300
++++ new/doc/sphinx/_templates/layout.html	2018-09-04 14:52:34.000000000 +0300
+@@ -77,35 +77,31 @@
+ 
+   <nav class="navbar navbar-expand-md navbar-light bg-light static-top mb-4">
+       <div class="container"><!-- This keeps the margins nice -->
+-          <a class="navbar-brand" href="/index.html">
+-          <img src="/assets/img/cantera-logo.png" alt="Cantera" id="logo" class="d-inline-block align-top">
+-          </a>
+-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+-              <span class="navbar-toggler-icon"></span>
+-          </button>
++          <ul class="navbar-nav ml-auto">
++              <li class="nav-item">
++                <a target="_blank" href="https://cantera.org/install/index.html" class="nav-link">to Cantera official site</a>
++              </li>
++          </ul>
+ 
+           <div class="collapse navbar-collapse" id="bs-navbar">
+             <ul class="navbar-nav ml-auto">
+               <li class="nav-item">
+-                <a href="/install/index.html" class="nav-link">Install</a>
+-              </li>
+-              <li class="nav-item">
+-                <a href="/examples/index.html" class="nav-link">Examples</a>
++                <a target="_blank" href="https://cantera.org/install/index.html" class="nav-link">Install</a>
+               </li>
+               <li class="nav-item">
+-                <a href="/about.html" class="nav-link">About</a>
++                <a target="_blank" href="https://cantera.org/examples/index.html" class="nav-link">Examples</a>
+               </li>
+               <li class="nav-item">
+-                <a href="/community.html" class="nav-link">Community</a>
++                <a target="_blank" href="https://cantera.org/community.html" class="nav-link">Community</a>
+               </li>
+               <li class="nav-item">
+-                <a href="/science/index.html" class="nav-link">Science</a>
++                <a target="_blank" href="https://cantera.org/science/index.html" class="nav-link">Science</a>
+               </li>
+               <li class="nav-item">
+-                <a href="/documentation/index.html" class="nav-link">Documentation</a>
++                <a href="/usr/share/cantera/doc/sphinx/html/index.html" class="nav-link">Documentation</a>
+               </li>
+               <li class="nav-item">
+-                <a href="/blog/index.html" class="nav-link">Blog</a>
++                <a target="_blank" href="https://cantera.org/blog/index.html" class="nav-link">Blog</a>
+               </li>
+             </ul>
+           </div><!-- /.navbar-collapse -->
