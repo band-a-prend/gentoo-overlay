@@ -16,15 +16,13 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
 IUSE="debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 
-## USE-flags INFO: 
-## "matlab" and "sphinx_docs" require MATLAB and matlabdomain package installed
-## (install it with: pip install sphinxcontrib-matlabdomain).
-## Last package isn't in portage too: dev-python/sphinxcontrib-matlabdomain
-## and is required to build Sphinx documentation. So both of this USE-flags is disabled now by default.
+## USE-flags INFO: "matlab" requires MATLAB to be installed preliminarily
+## so this USE-flag is disabled by default.
+## Installation with this USE-flag is untested.
 
-## Python2 is required by scons to work.
+## Python2 is required by '<scons-3.0' to work.
 ## Python3 automatic detection is used by cantera before compilling
-## if python3_package is not set no "n".
+## if python3_package isn't set no "n".
 
 REQUIRED_USE="
 	python? ( || ( python_targets_python2_7 python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 ) )
@@ -64,9 +62,9 @@ DEPEND="
 	)
 "
 
-	# fix compability only with libfmt 4.x as
-	# fixing compability with 5.y requires too many changes
-	# and fixed in cantera 2.4.0
+	# Fix compability only with libfmt-4.x as
+	# fixing compability with libfmt-5.y requires too many changes
+	# and is fixed in Cantera 2.4.0.
 PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_googletest_option.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
@@ -76,27 +74,19 @@ PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
 
-## Full list of configuration options of Cantera is presented here: 
+## Full list of configuration options of Cantera is presented here:
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
-
-## 'python_package=minimal' has ck2cti.py to be installed. 
-## This xonverter utility requeres numpy and cython to run.
-## If "python_package" will be changed to "none" instead of "minimal" 
-## then dev-python/numpy and dev-python/cython dependency could be moved 
-## to "python?" USE-conditional statement as they both are requeried 
-## to build Python part of Cantera package.
 
 scons_vars=()
 set_scons_vars() {
 	scons_vars=(
-## temporary commented ##
 		CC="$(tc-getCC)"
 		CXX="$(tc-getCXX)"
 		cc_flags="${CXXFLAGS}"
 		cxx_flags="-std=c++11"
 		debug=$(usex debug)
 		use_pch=$(usex pch)
-## in some cases other order could break the right location of Boost ##
+## In some cases other order can break the detection of right location of Boost: ##
 		system_fmt="y"
 		system_sundials="y"
 		system_eigen="y"
@@ -135,7 +125,7 @@ set_scons_targets() {
 			MATL_PATH="${MATLAB_DIR}/$(ls ${MATLAB_DIR})"
 			scons_targets+=( matlab_path=${MATL_PATH} )
 		else
-			eerror "MATLAB must be installed in /opt/MATLAB directory to build Matlab bindigs"
+			eerror "MATLAB must be installed in /opt/MATLAB directory to build Matlab bindings"
 			die
 		fi
 	fi
@@ -145,9 +135,9 @@ src_compile() {
 	set_scons_targets
 	set_scons_vars
 	escons build "${scons_vars[@]}" "${scons_targets[@]}"
-	# fix sphinx docs compilation warnings caused by too early
-	# start - before compiling all python modules
-	# that cause the absence of some sections of 'Python Module Documentation'
+	## Fix sphinx docs compilation warnings caused by of start sphinx_docs build
+	## before compiling all python modules that results in the absence
+	## of some sections of 'Python Module Documentation'.
 	use doxygen_docs && escons doxygen doxygen_docs='y'
 	use sphinx_docs && escons sphinx sphinx_docs='y'
 }
@@ -167,8 +157,8 @@ src_install() {
 }
 
 #pkg_preinst() {
-	## Rebuild bytecode .pyc files with relative paths instead of scons-'prefix' "${D}/usr" absolute paths
-	## Currently for python 2.7 and 3.5. This action seems is not nessessary. So temporary commented
+	## Rebuild bytecode .pyc files with relative paths instead of scons-'prefix' "${D}/usr" absolute paths.
+	## Currently for python 2.7 and 3.5. This action seems is not nessessary. So temporary commented here.
 	#pushd ${D%/}/usr/lib64/python2.7
 	#	python2 -m compileall .
 	#popd
@@ -179,14 +169,13 @@ src_install() {
 
 pkg_postinst() {
 	if ! use fortran ; then
-		elog "C++ samples are installed to '/usr/share/cantera/samples/' directory"
+		elog "C++ samples are installed to '/usr/share/cantera/samples/' directory."
 	else
-		elog "C++ and Fortran are samples installed to '/usr/share/cantera/samples/' directory"
+		elog "C++ and Fortran samples are installed to '/usr/share/cantera/samples/' directory."
 	fi
 	if ! use python && use python_targets_python2_7 ; then
-		elog "You just install cantera python=\"minimal\" configuration"
+		elog "You just install Cantera python=\"minimal\" configuration."
 		elog "If you are planning to process CTI files and use \"ck2cti\" utility"
-		elog "then you need additionaly to install dev-python/numpy[python_targets_python2_7]"
-		elog "or install this package via pip for python2.7"
+		elog "then you need additionaly to install dev-python/numpy[python_targets_python2_7]."
 	fi
 }
