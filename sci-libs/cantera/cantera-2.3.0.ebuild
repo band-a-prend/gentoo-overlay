@@ -59,6 +59,7 @@ DEPEND="
 		dev-python/pyparsing
 		dev-python/sphinx
 		dev-python/sphinxcontrib-doxylink
+		dev-python/sphinxcontrib-matlabdomain
 	)
 "
 
@@ -70,6 +71,7 @@ PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_doxygen_docs_installation.patch"
+	"${FILESDIR}/${PN}_fix_sphinx_docs_installation.patch"
 	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
 
@@ -112,8 +114,6 @@ set_scons_targets() {
 	scons_targets=(
 		prefix="/usr"
 		stage_dir="${D%/}"
-		doxygen_docs=$(usex doxygen_docs)
-		sphinx_docs=$(usex sphinx_docs)
 		f90_interface=$(usex fortran y n)
 	)
 
@@ -149,6 +149,11 @@ src_compile() {
 	set_scons_targets
 	set_scons_vars
 	escons build "${scons_vars[@]}" "${scons_targets[@]}"
+	# fix sphinx docs compilation warnings caused by too early
+	# start - before compiling all python modules
+	# that cause the absence of some sections of 'Python Module Documentation'
+	use doxygen_docs && escons doxygen doxygen_docs='y'
+	use sphinx_docs && escons sphinx sphinx_docs='y'
 }
 
 src_test() {
@@ -159,6 +164,9 @@ src_install() {
 	escons install
 	if use doxygen_docs ; then
 		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
+	fi
+	if use sphinx_docs ; then
+		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/sphinx/html/index.html" "Cantera Sphinx Documentation" "text-html" "Development"
 	fi
 }
 
