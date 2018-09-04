@@ -12,9 +12,7 @@ HOMEPAGE="http://www.cantera.org"
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
-	test? ( https://github.com/google/googletest/archive/release-1.7.0.tar.gz -> googletest-1.7.0.tar.gz )
-	"
+SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
 IUSE="debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 
@@ -61,6 +59,9 @@ DEPEND="
 		dev-python/sphinxcontrib-doxylink
 		dev-python/sphinxcontrib-matlabdomain
 	)
+	test? (
+		>=dev-cpp/gtest-1.7.0
+	)
 "
 
 	# fix compability only with libfmt 4.x as
@@ -74,11 +75,6 @@ PATCHES=(
 	"${FILESDIR}/${PN}_fix_sphinx_docs_installation.patch"
 	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
-
-src_prepare() {
-	default
-	use test && mv "${WORKDIR}"/googletest-release-1.7.0/* "${WORKDIR}/${P}"/ext/googletest/
-}
 
 ## Full list of configuration options of Cantera is presented here: 
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
