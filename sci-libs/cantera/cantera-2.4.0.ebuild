@@ -25,7 +25,7 @@ IUSE="debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 ## if python3_package isn't set no "n".
 
 REQUIRED_USE="
-	python? ( || ( python_targets_python2_7 python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 python_targets_python3_7 ) )
+	python? ( ${PYTHON_REQUIRED_USE} )
 	python_targets_python3_4? ( !python_targets_python3_5 !python_targets_python3_6 !python_targets_python3_7 )
 	python_targets_python3_5? ( !python_targets_python3_4 !python_targets_python3_6 !python_targets_python3_7 )
 	python_targets_python3_6? ( !python_targets_python3_4 !python_targets_python3_5 !python_targets_python3_7 )
@@ -47,7 +47,7 @@ DEPEND="
 	python? (
 		dev-python/3to2
 		dev-python/cython
-		dev-python/numpy
+		dev-python/numpy[${PYTHON_USEDEP}]
 		dev-python/pip
 	)
 	doxygen_docs? (
@@ -103,7 +103,6 @@ set_scons_targets() {
 
 	if use python ; then
 		use python_targets_python2_7 && scons_targets+=( python2_package="full" )
-		use python_targets_python2_7 || scons_targets+=( python2_package="none" )
 		use python_targets_python3_4 && scons_targets+=( python3_package="full" python3_cmd="python3.4" )
 		use python_targets_python3_5 && scons_targets+=( python3_package="full" python3_cmd="python3.5" )
 		use python_targets_python3_6 && scons_targets+=( python3_package="full" python3_cmd="python3.6" )
@@ -114,11 +113,11 @@ set_scons_targets() {
 		use python_targets_python3_5 && scons_targets+=( python3_package="minimal" python3_cmd="python3.5" )
 		use python_targets_python3_6 && scons_targets+=( python3_package="minimal" python3_cmd="python3.6" )
 		use python_targets_python3_7 && scons_targets+=( python3_package="minimal" python3_cmd="python3.7" )
-		use python_targets_python2_7 || scons_targets+=( python2_package="none" )
 	fi
 
+	use python_targets_python2_7 || scons_targets+=( python2_package="none" )
 	use python_targets_python3_4 || use python_targets_python3_5 || \
-					use python_targets_python3_6 || use python_targets_python3_7 || \
+	use python_targets_python3_6 || use python_targets_python3_7 || \
 					scons_targets+=( python3_package="none" )
 
 	use matlab && scons_targets+=( matlab_toolbox="y" )
