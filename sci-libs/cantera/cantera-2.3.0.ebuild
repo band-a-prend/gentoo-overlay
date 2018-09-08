@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
-IUSE="debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
+IUSE="+cti debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 
 ## USE-flags INFO: "matlab" requires MATLAB to be installed preliminarily
 ## so this USE-flag is disabled by default.
@@ -25,7 +25,7 @@ IUSE="debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 ## if python3_package isn't set no "n".
 
 REQUIRED_USE="
-	python? ( ${PYTHON_REQUIRED_USE} )
+	python? ( cti ${PYTHON_REQUIRED_USE} )
 	python_targets_python3_4? ( !python_targets_python3_5 !python_targets_python3_6 )
 	python_targets_python3_5? ( !python_targets_python3_4 !python_targets_python3_6 )
 	python_targets_python3_6? ( !python_targets_python3_4 !python_targets_python3_5 )
@@ -109,7 +109,9 @@ set_scons_targets() {
 		use python_targets_python3_5 && scons_targets+=( python3_package="y" python3_cmd="python3.5" )
 		use python_targets_python3_6 && scons_targets+=( python3_package="y" python3_cmd="python3.6" )
 	else
-		use python_targets_python2_7 && scons_targets+=( python_package="minimal" python3_package="n")
+		if use cti ; then
+			use python_targets_python2_7 && scons_targets+=( python_package="minimal" python3_package="n")
+		fi
 	fi
 
 	use python_targets_python2_7 || scons_targets+=( python_package="none" )
@@ -167,14 +169,16 @@ src_install() {
 #}
 
 pkg_postinst() {
+	if use cti && ! use python; then
+		elog "Cantera was build without 'python' use-flag therefore the CTI tool 'ck2cti'"
+		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
+	fi
 	if ! use fortran ; then
 		elog "C++ samples are installed to '/usr/share/cantera/samples/' directory."
 	else
 		elog "C++ and Fortran samples are installed to '/usr/share/cantera/samples/' directory."
 	fi
-	if ! use python && use python_targets_python2_7 ; then
-		elog "You just install Cantera python=\"minimal\" configuration."
-		elog "If you are planning to process CTI files and use \"ck2cti\" utility"
-		elog "then you need additionaly to install dev-python/numpy[python_targets_python2_7]."
+	if use python ; then
+		elog "Python examples are installed to '/usr/lib64/python{2.7,3.x}/site-packages/cantera/examples' directories."
 	fi
 }
