@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
-IUSE="+cti debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
+IUSE="+cpp +cti debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 
 ## USE-flags INFO: "matlab" requires MATLAB to be installed preliminarily
 ## so this USE-flag is disabled by default.
@@ -25,6 +25,8 @@ IUSE="+cti debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 ## if python3_package isn't set no "n".
 
 REQUIRED_USE="
+	|| ( cpp python matlab )
+	fortran? ( cpp )
 	python? ( cti ${PYTHON_REQUIRED_USE} )
 	python_targets_python3_4? ( !python_targets_python3_5 !python_targets_python3_6 )
 	python_targets_python3_5? ( !python_targets_python3_4 !python_targets_python3_6 )
@@ -149,6 +151,11 @@ src_test() {
 
 src_install() {
 	escons install
+	if ! use cpp ; then
+		## remove C++, Fortran libraries, headers and samples
+		rm -rf "${D}/usr"/{include,lib64/{libcantera*,pkgconfig}} || die
+		rm -rf "${D}/usr/share/cantera/samples" || die
+	fi
 	if use doxygen_docs ; then
 		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
 	fi
