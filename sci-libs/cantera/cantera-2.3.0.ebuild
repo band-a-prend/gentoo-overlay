@@ -5,7 +5,7 @@ EAPI=6
 
 PYTHON_COMPAT=( python{2_7,3_{4,5,6}} )
 
-inherit eutils python-r1 scons-utils toolchain-funcs
+inherit desktop python-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="http://www.cantera.org"
@@ -29,9 +29,7 @@ REQUIRED_USE="
 	cti? ( ${PYTHON_REQUIRED_USE} )
 	fortran? ( cpp )
 	python? ( cti )
-	python_targets_python3_4? ( !python_targets_python3_5 !python_targets_python3_6 )
-	python_targets_python3_5? ( !python_targets_python3_4 !python_targets_python3_6 )
-	python_targets_python3_6? ( !python_targets_python3_4 !python_targets_python3_5 )
+	?? ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 )
 	"
 
 DEPEND="
@@ -144,7 +142,7 @@ src_compile() {
 }
 
 src_test() {
-	use test && escons test
+	escons test
 }
 
 src_install() {
