@@ -26,8 +26,9 @@ IUSE="+cpp +cti debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
 
 REQUIRED_USE="
 	|| ( cpp python matlab )
+	cti? ( ${PYTHON_REQUIRED_USE} )
 	fortran? ( cpp )
-	python? ( cti ${PYTHON_REQUIRED_USE} )
+	python? ( cti )
 	python_targets_python3_4? ( !python_targets_python3_5 !python_targets_python3_6 )
 	python_targets_python3_5? ( !python_targets_python3_4 !python_targets_python3_6 )
 	python_targets_python3_6? ( !python_targets_python3_4 !python_targets_python3_5 )
@@ -113,13 +114,10 @@ set_scons_targets() {
 	else
 		if use cti ; then
 			use python_targets_python2_7 && scons_targets+=( python_package="minimal" python3_package="n")
+		else
+			scons_targets+=( python_package="none" python3_package="n" )
 		fi
 	fi
-
-	use python_targets_python2_7 || scons_targets+=( python_package="none" )
-	use python_targets_python3_4 || use python_targets_python3_5 || \
-					use python_targets_python3_6 || \
-					scons_targets+=( python3_package="n" )
 
 	use matlab && scons_targets+=( matlab_toolbox="y" )
 	if use matlab; then
