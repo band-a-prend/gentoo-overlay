@@ -1,91 +1,120 @@
 ## gentoo-overlay
 
+[ [dev-util/codeblocks](#dev-utilcodeblocks)  ] [  [sci-libs/cantera](#sci-libscantera) ]
+
 ***
 
-### **dev-util/codeblocks**:  
-*(version bump ebuild with patch to build FortranProject plugin via autotools)*
+### dev-util/codeblocks:  
 
-**dev-util/codeblocks-17.12**  
-**dev-util/codeblocks-17.12-r300**  
-Related issues: [#643494](https://bugs.gentoo.org/643494)  
+> Code::Blocks is the open source, cross platform, free C, C++ and Fortran IDE.
+
+Code::Blocks homepage: http://www.codeblocks.org  
+FortranProject homepage: https://sourceforge.net/projects/fortranproject  
+
+
+#### Ebuilds:
+*(version bump ebuilds with patch to build FortranProject plugin via autotools)* 
+* `dev-util/codeblocks-17.12.ebuild`  
+* `dev-util/codeblocks-17.12-r300.ebuild`  
+
+Related issue: [#643494](https://bugs.gentoo.org/643494)  
 Related pull request: [#7324](https://github.com/gentoo/gentoo/pull/7324)  
-*(merged to portage tree after editing the commit with bug references and some changes)*
+*(merged to portage tree after editing the commit with bug references and some changes)*  
 
+* `dev-util/codeblocks-17.12-r1.ebuild`  
+* `dev-util/codeblocks-17.12-r301.ebuild`  
+* `dev-util/codeblocks-9999.ebuild`  
 
-**dev-util/codeblocks-17.12-r1**  
-**dev-util/codeblocks-17.12-r301**  
-**dev-util/codeblocks-9999**  
 Related issues: [#383037](https://bugs.gentoo.org/383037), [#656758](https://bugs.gentoo.org/656758), [issue](http://forums.codeblocks.org/index.php/topic,22641.0.html) from C::B user forum  
 Related pull request: [#9219](https://github.com/gentoo/gentoo/pull/9219)  
-*(merged to portage tree after editing the commit with bug references)*
+*(merged to portage tree after editing the commit with bug references)*  
+
+#### Local USE flags:
+* `contrib` - Build additional contrib components.  
+* `fortran` - Build FortranProject plugin which enables to use Code::Blocks IDE for Fortran language.  
 
 ***
 
-### **sci-libs/cantera**:  
-Homepage and documentation: http://cantera.org
+### sci-libs/cantera:  
 
-> Cantera is an open-source suite of object-oriented software tools for problems involving chemical kinetics,  
-> thermodynamics, and/or transport processes. The software automates the chemical kinetic, thermodynamic,  
-> and transport calculations so that the users can efficiently incorporate detailed chemical thermo-kinetics  
-> and transport models into their calculations.
+> Cantera is an open-source suite of object-oriented software tools for problems involving chemical kinetics, thermodynamics, and/or transport processes.  
+
+Homepage and documentation: http://cantera.org  
+GitHub page: https://github.com/Cantera/cantera  
 
 
-**EBUILDS**:  
-*(ebuilds is under development)*  
-**sci-libs/cantera-2.3.0**  
-**sci-libs/cantera-2.4.0**  
+#### Ebuilds:
+*(under development)*  
+* `sci-libs/cantera-2.3.0.ebuild`  
+* `sci-libs/cantera-2.4.0.ebuild`  
 
-**ADDITIONAL EBUILDS**:  
+
+#### Additional ebuilds:  
 *(to build sphinx documentation)*  
-**dev-python/sphinxcontrib-matlabdomain-0.3.3**  
-**dev-python/sphinxcontrib-katex-0.2.0**
+* `dev-python/sphinxcontrib-katex-0.2.0.ebuild`  
+* `dev-python/sphinxcontrib-matlabdomain-0.3.3.ebuild`  
 
 
-**TODO**:
-* Maybe it's worth to replace USE-flags `doxygen_docs` and  `sphinx_docs` to compile documentations from source by `doc` that will install already compiled sphinx and doxygen documentation from additional official tarball. It's possible only for Cantera-2.3.0 as for current stable version 2.4.0 such docs contains only Python and Matlab interface API docs and CTI input documentation. The reason also is that `sphinx_docs` depend on packages that are absent in portage tree and sphinx documentation contains referenses to doxygen documentation so it's rationally to provide them together.
+#### Local USE flags:  
+
+* `cpp` - Install C++ API libraries, headers and samples.  
+* `cti` - Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format.  
+* `debug` - Enable compiler debugging symbols.  
+* `doxygen_docs` - Build HTML documentation for the Cantera C++ interface using Doxygen.  
+* `matlab` - Add optional support/bindings for the Matlab language. Matlab must be already installed.  
+* `sphinx_docs` - Build HTML documentation for Cantera using Sphinx.  
+* `test` - Perfom libraries testing after compilation.  
 
 
-**UNTESTED**:  
-* Building with `USE=matlab`
+#### Untested:  
+* Building with `USE="matlab"`  
 
 
-**USE-flags**:  
+#### ToDo:  
+* Maybe it's worth to replace USE-flags `doxygen_docs` and  `sphinx_docs` to compile documentations from source by `doc` that will install already compiled sphinx and doxygen documentation from additional official tarball. It's possible only for Cantera-2.3.0 as for current stable version 2.4.0 such docs contains only Python and Matlab interface API docs and CTI input documentation. The reason also is that `sphinx_docs` depend on packages that are absent in portage tree and sphinx documentation contains referenses to doxygen documentation so it's rationally to provide them together.  
+* Using common system optimization flag in `FORTRANFLAGS` configuration option instead of default `-O3`.  
+* Implementation and testing of USE flag to build Cantera package with BLAS/LAPACK implementation instead of Eigen.  
 
-[Full list of Cantera-2.4.0 configuration options](https://cantera.org/compiling/config-options.html)  
 
-Some of them ([+] - marks that are used within ebuild):
+#### Cantera package configuration options:
+Full list of configuration options is presented at the appropriate page of [Cantera documentation](https://cantera.org/compiling/config-options.html).  
 
-[+] `python_package`: [ new | full | minimal | none | default ]  
-[+] `python2_package`: [ y | n | full | minimal | none | default ] (since v2.4.0)  
-[+] `python3_package`: [ y | n | default ]  
+Some of this options are listed below (checked if is used within ebuild):  
+
+* [x] `python_package`: [ new | full | minimal | none | default ] - If you plan to work in Python, then you need the full Cantera Python package. If, on the other hand, you will only use Cantera from some other language (e.g. MATLAB or Fortran 90/95) and only need Python to process CTI files, then you only need a minimal subset of the package and Cython and NumPy are not necessary. The none option doesn’t install any components of the Python interface. The default behavior is to build the full Python module for whichever version of Python is running SCons if the required prerequisites (NumPy and Cython) are installed. Note: y is a synonym for full and n is a synonym for none. default: 'default'    
+* [x] `python2_package`: [ y | n | full | minimal | none | default ] (since v2.4.0) - Controls whether or not the Python 2 module will be built. By default, the module will be built if the Python 2 interpreter and the required dependencies (NumPy for Python 2 and Cython for the version of Python for which SCons is installed) can be found. default: 'default'  
+* [x] `python3_package`: [ y | n | default ]  
 or  
-[+] `python3_package`: [ y | n | full | minimal | none | default ] (since v2.4.0)  
+* [x] `python3_package`: [ y | n | full | minimal | none | default ] (since v2.4.0) - Controls whether or not the Python 3 module will be built. By default, the module will be built if the Python 3 interpreter and the required dependencies (NumPy for Python 3 and Cython for the version of Python for which SCons is installed) can be found. default: 'default'  
+* [x] `python3_cmd`: [ /path/to/python3_cmd ] - The path to the Python 3 interpreter. The default is python3; if this executable cannot be found, this value must be specified to build the Python 3 module. default: 'python3'  
 
-[+] `googletest`: [ 'default' | 'system' | 'submodule' | 'none' ] (since v2.4.0) - Select whether to use `gtest/gmock` from system installation (`system`), from a Git submodule (`submodule`), to decide automatically (`default`) or don’t look for gtest/gmock (`none`).
+* [x] `googletest`: [ 'default' | 'system' | 'submodule' | 'none' ] (since v2.4.0) - Select whether to use gtest/gmock from system installation (system), from a Git submodule (submodule), to decide automatically (default) or don’t look for gtest/gmock (none).  
 
-[+] `matlab_toolbox`: [ y | n | default ]  
-[+] `matlab_path`: [ /path/to/matlab_path ] - requires installed MATLAB
+* [x] `matlab_toolbox`: [ y | n | default ]  
+* [x] `matlab_path`: [ /path/to/matlab_path ] - requires installed MATLAB  
 
-[+] `use_pch`: [ yes | no ] - Use a precompiled-header to speed up compilation  
-[+] `debug`: [ yes | no ]  
+* [x] `cc_flags`: [ string ] - Compiler flags passed to both the C and C++ compilers, regardless of optimization level. default: ''  
+* [x] `cxx_flags`: [ string ] - Compiler flags passed to the C++ compiler only. Separate multiple options with spaces, e.g., cxx_flags='-g -Wextra -O3 --std=c++11'. default: ''  
+* [x] `extra_inc_dirs`: [ string ] - Additional directories to search for header files (colon-separated list). default: '' 
+* [x] `prefix`: [ /path/to/prefix ] - Set this to the directory where Cantera should be installed. default: ''  
+* [x] `stage_dir`: [ /path/to/stage_dir ] - Directory relative to the Cantera source directory to be used as a staging area for building e.g., a Debian package. If specified, scons install will install files to `stage_dir/prefix/....`. default: '' 
 
-[+] `f90_interface`: [ y | n | default ]  
-`FORTRAN`: [ /path/to/FORTRAN ] - set Fortran compiler 
-`FORTRANFLAGS`: [ string ] - default "-O3"
+* [x] `use_pch`: [ yes | no ] - Use a precompiled-header to speed up compilation  
+* [x] `debug`: [ yes | no ] - Enable compiler debugging symbols  
 
-`coverage`: [ yes | no ] - Enable collection of code coverage information with gcov. Available only when compiling with gcc. default: 'no'
+* [x] `f90_interface`: [ y | n | default ] - This variable controls whether the Fortran 90/95 interface will be built. If set to default, the builder will look for a compatible Fortran compiler in the PATH environment variable, and compile the Fortran 90 interface if one is found. default: 'default'  
 
-`blas_lapack_libs`: [ string ] - e.g., "lapack,blas" or "lapack,f77blas,cblas,atlas" to use them instead of Eigen library  
-`blas_lapack_dir`: [ /path/to/blas_lapack_dir ] - Directory containing the libraries specified by blas_lapack_libs. Omit it if "/usr/lib"  
-`lapack_names`: [ lower | upper ]  
-`lapack_ftn_trailing_underscore`: [ yes | no ] - Controls whether the LAPACK functions have a trailing underscore in the Fortran libraries  
-`lapack_ftn_string_len_at_end`: [ yes | no ] - Controls whether the LAPACK functions have the string length argument at the end of the argument list in the Fortran libraries
+* [ ] `FORTRAN`: [ /path/to/FORTRAN ] - set Fortran compiler  
+* [ ] `FORTRANFLAGS`: [ string ] - default "-O3"  
 
-`renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a _shared extension added to their base name  
-`versioned_shared_library`: [ yes | no ] - create a versioned shared library, with symlinks to the more generic library name  
-`layout`: [ standard | compact | debian ] - The layout of the directory structure. 'standard' installs files to several subdirectories under 'prefix', e.g. $prefix/bin, $prefix/include/cantera, $prefix/lib. This layout is best used in conjunction with 'prefix=/usr/local'. 'compact' puts all installed files in the subdirectory defined by 'prefix'. This layout is best with a prefix like '/opt/cantera'  
-default: 'standard'
+* [ ] `coverage`: [ yes | no ] - Enable collection of code coverage information with gcov. Available only when compiling with gcc. default: 'no'  
 
-... and many others.
+* [ ] `blas_lapack_libs`: [ string ] - e.g., "lapack,blas" or "lapack,f77blas,cblas,atlas" to use them instead of Eigen library  
+* [ ] `blas_lapack_dir`: [ /path/to/blas_lapack_dir ] - Directory containing the libraries specified by blas_lapack_libs. Omit it if "/usr/lib"  
+* [ ] `lapack_names`: [ lower | upper ] - Set depending on whether the procedure names in the specified libraries are lowercase or uppercase. If you don’t know, run nm on the library file (e.g., nm libblas.a). default: 'lower'  
+* [ ] `lapack_ftn_trailing_underscore`: [ yes | no ] - Controls whether the LAPACK functions have a trailing underscore in the Fortran libraries  
+* [ ] `lapack_ftn_string_len_at_end`: [ yes | no ] - Controls whether the LAPACK functions have the string length argument at the end of the argument list in the Fortran libraries  
 
+* [ ] `renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a _shared extension added to their base name  
+* [ ] `versioned_shared_library`: [ yes | no ] - create a versioned shared library, with symlinks to the more generic library name  
 
