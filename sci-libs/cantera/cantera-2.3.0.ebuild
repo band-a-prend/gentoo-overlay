@@ -111,11 +111,16 @@ set_scons_targets() {
 		use python_targets_python3_6 && scons_targets+=( python3_package="y" python3_cmd="python3.6" )
 	else
 		if use cti ; then
-			use python_targets_python2_7 && scons_targets+=( python_package="minimal" python3_package="n")
+			use python_targets_python2_7 && scons_targets+=( python_package="minimal" python3_package="n" )
 		else
 			scons_targets+=( python_package="none" python3_package="n" )
 		fi
 	fi
+	## Force setup of python{2,3}_package="none" if appropriate python_targets_python{2_7,3_x} isn't active
+	## regardless of USE 'cti' or/and 'python' are enabled
+	use python_targets_python2_7 || scons_targets+=( python2_package="none" )
+	use python_targets_python3_4 || use python_targets_python3_5 || \
+	use python_targets_python3_6 || scons_targets+=( python3_package="n" )
 
 	use matlab && scons_targets+=( matlab_toolbox="y" )
 	if use matlab; then
