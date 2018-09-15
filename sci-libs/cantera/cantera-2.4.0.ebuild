@@ -103,13 +103,10 @@ set_scons_targets() {
 
 	if use cti ; then
 		python_setup
-		if use python ; then
-			use python_targets_python2_7 && scons_targets+=( python2_package="full" python2_cmd="python2.7" )
-			python_is_python3 && scons_targets+=( python3_package="full" python3_cmd="${EPYTHON}" )
-		else
-			use python_targets_python2_7 && scons_targets+=( python2_package="minimal" python2_cmd="python2.7" )
-			python_is_python3 && scons_targets+=( python3_package="minimal" python3_cmd="${EPYTHON}" )
-		fi
+		local scons_python=$(usex python full minimal)
+		use python_targets_python2_7 && scons_targets+=( python2_package="${scons_python}" python2_cmd="python2.7" )
+		python_is_python3 && scons_targets+=( python3_package="${scons_python}" python3_cmd="${EPYTHON}" )
+
 		## Force setup of python{2,3}_package="none" if appropriate python_targets_python{2_7,3_x} isn't active
 		## regardless of USE 'cti' or/and 'python' are enabled
 		use python_targets_python2_7 || scons_targets+=( python2_package="none" )
