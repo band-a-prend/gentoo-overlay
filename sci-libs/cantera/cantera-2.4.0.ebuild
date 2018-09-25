@@ -32,13 +32,20 @@ REQUIRED_USE="
 	?? ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 python_targets_python3_7 )
 	"
 
+RDEPEND="
+	python? (
+		dev-python/numpy[${PYTHON_USEDEP}]
+	)
+"
+
 # SCons >= 3.0 is recomended, but builds with older versions
 # doxygen-1.8.14 is recomended
 DEPEND="
+	${RDEPEND}
 	dev-cpp/eigen
 	dev-libs/boost
-	dev-util/scons
 	dev-libs/libfmt:0=
+	dev-util/scons
 	sci-libs/sundials
 	fortran? (
 		sci-libs/sundials[fortran]
@@ -46,17 +53,12 @@ DEPEND="
 	)
 	python? (
 		dev-python/3to2
-		dev-python/cython
-		dev-python/numpy[${PYTHON_USEDEP}]
-		dev-python/pip
+		dev-python/cython[${PYTHON_USEDEP}]
 	)
 	doxygen_docs? (
 		app-doc/doxygen[dot]
 	)
 	sphinx_docs? (
-		dev-python/pygments
-		dev-python/pyparsing
-		dev-python/sphinx
 		dev-python/sphinxcontrib-doxylink
 		dev-python/sphinxcontrib-matlabdomain
 		dev-python/sphinxcontrib-katex

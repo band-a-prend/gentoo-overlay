@@ -32,11 +32,18 @@ REQUIRED_USE="
 	?? ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 )
 	"
 
+RDEPEND="
+	python? (
+		dev-python/numpy[${PYTHON_USEDEP}]
+	)
+"
+
 DEPEND="
+	${RDEPEND}
 	dev-cpp/eigen
 	dev-libs/boost
-	dev-util/scons
 	dev-libs/libfmt:0/4
+	dev-util/scons
 	sci-libs/sundials
 	fortran? (
 		sci-libs/sundials[fortran]
@@ -44,17 +51,12 @@ DEPEND="
 	)
 	python? (
 		dev-python/3to2
-		dev-python/cython
-		dev-python/numpy[${PYTHON_USEDEP}]
-		dev-python/pip
+		dev-python/cython[${PYTHON_USEDEP}]
 	)
 	doxygen_docs? (
 		app-doc/doxygen[dot]
 	)
 	sphinx_docs? (
-		dev-python/pygments
-		dev-python/pyparsing
-		dev-python/sphinx
 		dev-python/sphinxcontrib-doxylink
 		dev-python/sphinxcontrib-matlabdomain
 	)
