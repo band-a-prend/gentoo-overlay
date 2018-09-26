@@ -6,11 +6,8 @@
     <email>maintainer-needed@gentoo.org</email>
   </maintainer>
   <longdescription>
-    Cantera is an open-source suite of object-oriented software tools 
-    for problems involving chemical kinetics, thermodynamics, and/or transport processes. 
-    The software automates the chemical kinetic, thermodynamic, and transport calculations 
-    so that the users can efficiently incorporate detailed chemical thermo-kinetics 
-    and transport models into their calculations.
+    Cantera is an open-source suite of object-oriented software tools
+    for problems involving chemical kinetics, thermodynamics, and/or transport processes.
   </longdescription>
   <use>
     <flag name="cpp">Install C++ API libraries, headers and samples</flag>

@@ -149,17 +149,6 @@ src_install() {
 	fi
 }
 
-#pkg_preinst() {
-	## Rebuild bytecode .pyc files with relative paths instead of scons-'prefix' "${D}/usr" absolute paths.
-	## Currently for python 2.7 and 3.5. This action seems is not nessessary. So temporary commented here.
-	#pushd ${D%/}/usr/lib64/python2.7
-	#	python2 -m compileall .
-	#popd
-	#pushd ${D%/}/usr/lib64/python3.5
-	#	python3.5 -m compileall .
-	#popd
-#}
-
 pkg_postinst() {
 	if use cti && ! use python; then
 		elog "Cantera was build without 'python' use-flag therefore the CTI tool 'ck2cti'"
