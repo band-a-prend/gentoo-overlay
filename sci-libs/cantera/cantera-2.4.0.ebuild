@@ -152,6 +152,8 @@ src_install() {
 		rm -rf "${D}/usr"/{include,lib64/{libcantera*,pkgconfig}} || die
 		rm -rf "${D}/usr/share/cantera/samples" || die
 	fi
+	# fix "SyntaxError: Unexpected token ," at line 2 of katex_autorenderer.js
+	sed -i '2s/,//' "${D}/usr/share/cantera/doc/sphinx/html/_static/katex_autorenderer.js"
 	if use doxygen_docs ; then
 		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
 	fi
