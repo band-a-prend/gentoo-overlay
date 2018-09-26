@@ -14,18 +14,14 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
-IUSE="+cpp +cti debug doxygen_docs fortran -matlab pch python -sphinx_docs test"
-
-## USE-flags INFO: "matlab" requires MATLAB to be installed preliminarily
-## so this USE-flag is disabled by default.
-## Installation with this USE-flag is untested.
+IUSE="+cpp +cti debug doxygen_docs fortran pch python -sphinx_docs test"
 
 ## Python2 is required by '<scons-3.0' to work.
 ## Python3 automatic detection is used by cantera before compilling
 ## if python3_package isn't set no "n".
 
 REQUIRED_USE="
-	|| ( cpp python matlab )
+	|| ( cpp python )
 	cti? ( ${PYTHON_REQUIRED_USE} )
 	fortran? ( cpp )
 	python? ( cti )
@@ -120,18 +116,6 @@ set_scons_targets() {
 		python_is_python3 || scons_targets+=( python3_package="n" )
 	else
 		scons_targets+=( python_package="none" python3_package="n" )
-	fi
-
-	use matlab && scons_targets+=( matlab_toolbox="y" )
-	if use matlab; then
-		MATLAB_DIR="/opt/MATLAB"
-		if [ -d ${MATLAB_DIR} ]; then
-			MATL_PATH="${MATLAB_DIR}/$(ls ${MATLAB_DIR})"
-			scons_targets+=( matlab_path=${MATL_PATH} )
-		else
-			eerror "MATLAB must be installed in /opt/MATLAB directory to build Matlab bindings"
-			die
-		fi
 	fi
 }
 
