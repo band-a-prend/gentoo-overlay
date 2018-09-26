@@ -15,7 +15,6 @@
   <use>
     <flag name="cpp">Install C++ API libraries, headers and samples</flag>
     <flag name="cti">Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format</flag>
-    <flag name="debug">Enable compiler debugging symbols</flag>
     <flag name="doxygen_docs">Build HTML documentation for the Cantera C++ interface using Doxygen</flag>
     <flag name="sphinx_docs">Build HTML documentation for Cantera using Sphinx</flag>
     <flag name="test">Perfom libraries testing after compilation</flag>

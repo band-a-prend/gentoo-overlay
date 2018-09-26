@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
-IUSE="+cpp +cti debug doxygen_docs fortran pch python -sphinx_docs test"
+IUSE="+cpp +cti doxygen_docs fortran pch python -sphinx_docs test"
 
 ## Python2 is required by '<scons-3.0' to work.
 ## Python3 automatic detection is used by cantera before compilling
@@ -80,7 +80,7 @@ set_scons_vars() {
 		CXX="$(tc-getCXX)"
 		cc_flags="${CXXFLAGS}"
 		cxx_flags="-std=c++11"
-		debug=$(usex debug)
+		debug="no"
 		use_pch=$(usex pch)
 ## In some cases other order can break the detection of right location of Boost: ##
 		system_fmt="y"
