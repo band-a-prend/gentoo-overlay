@@ -1,9 +1,0 @@
-diff -Naur old/doc/SConscript new/doc/SConscript
---- old/doc/SConscript	2017-01-13 06:28:53.000000000 +0300
-+++ new/doc/SConscript	2018-09-04 00:57:26.000000000 +0300
-@@ -295,3 +295,5 @@
-     build(b)
-     localenv.Depends(sphinxdocs, b)
-     localenv.AlwaysBuild(sphinxdocs)
-+    install(localenv.RecursiveInstall, '$inst_docdir/sphinx/html',
-+            '#/build/docs/sphinx/html')

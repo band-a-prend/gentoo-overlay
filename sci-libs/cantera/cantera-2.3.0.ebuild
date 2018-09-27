@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
-IUSE="+cpp +cti doxygen_docs fortran pch python -sphinx_docs test"
+IUSE="+cpp +cti fortran pch python test"
 
 ## Python2 is required by '<scons-3.0' to work.
 ## Python3 automatic detection is used by cantera before compilling
@@ -49,13 +49,6 @@ DEPEND="
 		dev-python/3to2
 		dev-python/cython[${PYTHON_USEDEP}]
 	)
-	doxygen_docs? (
-		app-doc/doxygen[dot]
-	)
-	sphinx_docs? (
-		dev-python/sphinxcontrib-doxylink
-		dev-python/sphinxcontrib-matlabdomain
-	)
 	test? (
 		>=dev-cpp/gtest-1.7.0
 	)
@@ -68,8 +61,6 @@ PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_googletest_option.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
-	"${FILESDIR}/${PN}_${PV}_fix_doxygen_docs_installation.patch"
-	"${FILESDIR}/${PN}_fix_sphinx_docs_installation.patch"
 	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
 
@@ -123,11 +114,6 @@ src_compile() {
 	set_scons_targets
 	set_scons_vars
 	escons build "${scons_vars[@]}" "${scons_targets[@]}"
-	## Fix sphinx docs compilation warnings caused by of start sphinx_docs build
-	## before compiling all python modules that results in the absence
-	## of some sections of 'Python Module Documentation'.
-	use doxygen_docs && escons doxygen doxygen_docs='y'
-	use sphinx_docs && escons sphinx sphinx_docs='y'
 }
 
 src_test() {
@@ -140,12 +126,6 @@ src_install() {
 		## remove C++, Fortran libraries, headers and samples
 		rm -rf "${D}/usr"/{include,lib64/{libcantera*,pkgconfig}} || die
 		rm -rf "${D}/usr/share/cantera/samples" || die
-	fi
-	if use doxygen_docs ; then
-		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
-	fi
-	if use sphinx_docs ; then
-		make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/sphinx/html/index.html" "Cantera Sphinx Documentation" "text-html" "Development"
 	fi
 }
 
