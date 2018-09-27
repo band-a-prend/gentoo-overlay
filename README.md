@@ -50,28 +50,19 @@ GitHub page: https://github.com/Cantera/cantera
 
 
 #### Additional ebuilds:  
-*(to build sphinx documentation)*  
-* `dev-python/sphinxcontrib-katex-0.2.0.ebuild`  
-* `dev-python/sphinxcontrib-matlabdomain-0.3.3.ebuild`  
+*(to install doxygen and sphinx documentation)*  
+* `app-doc/cantera-docs-2.3.0.ebuild`  
+* `app-doc/cantera-docs-2.4.0.ebuild`  
 
 
 #### Local USE flags:  
 
 * `cpp` - Install C++ API libraries, headers and samples.  
 * `cti` - Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format.  
-* `debug` - Enable compiler debugging symbols.  
-* `doxygen_docs` - Build HTML documentation for the Cantera C++ interface using Doxygen.  
-* `matlab` - Add optional support/bindings for the Matlab language. Matlab must be already installed.  
-* `sphinx_docs` - Build HTML documentation for Cantera using Sphinx.  
 * `test` - Perfom libraries testing after compilation.  
 
 
-#### Untested:  
-* Building with `USE="matlab"`  
-
-
 #### ToDo:  
-* Maybe it's worth to replace USE-flags `doxygen_docs` and  `sphinx_docs` to compile documentations from source by `doc` that will install already compiled sphinx and doxygen documentation from additional official tarball. It's possible only for Cantera-2.3.0 as for current stable version 2.4.0 such docs contains only Python and Matlab interface API docs and CTI input documentation. The reason also is that `sphinx_docs` depend on packages that are absent in portage tree and sphinx documentation contains referenses to doxygen documentation so it's rationally to provide them together.  
 * Using common system optimization flag in `FORTRANFLAGS` configuration option instead of default `-O3`.  
 * Implementation and testing of USE flag to build Cantera package with BLAS/LAPACK implementation instead of Eigen.  
 
@@ -90,9 +81,6 @@ or
 
 * [x] `googletest`: [ 'default' | 'system' | 'submodule' | 'none' ] (since v2.4.0) - Select whether to use gtest/gmock from system installation (system), from a Git submodule (submodule), to decide automatically (default) or don’t look for gtest/gmock (none).  
 
-* [x] `matlab_toolbox`: [ y | n | default ]  
-* [x] `matlab_path`: [ /path/to/matlab_path ] - requires installed MATLAB  
-
 * [x] `cc_flags`: [ string ] - Compiler flags passed to both the C and C++ compilers, regardless of optimization level. default: ''  
 * [x] `cxx_flags`: [ string ] - Compiler flags passed to the C++ compiler only. Separate multiple options with spaces, e.g., cxx_flags='-g -Wextra -O3 --std=c++11'. default: ''  
 * [x] `extra_inc_dirs`: [ string ] - Additional directories to search for header files (colon-separated list). default: '' 
@@ -100,7 +88,6 @@ or
 * [x] `stage_dir`: [ /path/to/stage_dir ] - Directory relative to the Cantera source directory to be used as a staging area for building e.g., a Debian package. If specified, scons install will install files to `stage_dir/prefix/....`. default: '' 
 
 * [x] `use_pch`: [ yes | no ] - Use a precompiled-header to speed up compilation  
-* [x] `debug`: [ yes | no ] - Enable compiler debugging symbols  
 
 * [x] `f90_interface`: [ y | n | default ] - This variable controls whether the Fortran 90/95 interface will be built. If set to default, the builder will look for a compatible Fortran compiler in the PATH environment variable, and compile the Fortran 90 interface if one is found. default: 'default'  
 
@@ -115,6 +102,6 @@ or
 * [ ] `lapack_ftn_trailing_underscore`: [ yes | no ] - Controls whether the LAPACK functions have a trailing underscore in the Fortran libraries  
 * [ ] `lapack_ftn_string_len_at_end`: [ yes | no ] - Controls whether the LAPACK functions have the string length argument at the end of the argument list in the Fortran libraries  
 
-* [ ] `renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a _shared extension added to their base name  
+* [ ] `renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a '_shared' extension added to their base name  
 * [ ] `versioned_shared_library`: [ yes | no ] - create a versioned shared library, with symlinks to the more generic library name  
 
