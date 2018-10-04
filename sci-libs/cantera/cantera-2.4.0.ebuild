@@ -121,14 +121,13 @@ src_install() {
 }
 
 pkg_postinst() {
-	if use cti && ! use python; then
+	if use cti && ! use python ; then
 		elog "Cantera was build without 'python' use-flag therefore the CTI tool 'ck2cti'"
 		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
 	fi
-	if ! use fortran ; then
-		elog "C++ samples are installed to '/usr/share/cantera/samples/' directory."
-	else
-		elog "C++ and Fortran samples are installed to '/usr/share/cantera/samples/' directory."
+	local post_msg=$(usex fortran "and Fortran " "")
+	if use cpp ; then
+		elog "C++ ${post_msg}samples are installed to '/usr/share/cantera/samples/' directory."
 	fi
 	if use python ; then
 		elog "Python examples are installed to '/usr/lib64/python{2.7,3.x}/site-packages/cantera/examples' directories."
