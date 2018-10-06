@@ -114,9 +114,10 @@ src_test() {
 src_install() {
 	escons install
 	if ! use cpp ; then
-		## remove C++, Fortran libraries, headers and samples
-		rm -rf "${D}/usr"/{include,lib64/{libcantera*,pkgconfig}} || die
-		rm -rf "${D}/usr/share/cantera/samples" || die
+		einfo "Removing of C++, Fortran libraries, headers and samples"
+		local lib_dirname=$(usex amd64 "lib64" "lib")
+		rm -r "${D%/}/usr"/{include,${lib_dirname}/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
+		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
 	fi
 }
 
