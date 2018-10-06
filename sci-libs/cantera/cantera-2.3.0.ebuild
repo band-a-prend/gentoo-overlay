@@ -128,6 +128,9 @@ src_install() {
 		rm -r "${D%/}/usr"/{include,${lib_dirname}/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
 		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
 	fi
+	if ! use cti ; then
+		rm -r "${D%/}/usr/share/man" || die "Can't remove man files."
+	fi
 }
 
 pkg_postinst() {
