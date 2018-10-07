@@ -93,7 +93,7 @@ or
 * [x] `f90_interface`: [ y | n | default ] - This variable controls whether the Fortran 90/95 interface will be built. If set to default, the builder will look for a compatible Fortran compiler in the PATH environment variable, and compile the Fortran 90 interface if one is found. default: 'default'  
 
 * [ ] `FORTRAN`: [ /path/to/FORTRAN ] - set Fortran compiler  
-* [ ] `FORTRANFLAGS`: [ string ] - default "-O3"  
+* [x] `FORTRANFLAGS`: [ string ] - default "-O3"  
 
 * [ ] `coverage`: [ yes | no ] - Enable collection of code coverage information with gcov. Available only when compiling with gcc. default: 'no'  
 
