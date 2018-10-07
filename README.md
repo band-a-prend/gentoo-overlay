@@ -59,6 +59,7 @@ GitHub page: https://github.com/Cantera/cantera
 
 * `cpp` - Install C++ API libraries, headers and samples.  
 * `cti` - Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format.  
+* `static-libs` - Install static version of C++ dynamic library as well.  
 * `test` - Perfom libraries testing after compilation.  
 
 

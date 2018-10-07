@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
-IUSE="+cpp +cti fortran pch python test"
+IUSE="+cpp +cti fortran pch python static-libs test"
 
 ## Python2 is required by '<scons-3.0' to work.
 ## Python3 automatic detection is used by cantera before compilling
@@ -25,6 +25,7 @@ REQUIRED_USE="
 	cti? ( ${PYTHON_REQUIRED_USE} )
 	fortran? ( cpp )
 	python? ( cti )
+	static-libs? ( cpp )
 	?? ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 )
 	"
 
@@ -122,11 +123,14 @@ src_test() {
 
 src_install() {
 	escons install
+	local lib_dirname=$(usex amd64 "lib64" "lib")
 	if ! use cpp ; then
 		einfo "Removing of C++, Fortran libraries, headers and samples"
-		local lib_dirname=$(usex amd64 "lib64" "lib")
 		rm -r "${D%/}/usr"/{include,${lib_dirname}/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
 		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
+	elif ! use static-libs ; then
+		einfo "Removing of C++ static library file."
+		rm -r "${D%/}/usr/${lib_dirname}/libcantera.a" || die "Can't remove cantera C++ static library."
 	fi
 	if ! use cti ; then
 		rm -r "${D%/}/usr/share/man" || die "Can't remove man files."
