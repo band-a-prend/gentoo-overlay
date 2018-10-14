@@ -61,8 +61,7 @@ PATCHES=( "${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch" )
 ## Full list of configuration options of Cantera is presented here:
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 
-scons_vars=()
-set_scons_vars() {
+src_configure() {
 	scons_vars=(
 		CC="$(tc-getCC)"
 		CXX="$(tc-getCXX)"
@@ -78,13 +77,8 @@ set_scons_vars() {
 		extra_inc_dirs="/usr/include/eigen3"
 	)
 	use test || scons_vars+=( googletest="none" )
-}
 
-scons_targets=()
-set_scons_targets() {
 	scons_targets=(
-		prefix="/usr"
-		stage_dir="${D%/}"
 		f90_interface=$(usex fortran y n)
 	)
 
@@ -104,8 +98,6 @@ set_scons_targets() {
 }
 
 src_compile() {
-	set_scons_targets
-	set_scons_vars
 	escons build "${scons_vars[@]}" "${scons_targets[@]}"
 }
 
@@ -114,7 +106,7 @@ src_test() {
 }
 
 src_install() {
-	escons install
+	escons install stage_dir="${D%/}" prefix="/usr"
 	local lib_dirname=$(usex amd64 "lib64" "lib")
 	if ! use cpp ; then
 		einfo "Removing of C++, Fortran libraries, headers and samples"
