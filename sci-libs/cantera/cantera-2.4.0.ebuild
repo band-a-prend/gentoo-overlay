@@ -58,6 +58,13 @@ DEPEND="
 
 PATCHES=( "${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch" )
 
+src_prepare() {
+	default
+	# modify SConstruct to set env['libdirname'] to $(get_libdir)
+	sed -i "1469,1471s/^/#/" "${S}"/SConstruct || die "failed to modify 'SConstruct'"
+	sed -i "1472s/^[ \t]*//; s/'lib'/'$(get_libdir)'/" "${S}"/SConstruct || die "failed to modify 'SConstruct' with get_libdir"
+}
+
 ## Full list of configuration options of Cantera is presented here:
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 
@@ -107,13 +114,12 @@ src_test() {
 
 src_install() {
 	escons install stage_dir="${D%/}" prefix="/usr"
-	local lib_dirname=$(usex amd64 "lib64" "lib")
 	if ! use cxx ; then
 		einfo "Removing of C++, Fortran libraries, headers and samples"
-		rm -r "${D%/}/usr"/{include,${lib_dirname}/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
+		rm -r "${D%/}/usr"/{include,$(get_libdir)/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
 		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
 	elif ! use static-libs ; then
-		rm -r "${D%/}/usr/${lib_dirname}/libcantera.a" || die "Can't remove cantera C++ static library."
+		rm -r "${D%/}/usr/$(get_libdir)/libcantera.a" || die "Can't remove cantera C++ static library."
 	fi
 	if ! use cti ; then
 		rm -r "${D%/}/usr/share/man" || die "Can't remove man files."
