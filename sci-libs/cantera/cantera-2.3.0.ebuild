@@ -14,18 +14,18 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="+cpp +cti fortran pch python static-libs test"
+IUSE="+cti +cxx fortran pch python static-libs test"
 
 ## Python2 is required by '<scons-3.0' to work.
 ## Python3 automatic detection is used by cantera before compilling
 ## if python3_package isn't set no "n".
 
 REQUIRED_USE="
-	|| ( cpp python )
+	|| ( cxx python )
 	cti? ( ${PYTHON_REQUIRED_USE} )
-	fortran? ( cpp )
+	fortran? ( cxx )
 	python? ( cti )
-	static-libs? ( cpp )
+	static-libs? ( cxx )
 	?? ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 )
 	"
 
@@ -117,12 +117,11 @@ src_test() {
 src_install() {
 	escons install stage_dir="${D%/}" prefix="/usr"
 	local lib_dirname=$(usex amd64 "lib64" "lib")
-	if ! use cpp ; then
+	if ! use cxx ; then
 		einfo "Removing of C++, Fortran libraries, headers and samples"
 		rm -r "${D%/}/usr"/{include,${lib_dirname}/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
 		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
 	elif ! use static-libs ; then
-		einfo "Removing of C++ static library file."
 		rm -r "${D%/}/usr/${lib_dirname}/libcantera.a" || die "Can't remove cantera C++ static library."
 	fi
 	if ! use cti ; then
@@ -136,7 +135,7 @@ pkg_postinst() {
 		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
 	fi
 	local post_msg=$(usex fortran "and Fortran " "")
-	if use cpp ; then
+	if use cxx ; then
 		elog "C++ ${post_msg}samples are installed to '/usr/share/cantera/samples/' directory."
 	fi
 	if use python ; then

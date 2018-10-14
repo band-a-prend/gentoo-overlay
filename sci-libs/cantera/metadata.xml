@@ -10,7 +10,6 @@
     for problems involving chemical kinetics, thermodynamics, and/or transport processes.
   </longdescription>
   <use>
-    <flag name="cpp">Install C++ API libraries, headers and samples</flag>
     <flag name="cti">Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format</flag>
     <flag name="static-libs">Install static version of C++ dynamic library as well</flag>
     <flag name="test">Perfom libraries testing after compilation</flag>
