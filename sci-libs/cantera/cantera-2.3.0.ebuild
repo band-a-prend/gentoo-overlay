@@ -68,6 +68,13 @@ PATCHES=(
 ## Full list of configuration options of Cantera is presented here:
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 
+src_prepare() {
+	default
+	# modify SConstruct to set env['libdirname'] to $(get_libdir)
+	sed -i "1280,1282s/^/#/" "${S}"/SConstruct || die "failed to modify 'test_problems/SConscript'"
+	sed -i "1283s/^[ \t]*//; s/'lib'/'$(get_libdir)'/" "${S}"/SConstruct || die "failed to modify 'test_problems/SConscript' with get_libdir"
+}
+
 src_configure() {
 	scons_vars=(
 		CC="$(tc-getCC)"

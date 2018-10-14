@@ -61,6 +61,13 @@ PATCHES=( "${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch" )
 ## Full list of configuration options of Cantera is presented here:
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 
+src_prepare() {
+	default
+	# modify SConstruct to set env['libdirname'] to $(get_libdir)
+	sed -i "1469,1471s/^/#/" "${S}"/SConstruct || die "failed to modify 'SConstruct'"
+	sed -i "1472s/^[ \t]*//; s/'lib'/'$(get_libdir)'/" "${S}"/SConstruct || die "failed to modify 'SConstruct' with get_libdir"
+}
+
 src_configure() {
 	scons_vars=(
 		CC="$(tc-getCC)"
