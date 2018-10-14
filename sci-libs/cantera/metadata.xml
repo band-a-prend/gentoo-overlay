@@ -11,8 +11,7 @@
   </longdescription>
   <use>
     <flag name="cti">Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format</flag>
-    <flag name="static-libs">Install static version of C++ dynamic library as well</flag>
-    <flag name="test">Perfom libraries testing after compilation</flag>
+    <flag name="static-libs">Install static version of C++ dynamic library as well. This flag doesn't affect Fortran static library.</flag>
   </use>
   <upstream>
     <remote-id type="github">cantera</remote-id>
