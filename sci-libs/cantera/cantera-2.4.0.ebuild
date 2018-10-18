@@ -3,9 +3,9 @@
 
 EAPI=6
 
-PYTHON_COMPAT=( python{2_7,3_{4,5,6,7}} )
+PYTHON_COMPAT=( python3_{4,5,6} )
 
-inherit desktop python-r1 scons-utils toolchain-funcs
+inherit desktop python-single-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="http://www.cantera.org"
@@ -14,11 +14,7 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="+cti +cxx fortran pch python static-libs test"
-
-## Python2 is required by '<scons-3.0' to work.
-## Python3 automatic detection is used by cantera before compilling
-## if python3_package isn't set no "n".
+IUSE="+cti cxx fortran pch +python static-libs test"
 
 REQUIRED_USE="
 	|| ( cxx python )
@@ -26,7 +22,7 @@ REQUIRED_USE="
 	fortran? ( cxx )
 	python? ( cti )
 	static-libs? ( cxx )
-	?? ( python_targets_python3_4 python_targets_python3_5 python_targets_python3_6 python_targets_python3_7 )
+	^^ ( $(python_gen_useflags 'python3*') )
 	"
 
 RDEPEND="
@@ -35,20 +31,18 @@ RDEPEND="
 	)
 "
 
-# SCons >= 3.0 is recomended, but builds with older versions
 DEPEND="
 	${RDEPEND}
 	dev-cpp/eigen
 	dev-libs/boost
 	dev-libs/libfmt:0=
-	dev-util/scons
+	dev-util/scons[${PYTHON_USEDEP}]
 	sci-libs/sundials
 	fortran? (
 		sci-libs/sundials[fortran]
 		sys-devel/gcc[fortran]
 	)
 	python? (
-		dev-python/3to2
 		dev-python/cython[${PYTHON_USEDEP}]
 	)
 	test? (
@@ -87,20 +81,15 @@ src_configure() {
 
 	scons_targets=(
 		f90_interface=$(usex fortran y n)
+		python2_package="none"
 	)
 
 	if use cti ; then
 		python_setup
 		local scons_python=$(usex python full minimal)
-		use python_targets_python2_7 && scons_targets+=( python2_package="${scons_python}" python2_cmd="python2.7" )
-		python_is_python3 && scons_targets+=( python3_package="${scons_python}" python3_cmd="${EPYTHON}" )
-
-		## Force setup of python{2,3}_package="none" if appropriate python_targets_python{2_7,3_x} isn't active
-		## regardless of USE 'cti' or/and 'python' are enabled
-		use python_targets_python2_7 || scons_targets+=( python2_package="none" )
-		python_is_python3 || scons_targets+=( python3_package="none" )
+		scons_targets+=( python3_package="${scons_python}" python3_cmd="${EPYTHON}" )
 	else
-		scons_targets+=( python2_package="none" python3_package="none" )
+		scons_targets+=( python3_package="none" )
 	fi
 }
 
@@ -136,6 +125,6 @@ pkg_postinst() {
 		elog "C++ ${post_msg}samples are installed to '/usr/share/cantera/samples/' directory."
 	fi
 	if use python ; then
-		elog "Python examples are installed to '/usr/lib64/python{2.7,3.x}/site-packages/cantera/examples' directories."
+		elog "Python examples are installed to '/usr/lib64/python3.x/site-packages/cantera/examples' directories."
 	fi
 }
