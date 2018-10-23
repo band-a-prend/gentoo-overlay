@@ -22,7 +22,7 @@ REQUIRED_USE="
 	fortran? ( cxx )
 	python? ( cti )
 	static-libs? ( cxx )
-	^^ ( $(python_gen_useflags 'python3*') )
+	${PYTHON_REQUIRED_USE}
 	"
 
 RDEPEND="
@@ -36,7 +36,6 @@ DEPEND="
 	dev-cpp/eigen
 	dev-libs/boost
 	dev-libs/libfmt:0=
-	dev-util/scons[${PYTHON_USEDEP}]
 	sci-libs/sundials
 	fortran? (
 		sci-libs/sundials[fortran]
@@ -85,7 +84,6 @@ src_configure() {
 	)
 
 	if use cti ; then
-		python_setup
 		local scons_python=$(usex python full minimal)
 		scons_targets+=( python3_package="${scons_python}" python3_cmd="${EPYTHON}" )
 	else
