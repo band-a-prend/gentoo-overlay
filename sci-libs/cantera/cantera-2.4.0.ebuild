@@ -53,9 +53,9 @@ PATCHES=( "${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch" )
 
 src_prepare() {
 	default
-	# modify SConstruct to set env['libdirname'] to $(get_libdir)
-	sed -i "1469,1471s/^/#/" "${S}"/SConstruct || die "failed to modify 'SConstruct'"
-	sed -i "1472s/^[ \t]*//; s/'lib'/'$(get_libdir)'/" "${S}"/SConstruct || die "failed to modify 'SConstruct' with get_libdir"
+	# modify SConstruct to comment block of lines and to set "env['libdirname'] = '$(get_libdir)'"
+	sed -i "/if any(name.startswith/,/else:/ s/^/#/" "${S}"/SConstruct || die "failed to modify 'SConstruct'"
+	sed -i "/env\['libdirname'\] = 'lib'/{s/^[ \t]*//;s/'lib'/'$(get_libdir)'/}" "${S}"/SConstruct || die "failed to modify 'SConstruct' with get_libdir"
 }
 
 ## Full list of configuration options of Cantera is presented here:
