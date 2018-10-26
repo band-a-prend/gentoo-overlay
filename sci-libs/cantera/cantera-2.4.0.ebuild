@@ -5,7 +5,10 @@ EAPI=6
 
 PYTHON_COMPAT=( python3_{4,5,6} )
 
-inherit desktop python-single-r1 scons-utils toolchain-funcs
+FORTRAN_NEEDED=fortran
+FORTRAN_STANDARD=90
+
+inherit desktop python-single-r1 scons-utils toolchain-funcs fortran-2
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="http://www.cantera.org"
@@ -37,10 +40,6 @@ DEPEND="
 	dev-libs/boost
 	dev-libs/libfmt:0=
 	sci-libs/sundials
-	fortran? (
-		sci-libs/sundials[fortran]
-		sys-devel/gcc[fortran]
-	)
 	python? (
 		dev-python/cython[${PYTHON_USEDEP}]
 	)
@@ -50,6 +49,10 @@ DEPEND="
 "
 
 PATCHES=( "${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch" )
+
+pkg_setup() {
+	python-single-r1_pkg_setup
+}
 
 src_prepare() {
 	default

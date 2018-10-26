@@ -5,7 +5,10 @@ EAPI=6
 
 PYTHON_COMPAT=( python{2_7,3_{4,5,6}} )
 
-inherit desktop python-r1 scons-utils toolchain-funcs
+FORTRAN_NEEDED=fortran
+FORTRAN_STANDARD=90
+
+inherit desktop python-r1 scons-utils toolchain-funcs fortran-2
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="http://www.cantera.org"
@@ -42,10 +45,6 @@ DEPEND="
 	dev-libs/libfmt:0/4
 	dev-util/scons
 	sci-libs/sundials
-	fortran? (
-		sci-libs/sundials[fortran]
-		sys-devel/gcc[fortran]
-	)
 	python? (
 		dev-python/3to2
 		dev-python/cython[${PYTHON_USEDEP}]
@@ -64,6 +63,10 @@ PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
 	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
+
+pkg_setup() {
+	python_setup
+}
 
 src_prepare() {
 	default
@@ -97,7 +100,6 @@ src_configure() {
 	)
 
 	if use cti ; then
-		python_setup
 		if use python ; then
 			use python_targets_python2_7 && scons_targets+=( python_package="full" )
 			python_is_python3 && scons_targets+=( python3_package="y" python3_cmd="${EPYTHON}" )
