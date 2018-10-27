@@ -43,7 +43,7 @@ DEPEND="
 	dev-cpp/eigen
 	dev-libs/boost
 	dev-libs/libfmt:0/4
-	dev-util/scons
+	<dev-util/scons-3.0
 	sci-libs/sundials
 	python? (
 		dev-python/3to2
