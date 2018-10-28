@@ -105,7 +105,6 @@ src_test() {
 src_install() {
 	escons install stage_dir="${D%/}" prefix="/usr"
 	if ! use cxx ; then
-		einfo "Removing of C++, Fortran libraries, headers and samples"
 		rm -r "${D%/}/usr"/{include,$(get_libdir)/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
 		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
 	elif ! use static-libs ; then
