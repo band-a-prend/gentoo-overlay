@@ -32,14 +32,14 @@ RDEPEND="
 	python? (
 		dev-python/numpy[${PYTHON_USEDEP}]
 	)
+	sci-libs/sundials:0=
 "
 
 DEPEND="
 	${RDEPEND}
 	dev-cpp/eigen
 	dev-libs/boost
-	dev-libs/libfmt:0=
-	sci-libs/sundials
+	dev-libs/libfmt
 	python? (
 		dev-python/cython[${PYTHON_USEDEP}]
 	)

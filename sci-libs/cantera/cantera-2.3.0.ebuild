@@ -36,6 +36,7 @@ RDEPEND="
 	python? (
 		dev-python/numpy[${PYTHON_USEDEP}]
 	)
+	sci-libs/sundials:0=
 "
 
 DEPEND="
@@ -44,7 +45,6 @@ DEPEND="
 	dev-libs/boost
 	dev-libs/libfmt:0/4
 	<dev-util/scons-3.0
-	sci-libs/sundials
 	python? (
 		dev-python/3to2
 		dev-python/cython[${PYTHON_USEDEP}]
