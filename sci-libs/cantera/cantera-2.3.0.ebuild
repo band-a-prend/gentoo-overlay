@@ -85,6 +85,7 @@ src_configure() {
 		cc_flags="${CXXFLAGS}"
 		cxx_flags="-std=c++11"
 		debug="no"
+		FORTRAN="$(tc-getFC)"
 		FORTRANFLAGS="${CXXFLAGS}"
 		use_pch=$(usex pch)
 ## In some cases other order can break the detection of right location of Boost: ##

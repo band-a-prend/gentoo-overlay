@@ -82,17 +82,20 @@ or
 
 * [x] `googletest`: [ 'default' | 'system' | 'submodule' | 'none' ] (since v2.4.0) - Select whether to use gtest/gmock from system installation (system), from a Git submodule (submodule), to decide automatically (default) or don’t look for gtest/gmock (none).  
 
+* [x] `CXX`: [ string ] - The C++ compiler to use  
+* [x] `CC`: [ string ] - The C compiler to use. This is only used to compile CVODE  
 * [x] `cc_flags`: [ string ] - Compiler flags passed to both the C and C++ compilers, regardless of optimization level. default: ''  
 * [x] `cxx_flags`: [ string ] - Compiler flags passed to the C++ compiler only. Separate multiple options with spaces, e.g., cxx_flags='-g -Wextra -O3 --std=c++11'. default: ''  
-* [x] `extra_inc_dirs`: [ string ] - Additional directories to search for header files (colon-separated list). default: '' 
+* [x] `extra_inc_dirs`: [ string ] - Additional directories to search for header files (colon-separated list). default: ''  
+
 * [x] `prefix`: [ /path/to/prefix ] - Set this to the directory where Cantera should be installed. default: ''  
-* [x] `stage_dir`: [ /path/to/stage_dir ] - Directory relative to the Cantera source directory to be used as a staging area for building e.g., a Debian package. If specified, scons install will install files to `stage_dir/prefix/....`. default: '' 
+* [x] `stage_dir`: [ /path/to/stage_dir ] - Directory relative to the Cantera source directory to be used as a staging area for building e.g., a Debian package. If specified, scons install will install files to `stage_dir/prefix/....`. default: ''  
 
 * [x] `use_pch`: [ yes | no ] - Use a precompiled-header to speed up compilation  
 
 * [x] `f90_interface`: [ y | n | default ] - This variable controls whether the Fortran 90/95 interface will be built. If set to default, the builder will look for a compatible Fortran compiler in the PATH environment variable, and compile the Fortran 90 interface if one is found. default: 'default'  
 
-* [ ] `FORTRAN`: [ /path/to/FORTRAN ] - set Fortran compiler  
+* [x] `FORTRAN`: [ /path/to/FORTRAN ] - set Fortran compiler  
 * [x] `FORTRANFLAGS`: [ string ] - default "-O3"  
 
 * [ ] `coverage`: [ yes | no ] - Enable collection of code coverage information with gcov. Available only when compiling with gcc. default: 'no'  
