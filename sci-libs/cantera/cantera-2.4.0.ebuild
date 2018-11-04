@@ -48,8 +48,6 @@ DEPEND="
 	)
 "
 
-PATCHES=( "${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch" )
-
 pkg_setup() {
 	python-single-r1_pkg_setup
 }

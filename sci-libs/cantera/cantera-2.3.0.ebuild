@@ -61,7 +61,6 @@ PATCHES=(
 	"${FILESDIR}/${PN}_${PV}_googletest_option.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_fmt4_compability.patch"
 	"${FILESDIR}/${PN}_${PV}_fix_functional_error.patch"
-	"${FILESDIR}/${PN}_${PV}_disable_debug_and_optimization.patch"
 	)
 
 pkg_setup() {
