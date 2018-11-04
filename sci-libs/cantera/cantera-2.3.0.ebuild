@@ -8,7 +8,7 @@ PYTHON_COMPAT=( python{2_7,3_{4,5,6}} )
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD=90
 
-inherit desktop python-r1 scons-utils toolchain-funcs fortran-2
+inherit desktop fortran-2 python-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="http://www.cantera.org"
@@ -61,6 +61,7 @@ PATCHES=(
 	)
 
 pkg_setup() {
+	fortran-2_pkg_setup
 	python_setup
 }
 
