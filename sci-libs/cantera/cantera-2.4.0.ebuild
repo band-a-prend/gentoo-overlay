@@ -17,14 +17,11 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="+cti cxx fortran pch +python static-libs test"
+IUSE="+cti fortran pch +python test"
 
 REQUIRED_USE="
-	|| ( cxx python )
 	cti? ( ${PYTHON_REQUIRED_USE} )
-	fortran? ( cxx )
 	python? ( cti )
-	static-libs? ( cxx )
 	${PYTHON_REQUIRED_USE}
 	"
 
@@ -106,12 +103,6 @@ src_test() {
 
 src_install() {
 	escons install stage_dir="${D%/}"
-	if ! use cxx ; then
-		rm -r "${D%/}/usr"/{include,$(get_libdir)/{libcantera*,pkgconfig}} || die "Can't remove headers, libraries and pkgconfig files."
-		rm -r "${D%/}/usr/share/cantera/samples" || die "Can't remove samples files."
-	elif ! use static-libs ; then
-		rm -r "${D%/}/usr/$(get_libdir)/libcantera.a" || die "Can't remove cantera C++ static library."
-	fi
 	if ! use cti ; then
 		rm -r "${D%/}/usr/share/man" || die "Can't remove man files."
 	fi
@@ -122,10 +113,10 @@ pkg_postinst() {
 		elog "Cantera was build without 'python' use-flag therefore the CTI tool 'ck2cti'"
 		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
 	fi
+
 	local post_msg=$(usex fortran "and Fortran " "")
-	if use cxx ; then
-		elog "C++ ${post_msg}samples are installed to '/usr/share/cantera/samples/' directory."
-	fi
+	elog "C++ ${post_msg}samples are installed to '/usr/share/cantera/samples/' directory."
+
 	if use python ; then
 		elog "Python examples are installed to '/usr/lib64/python3.x/site-packages/cantera/examples' directories."
 	fi

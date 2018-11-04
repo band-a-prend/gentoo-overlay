@@ -58,7 +58,6 @@ GitHub page: https://github.com/Cantera/cantera
 #### Local USE flags:  
 
 * `cti` - Install CTI tools (ck2cti, ctml_writer) for conversion of Chemkin files to Cantera format.  
-* `static-libs` - Install static version of C++ dynamic library as well. This flag doesn't affect Fortran static library.  
 
 
 #### ToDo:  
