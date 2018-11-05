@@ -45,6 +45,8 @@ DEPEND="
 	)
 "
 
+PATCHES=( "${FILESDIR}/${PN}_${PV}_libdirname_variable.patch" )
+
 pkg_setup() {
 	fortran-2_pkg_setup
 	python-single-r1_pkg_setup
@@ -52,9 +54,6 @@ pkg_setup() {
 
 src_prepare() {
 	default
-	# modify SConstruct to comment block of lines and to set "env['libdirname'] = '$(get_libdir)'"
-	sed -i "/if any(name.startswith/,/else:/ s/^/#/" "${S}"/SConstruct || die "failed to modify 'SConstruct'"
-	sed -i "/env\['libdirname'\] = 'lib'/{s/^[ \t]*//;s/'lib'/'$(get_libdir)'/}" "${S}"/SConstruct || die "failed to modify 'SConstruct' with get_libdir"
 	# patch to work 'scons test' properly in case of set up 'renamed_shared_libraries="no"' option
 	sed -i "s/, libs=\['cantera_shared'\]//" "${S}"/test_problems/SConscript || die "failed to modify 'test_problems/SConscript'"
 }
@@ -103,7 +102,7 @@ src_test() {
 }
 
 src_install() {
-	escons install stage_dir="${D%/}"
+	escons install stage_dir="${D%/}" libdirname="$(get_libdir)"
 	if ! use cti ; then
 		rm -r "${D%/}/usr/share/man" || die "Can't remove man files."
 	fi
