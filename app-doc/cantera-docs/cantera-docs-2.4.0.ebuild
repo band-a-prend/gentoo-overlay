@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit desktop
+inherit desktop xdg-utils
 
 DESCRIPTION="Documentation API reference for Cantera package libraries"
 HOMEPAGE="https://cantera.org"
@@ -17,9 +17,17 @@ IUSE=""
 S="${WORKDIR}/"
 
 src_install() {
-	dodir /usr/share/cantera/doc/
-	cp -R "${S}/." "${D}/usr/share/cantera/doc/" || die "cantera-docs installation failed"
+	insinto /usr/share/cantera/doc/
+	doins -r "${S}/."
 
 	make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
 	make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/sphinx/html/index.html" "Cantera Sphinx Documentation" "text-html" "Development"
+}
+
+pkg_postinst() {
+	xdg_desktop_database_update
+}
+
+pkg_postrm() {
+	xdg_desktop_database_update
 }
