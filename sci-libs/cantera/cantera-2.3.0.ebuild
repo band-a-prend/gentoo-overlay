@@ -138,9 +138,9 @@ pkg_postinst() {
 	fi
 
 	local post_msg=$(usex fortran "and Fortran " "")
-	elog "C++ ${post_msg}samples are installed to '/usr/share/cantera/samples/' directory."
+	elog "C++ ${post_msg}samples are installed to '/usr/share/${PN}/samples/' directory."
 
 	if use python ; then
-		elog "Python examples are installed to '/usr/lib64/python{2.7,3.x}/site-packages/cantera/examples' directories."
+		elog "Python examples are installed to '/usr/$(get_libdir)/python{2.7,3.x}/site-packages/${PN}/examples/' directories."
 	fi
 }
