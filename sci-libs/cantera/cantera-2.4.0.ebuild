@@ -108,6 +108,9 @@ src_install() {
 	escons install stage_dir="${D%/}" libdirname="$(get_libdir)"
 	if ! use cti ; then
 		rm -r "${D%/}/usr/share/man" || die "Can't remove man files."
+	else
+		# Run the byte-compile of modules
+		python_optimize "${D%/}/$(python_get_sitedir)/${PN}"
 	fi
 }
 
