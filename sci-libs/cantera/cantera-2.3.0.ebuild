@@ -72,6 +72,8 @@ src_prepare() {
 	sed -i "/env\['libdirname'\] = 'lib'/{s/^[ \t]*//;s/'lib'/'$(get_libdir)'/}" "${S}"/SConstruct || die "failed to modify 'SConstruct' with get_libdir"
 	# patch to work 'scons test' properly in case of set up 'renamed_shared_libraries="no"' option
 	sed -i "s/, libs=\['cantera_shared'\]//" "${S}"/test_problems/SConscript || die "failed to modify 'test_problems/SConscript'"
+	# patch env to pass CCACHE_DIR variable
+	sed -i "s/ENV={'PATH': os.environ\['PATH'\]}/ENV={'PATH': os.environ\['PATH'\], 'CCACHE_DIR': os.environ.get('CCACHE_DIR','')}/" "${S}"/SConstruct || die "failed to modify 'SConstruct'"
 }
 
 ## Full list of configuration options of Cantera is presented here:
@@ -92,6 +94,7 @@ src_configure() {
 		system_fmt="y"
 		system_sundials="y"
 		system_eigen="y"
+		env_vars="all"
 		extra_inc_dirs="/usr/include/eigen3"
 	)
 	use test || scons_vars+=( googletest="none" )
