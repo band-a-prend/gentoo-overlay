@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit desktop xdg-utils
+inherit desktop
 
 DESCRIPTION="Documentation API reference for Cantera package libraries"
 HOMEPAGE="https://cantera.org"
@@ -13,6 +13,10 @@ LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
+
+RDEPEND="
+	x11-misc/xdg-utils
+"
 
 S="${WORKDIR}/docs-${PV}"
 
@@ -30,12 +34,4 @@ src_install() {
 
 	make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/doxygen/html/index.html" "Cantera Doxygen Documentation" "text-html" "Development"
 	make_desktop_entry "/usr/bin/xdg-open /usr/share/cantera/doc/sphinx/html/index.html" "Cantera Sphinx Documentation" "text-html" "Development"
-}
-
-pkg_postinst() {
-	xdg_desktop_database_update
-}
-
-pkg_postrm() {
-	xdg_desktop_database_update
 }
