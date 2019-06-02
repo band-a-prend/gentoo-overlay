@@ -19,7 +19,7 @@ FortranProject homepage: https://sourceforge.net/projects/fortranproject
 
 Related issue: [#643494](https://bugs.gentoo.org/643494)  
 Related pull request: [#7324](https://github.com/gentoo/gentoo/pull/7324)  
-*(merged to portage tree after editing the commit with bug references and some changes)*  
+*(merged to portage tree on 5 May 2018 after editing the commit with bug references and some changes)*  
 
 * `dev-util/codeblocks-17.12-r1.ebuild`  
 * `dev-util/codeblocks-17.12-r301.ebuild`  
@@ -44,14 +44,15 @@ GitHub page: https://github.com/Cantera/cantera
 
 
 #### Ebuilds:
-*(under development)*  
-* `sci-libs/cantera-2.3.0.ebuild`  
+*(under development, please use package in main Gentoo portage tree)*  
 * `sci-libs/cantera-2.4.0.ebuild`  
 
+Related issue: [#200425](https://bugs.gentoo.org/200425)  
+Related pull request: [#10017](https://github.com/gentoo/gentoo/pull/10017)  
+*(merged to portage on 28 Nov 2018)*  
 
 #### Additional ebuilds:  
 *(to install doxygen and sphinx documentation)*  
-* `app-doc/cantera-docs-2.3.0.ebuild`  
 * `app-doc/cantera-docs-2.4.0.ebuild`  
 
 
@@ -71,7 +72,7 @@ Full list of configuration options is presented at the appropriate page of [Cant
 Some of this options are listed below (checked if is used within ebuild):  
 
 * [x] `python_package`: [ new | full | minimal | none | default ] - If you plan to work in Python, then you need the full Cantera Python package. If, on the other hand, you will only use Cantera from some other language (e.g. MATLAB or Fortran 90/95) and only need Python to process CTI files, then you only need a minimal subset of the package and Cython and NumPy are not necessary. The none option doesn’t install any components of the Python interface. The default behavior is to build the full Python module for whichever version of Python is running SCons if the required prerequisites (NumPy and Cython) are installed. Note: y is a synonym for full and n is a synonym for none. default: 'default'    
-* [x] `python2_package`: [ y | n | full | minimal | none | default ] (since v2.4.0) - Controls whether or not the Python 2 module will be built. By default, the module will be built if the Python 2 interpreter and the required dependencies (NumPy for Python 2 and Cython for the version of Python for which SCons is installed) can be found. default: 'default'  
+* [ ] `python2_package`: [ y | n | full | minimal | none | default ] (since v2.4.0) - Controls whether or not the Python 2 module will be built. By default, the module will be built if the Python 2 interpreter and the required dependencies (NumPy for Python 2 and Cython for the version of Python for which SCons is installed) can be found. default: 'default'  
 * [x] `python3_package`: [ y | n | default ]  
 or  
 * [x] `python3_package`: [ y | n | full | minimal | none | default ] (since v2.4.0) - Controls whether or not the Python 3 module will be built. By default, the module will be built if the Python 3 interpreter and the required dependencies (NumPy for Python 3 and Cython for the version of Python for which SCons is installed) can be found. default: 'default'  
@@ -103,6 +104,6 @@ or
 * [ ] `lapack_ftn_trailing_underscore`: [ yes | no ] - Controls whether the LAPACK functions have a trailing underscore in the Fortran libraries  
 * [ ] `lapack_ftn_string_len_at_end`: [ yes | no ] - Controls whether the LAPACK functions have the string length argument at the end of the argument list in the Fortran libraries  
 
-* [ ] `renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a '_shared' extension added to their base name  
+* [x] `renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a '_shared' extension added to their base name  
 * [ ] `versioned_shared_library`: [ yes | no ] - create a versioned shared library, with symlinks to the more generic library name  
 
