@@ -45,11 +45,12 @@ GitHub page: https://github.com/Cantera/cantera
 
 #### Ebuilds:
 *(under development, please use package in main Gentoo portage tree)*  
-* `sci-libs/cantera-2.4.0.ebuild`  
+* ~~`sci-libs/cantera-2.4.0.ebuild`~~ (droped due to the removing of old `<=sci-libs/sundials-3.1.2`)  
+* `sci-libs/cantera-2.4.0-r1.ebuild`  
 
-Related issue: [#200425](https://bugs.gentoo.org/200425)  
-Related pull request: [#10017](https://github.com/gentoo/gentoo/pull/10017)  
-*(merged to portage on 28 Nov 2018)*  
+Related issues: [#200425](https://bugs.gentoo.org/200425), [#689998](https://bugs.gentoo.org/689998), [#691404](https://bugs.gentoo.org/691404)  
+Related pull requests: [#10017](https://github.com/gentoo/gentoo/pull/10017), [#12303](https://github.com/gentoo/gentoo/pull/12303), [#12650](https://github.com/gentoo/gentoo/pull/12650)  
+*(initially added to portage tree on 28 Nov 2018)*  
 
 #### Additional ebuilds:  
 *(to install doxygen and sphinx documentation)*  
