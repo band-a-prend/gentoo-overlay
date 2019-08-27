@@ -46,10 +46,12 @@ GitHub page: https://github.com/Cantera/cantera
 #### Ebuilds:
 *(under development, please use package in main Gentoo portage tree)*  
 * ~~`sci-libs/cantera-2.4.0.ebuild`~~ (droped due to the removing of old `<=sci-libs/sundials-3.1.2`)  
-* `sci-libs/cantera-2.4.0-r1.ebuild`  
+* `sci-libs/cantera-2.4.0-r1.ebuild` (fix use of default build flag `-O3`, fix build against `=sci-libs/sundials-3.2`)  
+* `sci-libs/cantera-2.4.0-r2.ebuild` (set `python_prefix` installation path via `libdirname` env variable, add support of build against `>=sci-libs/sundials-4.0`)  
 
 Related issues: [#200425](https://bugs.gentoo.org/200425), [#689998](https://bugs.gentoo.org/689998), [#691404](https://bugs.gentoo.org/691404)  
-Related pull requests: [#10017](https://github.com/gentoo/gentoo/pull/10017), [#12303](https://github.com/gentoo/gentoo/pull/12303), [#12650](https://github.com/gentoo/gentoo/pull/12650)  
+Related pull requests: [#10017](https://github.com/gentoo/gentoo/pull/10017), [#12303](https://github.com/gentoo/gentoo/pull/12303), 
+[#12650](https://github.com/gentoo/gentoo/pull/12650), [#12701](https://github.com/gentoo/gentoo/pull/12701)  
 *(initially added to portage tree on 28 Nov 2018)*  
 
 #### Additional ebuilds:  
