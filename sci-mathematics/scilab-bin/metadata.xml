@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+        <!-- maintainer-needed -->
+<longdescription>Open-source numerical computational software and high-level math-oriented programming language</longdescription>
+  <upstream>
+    <remote-id type="github">scilab</remote-id>
+  </upstream>
+</pkgmetadata>
