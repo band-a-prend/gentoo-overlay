@@ -1,6 +1,12 @@
 ## gentoo-overlay
 
-[ [dev-util/codeblocks](#dev-utilcodeblocks)  ] [  [sci-libs/cantera](#sci-libscantera) ]
+The packages that are presented in Gentoo portage tree:  
+[ [dev-util/codeblocks](#dev-utilcodeblocks) ] [ [sci-libs/cantera](#sci-libscantera) ]  
+
+***
+
+The binary bundled packages that aren't presented in Gentoo portage tree:  
+[ [app-misc/double-commander-bin](#app-miscdouble-commander-bin) ] [ [media-gfx/WebPlotDigitizer-bin](#media-gfxwebplotdigitizer-bin) ] [ [sci-mathematica/scilab-bin](#sci-mathematicascilab-bin) ]  
 
 ***
 
@@ -109,4 +115,41 @@ or
 
 * [x] `renamed_shared_libraries`: [ yes | no ] - the shared libraries that are created will be renamed to have a '_shared' extension added to their base name  
 * [ ] `versioned_shared_library`: [ yes | no ] - create a versioned shared library, with symlinks to the more generic library name  
+
+***
+
+### app-misc/double-commander-bin:
+
+> Free cross platform open source file manager with two panels side by side.
+
+Homepage: https://doublecmd.sourceforge.io 
+
+#### Ebuilds:  
+*(under development)*  
+* `app-misc/double-commander-bin-0.9.6.ebuild`  
+
+***
+
+### media-gfx/WebPlotDigitizer-bin:
+
+> Web based tool to extract data from plots, images, and maps.  
+
+Homepage and documentation: https://automeris.io/WebPlotDigitizer  
+
+#### Ebuilds:  
+*(under development, RDEPEND is currently empty and required to be filled with actual runtime-deps)*  
+* `media-gfx/WebPlotDigitizer-bin-4.2.ebuild`  
+
+***
+
+### sci-mathematica/scilab-bin:
+
+>  Scilab is free and open source software for numerical computation providing a powerful computing environment for engineering and scientific applications
+
+Homepage and documentation: https://www.scilab.org  
+GitHub page: https://github.com/scilab/scilab  
+
+#### Ebuilds:  
+*(under development, RDEPEND is currently empty and required to be filled with actual runtime-deps)*  
+* `sci-mathematica/scilab-bin-6.0.2.ebuild`  
 
