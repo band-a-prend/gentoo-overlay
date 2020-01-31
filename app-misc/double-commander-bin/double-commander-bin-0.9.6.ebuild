@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -21,13 +21,14 @@ S="${WORKDIR}/${MY_PN}"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
+
 IUSE="gtk qt5"
 REQUIRED_USE=" ^^ ( gtk qt5 ) "
 
 QA_PREBUILT="
 	*/doublecmd
 	*/libQt5Pas.so.1
-	"
+"
 
 RDEPEND="
 	sys-apps/dbus
@@ -37,7 +38,7 @@ RDEPEND="
 	gtk? ( x11-libs/gtk+:2 )
 	qt5? ( dev-qt/qtgui:5
 	dev-qt/qtx11extras:5 )
-	"
+"
 
 src_prepare(){
 	default
@@ -51,12 +52,8 @@ src_install(){
 
 	exeinto "/opt/${MY_PN}-bin"
 	doexe "${S}/${MY_PN}"
-	dosym ../../opt/${MY_PN}-bin/${MY_PN} /usr/bin/${MY_PN}-bin
+	doexe "${S}/${MY_PN}.sh"
 
 	doicon -s 48 ${MY_PN}.png
-	make_desktop_entry "${MY_PN}-bin" "Double Commander" "${MY_PN}" "Utility;" || die "Failed making desktop entry!"
-
-	if use qt5; then
-		newlib.so libQt5Pas.so.1 libQt5Pas.so.1
-	fi
+	make_desktop_entry "/opt/${MY_PN}-bin/${MY_PN}.sh" "Double Commander" "${MY_PN}" "Utility;" || die "Failed making desktop entry!"
 }
