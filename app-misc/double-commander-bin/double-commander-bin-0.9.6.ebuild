@@ -30,14 +30,20 @@ QA_PREBUILT="
 	*/libQt5Pas.so.1
 "
 
+## "ldd doublecmd" output show linking to some libraries provided by sys-libs/glibc:2.2
+## (maybe virtual/libc-1) and no libraries of sys-libs/ncurses (that removed here).
+## x11-libs/X11 is optional dependency of dev-qt/qtgui:5 by [xcb] or [X]
+## therefore it is mentioned here explicitly.
 RDEPEND="
+	dev-libs/glib:2
 	sys-apps/dbus
-	dev-libs/glib
-	sys-libs/ncurses
 	x11-libs/libX11
+	virtual/libc
 	gtk? ( x11-libs/gtk+:2 )
-	qt5? ( dev-qt/qtgui:5
-	dev-qt/qtx11extras:5 )
+	qt5? (
+		dev-qt/qtgui:5
+		dev-qt/qtx11extras:5
+	)
 "
 
 src_prepare(){
