@@ -53,13 +53,13 @@ src_prepare(){
 }
 
 src_install(){
-	insinto "/opt/${MY_PN}-bin"
+	insinto "/opt/${PN}"
 	doins -r "${S}/."
 
-	exeinto "/opt/${MY_PN}-bin"
+	exeinto "/opt/${PN}"
 	doexe "${S}/${MY_PN}"
 	doexe "${S}/${MY_PN}.sh"
 
 	doicon -s 48 ${MY_PN}.png
-	make_desktop_entry "/opt/${MY_PN}-bin/${MY_PN}.sh" "Double Commander" "${MY_PN}" "Utility;" || die "Failed making desktop entry!"
+	make_desktop_entry "/opt/${PN}/${MY_PN}.sh" "Double Commander" "${MY_PN}" "Utility;" || die "Failed making desktop entry!"
 }
