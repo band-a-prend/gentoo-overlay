@@ -14,16 +14,17 @@ SRC_URI="amd64? ( gtk? ( mirror://sourceforge/${MY_PN}/${MY_PN}-${PV}.gtk2.x86_6
 	x86? ( gtk? ( mirror://sourceforge/${MY_PN}/${MY_PN}-${PV}.gtk2.i386.tar.xz )
 		qt5?  ( mirror://sourceforge/${MY_PN}/${MY_PN}-${PV}.qt5.i386.tar.xz ) )"
 
-RESTRICT="mirror"
-
-S="${WORKDIR}/${MY_PN}"
-
-LICENSE="GPL-2"
+# Licenses for package and plugins
+LICENSE="GPL-2+ LGPL-2-with-linking-exception LGPL-2.1+ LGPL-3 GPL-1 freedist"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 
 IUSE="gtk qt5"
 REQUIRED_USE=" ^^ ( gtk qt5 ) "
+
+RESTRICT="mirror"
+
+S="${WORKDIR}/${MY_PN}"
 
 QA_PREBUILT="
 	*/doublecmd
