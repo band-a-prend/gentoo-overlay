@@ -7,7 +7,7 @@ inherit desktop eutils
 
 MY_PN="doublecmd"
 DESCRIPTION="Free cross platform open source file manager with two panels side by side."
-HOMEPAGE="http://${MY_PN}.sourceforge.net/"
+HOMEPAGE="http://doublecmd.sourceforge.net/"
 
 SRC_URI="amd64? ( gtk? ( mirror://sourceforge/${MY_PN}/${MY_PN}-${PV}.gtk2.x86_64.tar.xz )
 		qt5?  ( mirror://sourceforge/${MY_PN}/${MY_PN}-${PV}.qt5.x86_64.tar.xz ) )
