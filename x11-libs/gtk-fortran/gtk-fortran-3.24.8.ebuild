@@ -22,7 +22,7 @@ IUSE="plplot"
 
 RDEPEND="
 	x11-libs/gtk+:3
-	plplot? ( >=sci-libs/plplot-5.13.0[fortran] )
+	plplot? ( >=sci-libs/plplot-5.13.0[cairo,fortran] )
 "
 
 DEPEND="
@@ -53,6 +53,7 @@ src_configure() {
 	mycmakeargs+=(
 		-DEXCLUDE_PLPLOT=$(usex plplot false true)
 		-DINSTALL_EXAMPLES=true
+		-DNO_BUILD_EXAMPLES=true
 	)
 	# Try to fix (fix similar warnings only for static library):
 	# /usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/../../../../x86_64-pc-linux-gnu/bin/ld: CMakeFiles/gtk-fortran_object.dir/gtk-hl-assistant.f90.o: 
