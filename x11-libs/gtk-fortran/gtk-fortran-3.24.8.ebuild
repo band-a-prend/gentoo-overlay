@@ -10,7 +10,7 @@ inherit cmake-utils flag-o-matic fortran-2
 
 DESCRIPTION="A GTK+ binding to build Graphical User Interfaces in Fortran"
 HOMEPAGE="https://github.com/vmagnin/gtk-fortran"
-SRC_URI="https://github.com/vmagnin/${PN}/archive/v19.04.gtk${PV}.tar.gz"
+SRC_URI="https://github.com/vmagnin/${PN}/archive/v19.04.gtk${PV}.tar.gz -> ${P}.tar.gz"
 
 S="${WORKDIR}/${PN}-19.04.gtk${PV}"
 
