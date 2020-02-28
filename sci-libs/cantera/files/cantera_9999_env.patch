@@ -1,0 +1,36 @@
+diff -Nur old/cantera-2.4.0/SConstruct new/cantera-2.4.0/SConstruct
+--- old/SConstruct	2018-08-24 16:24:45.000000000 +0300
++++ new/SConstruct	2019-07-17 15:50:06.000000000 +0300
+@@ -189,7 +189,7 @@
+     toolchain = ['default']
+ 
+ env = Environment(tools=toolchain+['textfile', 'subst', 'recursiveInstall', 'wix', 'gch'],
+-                  ENV={'PATH': os.environ['PATH']},
++                  ENV={'PATH': os.environ['PATH'], 'CCACHE_DIR': os.environ.get('CCACHE_DIR','')},
+                   toolchain=toolchain,
+                   **extraEnvArgs)
+ 
+@@ -723,10 +731,7 @@
+ env['cantera_pure_version'] = '.'.join(str(x) for x in ctversion.version)
+ env['cantera_short_version'] = '.'.join(str(x) for x in ctversion.version[:2])
+ 
+-try:
+-    env['git_commit'] = getCommandOutput('git', 'rev-parse', '--short', 'HEAD')
+-except Exception:
+-    env['git_commit'] = 'unknown'
++env['git_commit'] = 'unknown'
+ 
+ # Print values of all build options:
+ print("Configuration variables read from 'cantera.conf' and command line:")
+diff -Nur old/cantera-2.4.0/test_problems/SConscript new/cantera-2.4.0/test_problems/SConscript
+--- old/test_problems/SConscript	2018-08-24 16:24:45.000000000 +0300
++++ new/test_problems/SConscript	2019-07-17 15:41:35.000000000 +0300
+@@ -282,7 +282,7 @@
+ CompileAndTest('VPsilane_test', 'VPsilane_test', 'VPsilane_test', 'output_blessed.txt')
+ 
+ CompileAndTest('clib', 'clib_test', 'clib_test', 'output_blessed.txt',
+-               extensions=['^clib_test.c'], libs=['cantera_shared'])
++               extensions=['^clib_test.c'])
+ 
+ # Force explicitly-named tests to run even if SCons thinks they're up to date
+ for command in COMMAND_LINE_TARGETS:
