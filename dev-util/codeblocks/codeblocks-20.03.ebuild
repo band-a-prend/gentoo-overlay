@@ -8,13 +8,18 @@ WX_GTK_VER="3.0-gtk3"
 inherit autotools wxwidgets xdg-utils
 
 DESCRIPTION="The open source, cross platform, free C, C++ and Fortran IDE"
-HOMEPAGE="http://www.codeblocks.org/"
+HOMEPAGE="https://codeblocks.org/"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86"
 SRC_URI="mirror://sourceforge/${PN}/${P}.tar.xz"
 
-IUSE="contrib debug pch"
+# USE="fortran" enables FortranProject plugin (v1.6 updated to 2020-03-21 [r270])
+# that is delivered with Code::Blocks 20.03 source code.
+# https://sourceforge.net/projects/fortranproject
+# http://cbfortran.sourceforge.net
+
+IUSE="contrib debug fortran pch"
 
 BDEPEND="virtual/pkgconfig"
 
@@ -32,6 +37,7 @@ DEPEND="${RDEPEND}"
 
 PATCHES=(
 	"${FILESDIR}"/${P}-env.patch
+	"${FILESDIR}"/${P}-FortranProject-autotools-build.patch
 	)
 
 src_prepare() {
@@ -42,7 +48,12 @@ src_prepare() {
 src_configure() {
 	setup-wxwidgets
 
-	CONF_WITH_LST=$(use_with contrib contrib-plugins all)
+	# USE="contrib -fortran" setup:
+	use fortran || CONF_WITH_LST=$(use_with contrib contrib-plugins all,-FortranProject)
+	# USE="contrib fortran" setup:
+	use fortran && CONF_WITH_LST=$(use_with contrib contrib-plugins all)
+	# USE="-contrib fortran" setup:
+	use contrib || CONF_WITH_LST=$(use_with fortran contrib-plugins FortranProject)
 
 	econf \
 		--disable-static \
