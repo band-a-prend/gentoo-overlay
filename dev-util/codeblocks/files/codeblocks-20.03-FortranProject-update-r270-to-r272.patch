@@ -1,0 +1,230 @@
+diff -Naur old/src/plugins/contrib/FortranProject/nativeparserf.cpp new/src/plugins/contrib/FortranProject/nativeparserf.cpp
+--- old/src/plugins/contrib/FortranProject/nativeparserf.cpp	2020-03-21 18:45:12.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/nativeparserf.cpp	2020-03-28 19:30:39.000000000 +0300
+@@ -420,13 +420,59 @@
+ void NativeParserF::UpdateWorkspaceFilesDependency()
+ {
+     ClearWSDependency();
++    UpdateWSFilesDependency();
++}
++
++void NativeParserF::UpdateWSFilesDependency()
++{
+     ProjectsArray* projects = Manager::Get()->GetProjectManager()->GetProjects();
+ 
++    ProjectFilesArray pfs;
+     for (size_t i = 0; i < projects->GetCount(); ++i)
+     {
+         cbProject* proj = projects->Item(i);
+-        if (!proj->IsMakefileCustom())
+-            UpdateProjectFilesDependency(proj);
++        if (proj->IsMakefileCustom()) continue;
++
++        proj->SaveAllFiles();
++
++        FilesList& flist = proj->GetFilesList();
++        for (FilesList::iterator it = flist.begin(); it != flist.end(); ++it)
++        {
++            ProjectFile* pf = *it;
++            if (IsFileFortran(pf->relativeFilename))
++            {
++                pfs.push_back(pf);
++            }
++        }
++    }
++
++    wxString name = _T("### WorkspaceAllFortranFiles ###");
++    WSDependencyMap::iterator pos;
++    pos = m_WSDependency.find(name);
++    if (pos == m_WSDependency.end())
++    {
++        pos = m_WSDependency.insert(std::make_pair(name,new ProjectDependencies())).first;
++    }
++    if (pfs.size() > 0)
++    {
++        ProjectDependencies* projDep = pos->second;
++        projDep->MakeProjectFilesDependencies(pfs, m_Parser);
++        projDep->EnsureUpToDateObjs();
++
++        for (size_t i=0; i<pfs.size(); i++)
++        {
++            wxString fn2 = pfs[i]->file.GetFullPath();
++            unsigned short int wt = projDep->GetFileWeight(fn2);
++            pfs[i]->weight = wt;
++        }
++        if (projDep->HasInfiniteDependences())
++        {
++            wxString msg = _T("Warning. FortranProject plugin:\n");
++            msg << _T("     'It seems you have a circular dependency in Fortran files. Check your USE or INCLUDE statements.'");
++            Manager::Get()->GetLogManager()->Log(msg);
++            cbMessageBox(_("It seems you have a circular dependency in Fortran files. Check your USE or INCLUDE statements."),
++                         _("Warning"));
++        }
+     }
+ }
+ 
+@@ -435,7 +481,8 @@
+     project->SaveAllFiles();
+ 
+     ProjectFilesArray pfs;
+-    for (FilesList::iterator it = project->GetFilesList().begin(); it != project->GetFilesList().end(); ++it)
++    FilesList& flist = project->GetFilesList();
++    for (FilesList::iterator it = flist.begin(); it != flist.end(); ++it)
+     {
+         ProjectFile* pf = *it;
+         if (IsFileFortran(pf->relativeFilename))
+@@ -449,20 +496,21 @@
+     pos = m_WSDependency.find(fn);
+     if (pos == m_WSDependency.end())
+     {
+-        pos = m_WSDependency.insert(std::make_pair(fn,new ProjectDependencies(project))).first;
++        pos = m_WSDependency.insert(std::make_pair(fn,new ProjectDependencies())).first;
+     }
+     if (pfs.size() > 0)
+     {
+-        pos->second->MakeProjectFilesDependencies(pfs, m_Parser);
+-        pos->second->EnsureUpToDateObjs();
++        ProjectDependencies* projDep = pos->second;
++        projDep->MakeProjectFilesDependencies(pfs, m_Parser);
++        projDep->EnsureUpToDateObjs();
+ 
+         for (size_t i=0; i<pfs.size(); i++)
+         {
+             wxString fn2 = pfs[i]->file.GetFullPath();
+-            unsigned short int wt = pos->second->GetFileWeight(fn2);
++            unsigned short int wt = projDep->GetFileWeight(fn2);
+             pfs[i]->weight = wt;
+         }
+-        if (pos->second->HasInfiniteDependences())
++        if (projDep->HasInfiniteDependences())
+         {
+             wxString msg = _T("Warning. FortranProject plugin:\n");
+             msg << _T("     'It seems you have a circular dependency in Fortran files. Check your USE or INCLUDE statements.'");
+diff -Naur old/src/plugins/contrib/FortranProject/nativeparserf.h new/src/plugins/contrib/FortranProject/nativeparserf.h
+--- old/src/plugins/contrib/FortranProject/nativeparserf.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/nativeparserf.h	2020-03-28 19:30:39.000000000 +0300
+@@ -91,6 +91,7 @@
+         void OnEditorClose(EditorBase* editor);
+         void OnProjectActivated(cbProject* project);
+         void UpdateWorkspaceFilesDependency();
++        void UpdateWSFilesDependency();
+         void ClearWSDependency();
+         void RemoveProjectFilesDependency(cbProject* project);
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/projectdependencies.cpp new/src/plugins/contrib/FortranProject/projectdependencies.cpp
+--- old/src/plugins/contrib/FortranProject/projectdependencies.cpp	2020-03-21 18:52:38.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/projectdependencies.cpp	2020-03-28 19:47:50.000000000 +0300
+@@ -24,10 +24,10 @@
+ #include "nativeparserf.h"
+ 
+ 
+-ProjectDependencies::ProjectDependencies(cbProject* project)
++ProjectDependencies::ProjectDependencies()
+ {
+-    m_Project = project;
+     //ctor
++    m_WasInfiniteLoop = false;
+ }
+ 
+ ProjectDependencies::~ProjectDependencies()
+@@ -198,6 +198,7 @@
+     {
+         return 0;
+     }
++    cbProject* project = m_prFilesArr[idx]->GetParentProject();
+     unsigned short int wt;
+     unsigned short int wt_max = 0;
+     StringSet* fileUseModules = m_pUseModules[idx];
+@@ -213,6 +214,9 @@
+             size_t fidx = m_ModuleFileIdxMap[*pos];
+             if (fidx == idx)
+                 continue; // module defined and is used in the same file.
++            cbProject* project2 = m_prFilesArr[fidx]->GetParentProject();
++            if (project != project2)
++                continue; // files are from different projects. File weight is limited to the same project.
+             m_Deep++;
+             wt = 1 + GetFileWeightByIndex(fidx);
+             m_Deep--;
+@@ -421,7 +425,8 @@
+         const wxArrayString& btarr = pf->GetBuildTargets();
+         if (btarr.IsEmpty())
+             continue;
+-        ProjectBuildTarget* bTarget = m_Project->GetBuildTarget(btarr[0]);
++        cbProject* curProject = pf->GetParentProject();
++        ProjectBuildTarget* bTarget = curProject->GetBuildTarget(btarr[0]);
+         const pfDetails& pfd = pf->GetFileDetails(bTarget);
+         time_t time_src = wxFileModificationTime(pfd.source_file_absolute_native);
+ 
+@@ -430,12 +435,12 @@
+         for (pos=children->begin(); pos != children->end(); ++pos)
+         {
+             ProjectFile* pfChild = m_prFilesArr[*pos];
+-
++            cbProject* childProject = pfChild->GetParentProject();
+             const wxArrayString& btChild_arr = pfChild->GetBuildTargets();
+             size_t nChTag = btChild_arr.size();
+             for (size_t iCh=0; iCh < nChTag; ++iCh)
+             {
+-                ProjectBuildTarget* bTargetChild = m_Project->GetBuildTarget(btChild_arr[iCh]);
++                ProjectBuildTarget* bTargetChild = childProject->GetBuildTarget(btChild_arr[iCh]);
+                 Compiler* compilerChild = CompilerFactory::GetCompiler(bTargetChild->GetCompilerID());
+                 if(!compilerChild)
+                     continue;
+@@ -514,15 +519,34 @@
+ 
+ void ProjectDependencies::RemoveModFilesWS(NativeParserF* nativeParser)
+ {
+-    //Remove all *.mod files in Workspace
++    //Remove all *.mod and *.smod files in Workspace
++    cbProject* activeProject = Manager::Get()->GetProjectManager()->GetActiveProject();
++    if (!activeProject)
++        return;
++    wxString activeTargetName = activeProject->GetActiveBuildTarget();
+     ProjectsArray* projects = Manager::Get()->GetProjectManager()->GetProjects();
+     for (size_t i = 0; i < projects->GetCount(); ++i)
+     {
+         cbProject* pr = projects->Item(i);
+         if (!pr->IsMakefileCustom())
+         {
+-            ProjectBuildTarget* bTarget = pr->GetBuildTarget(pr->GetActiveBuildTarget());
+-            RemoveModFiles(pr, bTarget, nativeParser);
++            ProjectBuildTarget* bTarget = pr->GetBuildTarget(activeTargetName);
++            if (!bTarget)
++            {
++                const wxArrayString virtTagGroup = pr->GetVirtualBuildTargetGroup(activeTargetName);
++                for (size_t j = 0; j < virtTagGroup.GetCount(); ++j)
++                {
++                    bTarget = pr->GetBuildTarget(virtTagGroup[j]);
++                    if (bTarget)
++                    {
++                        RemoveModFiles(pr, bTarget, nativeParser);
++                    }
++                }
++            }
++            else
++            {
++                RemoveModFiles(pr, bTarget, nativeParser);
++            }
+         }
+     }
+ }
+diff -Naur old/src/plugins/contrib/FortranProject/projectdependencies.h new/src/plugins/contrib/FortranProject/projectdependencies.h
+--- old/src/plugins/contrib/FortranProject/projectdependencies.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/projectdependencies.h	2020-03-28 19:30:39.000000000 +0300
+@@ -34,7 +34,7 @@
+ class ProjectDependencies
+ {
+     public:
+-        ProjectDependencies(cbProject* project);
++        ProjectDependencies();
+         virtual ~ProjectDependencies();
+         void Clear();
+         void MakeProjectFilesDependencies(ProjectFilesArray& prFilesArr, ParserF& parser);
+@@ -53,7 +53,6 @@
+         unsigned short int GetFileWeightByIndex(size_t idx);
+         void MakeFileChildren(IntSet* children, size_t fileIndex);
+ 
+-        cbProject* m_Project;
+         ProjectFilesArray m_prFilesArr;
+     	StringSetPVector m_pUseModules;
+         StringSetPVector m_pDeclaredModules;
