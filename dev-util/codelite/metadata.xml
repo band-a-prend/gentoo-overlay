@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+<longdescription>
+	CodeLite is an open source, free, cross platform IDE specialized in C, C++,
+	PHP and JavaScript (mainly for backend developers using Node.js)
+</longdescription>
+<use>
+	<flag name="clang">Build with clang code completion support</flag>
+	<flag name="cpp-plugins">Build CodeLite with C++ plugins (besides build for PHP/WEB languages)</flag>
+	<flag name="custom-notebook">Use custom Notebook instead of wxWidgets's wxAuiNotebook</flag>
+	<flag name="flex">Add <pkg>sys-devel/flex</pkg> support</flag>
+	<flag name="lldb">Build or link to the <pkg>dev-util/lldb</pkg> debugger</flag>
+	<flag name="sftp">Add support for sftp via <pkg>net-libs/libssh</pkg></flag>
+	<flag name="webview">Build internal web browser</flag>
+</use>
+</pkgmetadata>
