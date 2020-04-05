@@ -38,6 +38,7 @@ DEPEND="${RDEPEND}"
 PATCHES=(
 	"${FILESDIR}"/${P}-env.patch
 	"${FILESDIR}"/${P}-FortranProject-autotools-build.patch
+	"${FILESDIR}"/${P}-FortranProject-fix-PCH-build.patch
 	"${FILESDIR}"/${P}-FortranProject-update-r270-to-r272.patch
 	)
 
