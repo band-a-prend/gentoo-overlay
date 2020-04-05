@@ -1,0 +1,1069 @@
+diff -Naur old/src/plugins/contrib/FortranProject/adddirparserthread.cpp new/src/plugins/contrib/FortranProject/adddirparserthread.cpp
+--- old/src/plugins/contrib/FortranProject/adddirparserthread.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/adddirparserthread.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,6 +1,7 @@
+ 
+ #include "adddirparserthread.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <logmanager.h>
+ #endif
+diff -Naur old/src/plugins/contrib/FortranProject/autoinsert.cpp new/src/plugins/contrib/FortranProject/autoinsert.cpp
+--- old/src/plugins/contrib/FortranProject/autoinsert.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/autoinsert.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,10 +1,13 @@
+ #include "autoinsert.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <configmanager.h>
+ #endif
+ #include <algorithm>
+ 
++#include <cbstyledtextctrl.h>
++
+ #include "fortranfileext.h"
+ 
+ extern FortranFileExt g_FortranFileExt;
+diff -Naur old/src/plugins/contrib/FortranProject/bindto.cpp new/src/plugins/contrib/FortranProject/bindto.cpp
+--- old/src/plugins/contrib/FortranProject/bindto.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/bindto.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -5,15 +5,14 @@
+ #include <wx/string.h>
+ //*)
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/regex.h>
+-    #include <wx/tokenzr.h>
+     #include <wx/textdlg.h>
+     #include <wx/dirdlg.h>
+     #include <wx/msgdlg.h>
+ 
+     #include <editormanager.h>
+-    #include <cbstyledtextctrl.h>
+     #include <configmanager.h>
+     #include <projectmanager.h>
+     #include <logmanager.h>
+@@ -21,6 +20,10 @@
+     #include <compilerfactory.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ //(*IdInit(Bindto)
+ const long Bindto::ID_BTOACTIVEPROJECT = wxNewId();
+ const long Bindto::ID_BTOCURRENTFILE = wxNewId();
+diff -Naur old/src/plugins/contrib/FortranProject/bufferparserthread.cpp new/src/plugins/contrib/FortranProject/bufferparserthread.cpp
+--- old/src/plugins/contrib/FortranProject/bufferparserthread.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/bufferparserthread.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,6 +1,7 @@
+ 
+ #include "bufferparserthread.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <logmanager.h>
+ #endif
+diff -Naur old/src/plugins/contrib/FortranProject/bufferparserthread.h new/src/plugins/contrib/FortranProject/bufferparserthread.h
+--- old/src/plugins/contrib/FortranProject/bufferparserthread.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/bufferparserthread.h	2020-04-02 20:39:54.000000000 +0300
+@@ -6,10 +6,10 @@
+ #ifndef CB_PRECOMP
+     #include <wx/thread.h>
+     #include <wx/event.h>
+-
+-    #include <cbthreadpool.h>
+ #endif
+ 
++#include <cbthreadpool.h>
++
+ class NativeParserF;
+ 
+ class BufferParserThread : public cbThreadedTask
+diff -Naur old/src/plugins/contrib/FortranProject/calledbydict.cpp new/src/plugins/contrib/FortranProject/calledbydict.cpp
+--- old/src/plugins/contrib/FortranProject/calledbydict.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/calledbydict.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,6 +1,7 @@
+ 
+ #include "calledbydict.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+     #include <wx/arrstr.h>
+diff -Naur old/src/plugins/contrib/FortranProject/calltree.cpp new/src/plugins/contrib/FortranProject/calltree.cpp
+--- old/src/plugins/contrib/FortranProject/calltree.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/calltree.cpp	2020-04-04 18:47:39.000000000 +0300
+@@ -1,6 +1,7 @@
+ 
+ #include "calltree.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <manager.h>
+ #endif
+@@ -481,6 +482,34 @@
+                 {
+                     parTok = pCTok;
+                 }
++                else if (pCTok->m_TokenKind == tkUse)
++                {
++                    if (pCTok->m_pParent)
++                    {
++                        if (pCTok->m_pParent->m_TokenKind != tkModule &&
++                            pCTok->m_pParent->m_TokenKind != tkSubmodule)
++                        {
++                            parTok = pCTok->m_pParent;
++                            while (parTok)
++                            {
++                                if ( !parTok->m_pParent ||
++                                     (parTok->m_pParent && parTok->m_pParent->m_TokenKind == tkFile))
++                                {
++                                    break;
++                                }
++                                else if (parTok->m_TokenKind != tkModule &&
++                                         parTok->m_TokenKind != tkSubmodule)
++                                {
++                                    parTok = parTok->m_pParent;
++                                }
++                                else
++                                    break;
++                            }
++                        }
++                        else
++                            parTok = pCTok->m_pParent;
++                    }
++                }
+                 else if (pCTok->m_pParent)
+                 {
+                     if (pCTok->m_pParent->m_TokenKind == tkInterfaceExplicit)
+diff -Naur old/src/plugins/contrib/FortranProject/calltreeview.cpp new/src/plugins/contrib/FortranProject/calltreeview.cpp
+--- old/src/plugins/contrib/FortranProject/calltreeview.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/calltreeview.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -15,6 +15,8 @@
+ #endif
+ #include <cmath>
+ 
++#include <cbstyledtextctrl.h>
++
+ #include "fortranproject.h"
+ #include "lineaddress.h"
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/ccsmartfilter.cpp new/src/plugins/contrib/FortranProject/ccsmartfilter.cpp
+--- old/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	2020-04-04 18:40:36.000000000 +0300
+@@ -8,6 +8,7 @@
+  */
+ #include "ccsmartfilter.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+ #endif
+@@ -389,7 +390,7 @@
+             kwLw == _T("contiguous") || kwLw == _T("selected_char_kind") || kwLw == _T("selected_int_kind") ||
+             kwLw == _T("selected_real_kind") || kwLw == _T("codimension") || kwLw == _T("size") || kwLw == _T("shape") ||
+             kwLw == _T("intent") || kwLw == _T("optional") || kwLw == _T("save") || kwLw == _T("parameter") ||
+-            kwLw == _T("private") || kwLw == _T("public"))
++            kwLw == _T("private") || kwLw == _T("public") || kwLw == _T("asynchronous"))
+         {
+             kwFits = true;
+         }
+diff -Naur old/src/plugins/contrib/FortranProject/changecase.cpp new/src/plugins/contrib/FortranProject/changecase.cpp
+--- old/src/plugins/contrib/FortranProject/changecase.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/changecase.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,13 +1,11 @@
+ 
+ #include "changecase.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+-
+     #include <cbauibook.h>
+     #include <cbeditor.h>
+     #include <cbproject.h>
+-    #include <cbstyledtextctrl.h>
+     #include <editormanager.h>
+     #include <editorcolourset.h>
+     #include <logmanager.h>
+@@ -16,6 +14,10 @@
+ #endif
+ #include <set>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "fortranfileext.h"
+ #include "textcutter.h"
+ 
+@@ -76,7 +78,7 @@
+ 	//*)
+ }
+ 
+-void ChangeCase::OnOK(wxCommandEvent& event)
++void ChangeCase::OnOK(cb_unused wxCommandEvent& event)
+ {
+     Manager::Get()->GetLogManager()->DebugLog(_T("ChangeCase::OnOK is called"));
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/constrhighlighter.cpp new/src/plugins/contrib/FortranProject/constrhighlighter.cpp
+--- old/src/plugins/contrib/FortranProject/constrhighlighter.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/constrhighlighter.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -13,10 +13,11 @@
+     #include <configmanager.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+-    #include <cbstyledtextctrl.h>
+ #endif
+ #include <algorithm>
+ 
++#include <cbstyledtextctrl.h>
++
+ ConstrHighlighter::ConstrHighlighter():
+     m_MakeHighlight(true),
+     m_FullColour(100, 100, 255),
+diff -Naur old/src/plugins/contrib/FortranProject/docblock.cpp new/src/plugins/contrib/FortranProject/docblock.cpp
+--- old/src/plugins/contrib/FortranProject/docblock.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/docblock.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,11 +1,15 @@
+ 
+ #include "docblock.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include "cbcolourmanager.h"
+ #endif
+ #include <iostream>
+ 
++#include <wx/html/htmlwin.h>
++
++#include "cbcolourmanager.h"
++
+ DocBlock::DocBlock():
+     m_Description(_T("**description**")),
+     m_Brief(_T("**brief**"))
+diff -Naur old/src/plugins/contrib/FortranProject/finfowindow.cpp new/src/plugins/contrib/FortranProject/finfowindow.cpp
+--- old/src/plugins/contrib/FortranProject/finfowindow.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/finfowindow.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -10,13 +10,16 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
++    #include <cbeditor.h>
+     #include <configmanager.h>
+-    #include <manager.h>
+     #include <editorcolourset.h>
+-    #include <cbeditor.h>
++    #include <manager.h>
++
+     #include <wx/sizer.h>
+ #endif
+ 
++#include <cbstyledtextctrl.h>
++
+ FInfoWindow::FInfoWindow()
+     :wxPanel(Manager::Get()->GetAppWindow())
+ {
+diff -Naur old/src/plugins/contrib/FortranProject/formatindent.cpp new/src/plugins/contrib/FortranProject/formatindent.cpp
+--- old/src/plugins/contrib/FortranProject/formatindent.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/formatindent.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,9 +1,8 @@
+ 
+ #include "formatindent.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+-
+     #include <projectmanager.h>
+     #include <cbproject.h>
+     #include <editormanager.h>
+@@ -12,6 +11,10 @@
+ #endif
+ #include <vector>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "formatindentdlg.h"
+ #include "fortranfileext.h"
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/formatindentdlg.cpp new/src/plugins/contrib/FortranProject/formatindentdlg.cpp
+--- old/src/plugins/contrib/FortranProject/formatindentdlg.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/formatindentdlg.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,13 +1,16 @@
+ 
+ #include "formatindentdlg.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <editormanager.h>
+     #include <configmanager.h>
+-    #include <cbstyledtextctrl.h>
+-    #include "cbeditor.h"
+ #endif
+ 
++#include <manager.h>
++#include <cbstyledtextctrl.h>
++#include <editormanager.h>
++#include "cbeditor.h"
++
+ //(*InternalHeaders(FormatIndentDlg)
+ #include <wx/intl.h>
+ #include <wx/button.h>
+diff -Naur old/src/plugins/contrib/FortranProject/fortranfileext.cpp new/src/plugins/contrib/FortranProject/fortranfileext.cpp
+--- old/src/plugins/contrib/FortranProject/fortranfileext.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/fortranfileext.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,13 +1,15 @@
+ 
+ #include "fortranfileext.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+     #include <configmanager.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
+ FortranFileExt::FortranFileExt()
+ {
+     m_ExtDone = false;
+diff -Naur old/src/plugins/contrib/FortranProject/fortranproject.cpp new/src/plugins/contrib/FortranProject/fortranproject.cpp
+--- old/src/plugins/contrib/FortranProject/fortranproject.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/fortranproject.cpp	2020-04-04 18:40:36.000000000 +0300
+@@ -10,7 +10,6 @@
+ #include <sdk.h> // Code::Blocks SDK
+ #ifndef CB_PRECOMP
+     #include <wx/filename.h>
+-    #include <wx/tokenzr.h>
+     #include <wx/gdicmn.h>
+     #include <wx/xrc/xmlres.h>
+     #include <wx/event.h>
+@@ -18,20 +17,23 @@
+     #include <wx/toolbar.h>
+     #include <wx/choicdlg.h>
+ 
+-    #include <configurationpanel.h>
+     #include <manager.h>
+-    #include <ccmanager.h>
+     #include <editorcolourset.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+     #include <projectmanager.h>
+-    #include <cbstyledtextctrl.h>
+-    #include <projectloader_hooks.h>
+-    #include <editor_hooks.h>
+     #include <cbeditor.h>
+ #endif
+ #include <vector>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++#include <ccmanager.h>
++#include <configurationpanel.h>
++#include <editor_hooks.h>
++#include <projectloader_hooks.h>
++
+ #include "fortranproject.h"
+ #include "fpoptionsdlg.h"
+ #include "fpoptionsprjdlg.h"
+@@ -595,7 +597,7 @@
+     return false;
+ } // end of EditorHasNameUnderCursor
+ 
+-void FortranProject::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data)
++void FortranProject::BuildModuleMenu(const ModuleType type, wxMenu* menu, cb_unused const FileTreeData* data)
+ {
+     if (!menu || !IsAttached() || !m_InitDone)
+         return;
+@@ -629,7 +631,7 @@
+ 
+ }
+ 
+-void FortranProject::OnGotoDeclaration(wxCommandEvent& event)
++void FortranProject::OnGotoDeclaration(cb_unused wxCommandEvent& event)
+ {
+     cbEditor* ed = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
+     if (!ed)
+@@ -1468,7 +1470,10 @@
+         m_pNativeParser->GetCallTips(lastName, m_LogOnlyUseAssoc, m_LogOnlyPublicNames, callTips, result);
+ 
+         wxString kwName;
+-        if (lastName.IsSameAs(_T("open")))
++        if (lastName.IsSameAs(_T("open")) ||
++            lastName.IsSameAs(_T("read")) ||
++            lastName.IsSameAs(_T("write")) ||
++            lastName.IsSameAs(_T("inquire")) )
+             kwName = _T("__fortran_statement_") + lastName;
+         else
+             kwName = lastName;
+@@ -1965,7 +1970,7 @@
+     }
+ }
+ 
+-void FortranProject::OnJumpBack(wxCommandEvent& event)
++void FortranProject::OnJumpBack(cb_unused wxCommandEvent& event)
+ {
+     JumpTracker* jTr = m_pNativeParser->GetJumpTracker();
+ 
+@@ -2067,7 +2072,7 @@
+     indent.Format();
+ }
+ 
+-void FortranProject::OnReparseEditorTimer(wxTimerEvent& event)
++void FortranProject::OnReparseEditorTimer(cb_unused wxTimerEvent& event)
+ {
+     m_pNativeParser->ReparseCurrentEditor();
+ }
+diff -Naur old/src/plugins/contrib/FortranProject/fpimagelist.cpp new/src/plugins/contrib/FortranProject/fpimagelist.cpp
+--- old/src/plugins/contrib/FortranProject/fpimagelist.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/fpimagelist.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,6 +1,7 @@
+ 
+ #include "fpimagelist.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+     #include <wx/bitmap.h>
+diff -Naur old/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp new/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+--- old/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -8,7 +8,6 @@
+ #ifndef CB_PRECOMP
+     #include <wx/intl.h>
+     #include <wx/listbox.h>
+-    #include <wx/xrc/xmlres.h>
+     #include <wx/spinctrl.h>
+     #include <wx/checkbox.h>
+     #include <wx/combobox.h>
+@@ -21,6 +20,7 @@
+     #include <wx/regex.h>
+     #include <wx/colordlg.h>
+     #include <wx/choice.h>
++    #include <wx/window.h>
+ 
+     #include <configmanager.h>
+     #include <manager.h>
+@@ -29,6 +29,8 @@
+ #include <algorithm>
+ #include <vector>
+ 
++#include <wx/xrc/xmlres.h>
++
+ #include "fortranproject.h"
+ 
+ BEGIN_EVENT_TABLE(FPOptionsDlg, wxPanel)
+@@ -181,7 +183,7 @@
+     m_AISelIdx = idx;
+ }
+ 
+-void FPOptionsDlg::OnAISelectionChanged(wxCommandEvent& event)
++void FPOptionsDlg::OnAISelectionChanged(cb_unused wxCommandEvent& event)
+ {
+     int idx = XRCCTRL(*this, "lbAIStatements", wxListBox)->GetSelection();
+     if (idx != wxNOT_FOUND)
+@@ -203,7 +205,7 @@
+     m_AInsert.EditRule(sel, aiType, doAddName, alignToStatement);
+ }
+ 
+-void FPOptionsDlg::OnUpdateUI(wxUpdateUIEvent& event)
++void FPOptionsDlg::OnUpdateUI(cb_unused wxUpdateUIEvent& event)
+ {
+     bool en = XRCCTRL(*this, "chkEnableCC", wxCheckBox)->GetValue();
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/fpoptionsdlg.h new/src/plugins/contrib/FortranProject/fpoptionsdlg.h
+--- old/src/plugins/contrib/FortranProject/fpoptionsdlg.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/fpoptionsdlg.h	2020-04-02 20:39:54.000000000 +0300
+@@ -10,10 +10,11 @@
+ #ifndef CB_PRECOMP
+     #include <wx/intl.h>
+ 
+-    #include <configurationpanel.h>
+     #include <settings.h>
+ #endif
+ 
++#include <configurationpanel.h>
++
+ #include "fortranproject.h"
+ #include "workspacebrowserf.h"
+ #include "autoinsert.h"
+diff -Naur old/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h new/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h
+--- old/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	2020-04-02 20:39:54.000000000 +0300
+@@ -10,9 +10,10 @@
+ #ifndef CB_PRECOMP
+     #include <wx/intl.h>
+     #include <settings.h>
+-    #include <configurationpanel.h>
+ #endif
+ 
++#include <configurationpanel.h>
++
+ #include "nativeparserf.h"
+ #include "parserf.h"
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90 new/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90
+--- old/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	2019-10-27 15:21:59.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	2020-04-04 18:40:36.000000000 +0300
+@@ -22,16 +22,16 @@
+                 default, dimension, direct, do, double, doubleprecision, else, &
+                 elseif, elsewhere, encoding, end, endassociate, endblockdata, enddo, &
+                 endfile, endforall, endfunction, endif, endinterface, endmodule, endprocedure, endprogram, &
+-                endselect, endsubroutine, endtype, endwhere, entry, eor, equivalence, &
+-                err, errmsg, exist, exit, external, final, file, flush, fmt, forall, form, format, &
++                endselect, endsubroutine, endtype, endwhere, entry, equivalence, &
++                err, errmsg, exist, exit, external, final, file, flush, forall, form, format, &
+                 formatted, function, go, goto, if, implicit, in, include, inout, &
+-                integer, inquire, intent, interface, intrinsic, iomsg, iolength, &
+-                iostat, kind, len, logical, module, named, namelist, nextrec, nml, &
++                integer, inquire, intent, interface, intrinsic, &
++                kind, len, logical, module, named, namelist, nextrec, nml, &
+                 none, nopass, nullify, number, only, open, opened, operator, optional, out, pad, &
+                 parameter, pass, pending, pointer, pos, position, precision, &
+                 print, private, program, protected, public, quote, read, readwrite, &
+-                real, rec, recl, recursive, result, return, rewind, save, select, &
+-                selectcase, selecttype, sequential, stat, status, stop, stream, &
++                real, recursive, result, return, rewind, save, select, &
++                selectcase, selecttype, sequential, status, stop, stream, &
+                 subroutine, target, then, to, type, unformatted, unit, use, value, &
+                 volatile, wait, where, while, write, procedure, elemental, pure, sequence, &
+                 import, is, &
+@@ -3410,8 +3410,8 @@
+     character(len=*), intent(in) :: DECIMAL ! Specifies the default decimal edit mode: 'POINT' (default) or 'COMMA'.
+     character(len=*), intent(in) :: DELIM   ! Specifies delimiter for character constants in namelist: 'APOSTROPHE', 'QUOTE' or 'NONE'.
+     character(len=*), intent(in) :: ENCODING ! Shall be: 'DEFAULT' or 'UTF-8'.
+-    integer, intent(in)          :: ERR      ! Statement label to go if error occurs.
+-    character(len=*), intent(in) :: FORM     ! Shall be: 'DEFAULT' or 'UTF-8'.
++    integer, intent(out)         :: ERR      ! Statement label to go if error occurs.
++    character(len=*), intent(in) :: FORM     ! Shall be: 'FORMATTED' or 'UNFORMATTED'.
+     integer, intent(out) :: IOSTAT     ! Returns: a zero value if no error, a positive value if an error.
+     character(len=*), intent(in) :: PAD      ! Specifies if input records are padded with blanks: 'YES' (default) or 'NO'.
+     character(len=*), intent(in) :: POSITION ! Specifies the file position for a file connected: 'ASIS', 'REWIND', 'APPEND'.
+@@ -3421,6 +3421,94 @@
+     character(len=*), intent(in) :: STATUS ! Specifies the status of the file when it is opened: 'OLD', 'NEW', 'SCRATCH', 'REPLACE', or 'UNKNOWN'. 
+ end subroutine
+ 
++subroutine __fortran_statement_READ(UNIT, FMT, NML, ADVANCE, ASYNCHRONOUS, BLANK, DECIMAL, END, EOR, ERR, &
++                    ID, IOMSG, IOSTAT, PAD, POS, REC, ROUND, SIZE )
++    ! Read data from UNIT.
++    
++    integer, intent(in) :: UNIT         ! External file unit number.
++    character(len=*), intent(in) :: FMT ! Format specification 
++    type(*), intent(in) :: NML          ! Namelist group name
++    character(len=*), intent(in) :: ADVANCE ! 'YES' or 'NO'. Determines whether advancing read occurs.
++    character(len=*), intent(in) :: ASYNCHRONOUS ! 'YES' or 'NO'. Determines whether this read statement is synchronous or asynchronous.
++    character(len=*), intent(in) :: BLANK    ! Controls how interpreted blanks. Values: 'NULL' or 'ZERO'.
++    character(len=*), intent(in) :: DECIMAL  ! Controls decimal edit mode: 'POINT' or 'COMMA'.
++    integer, intent(out)          :: END     ! Statement label to go if end-of-file occurs.
++    integer, intent(out)          :: EOR     ! Statement label to go if end-of-record occurs.
++    integer, intent(out)          :: ERR     ! Statement label to go if error occurs.
++    integer, intent(out)          :: ID      ! Used in n asynchronous read statement.
++    character(len=*), intent(out) :: IOMSG   ! Explanatory message assigned if an error, end-of-file, or end-of-record condition occurs.
++    integer, intent(out) :: IOSTAT  ! Zero if no error or end-of-file or end-of-record occurs. Non-zero values in other cases.
++    character(len=*), intent(in) :: PAD      ! Specifies if input record are padded with blanks: 'YES' (default) or 'NO'.
++    integer, intent(in) :: POS      ! Specifies the file position in file storage units (only in stream access). 
++    integer, intent(in) :: REC      ! Specifies the number of the record that is to be read (only in direct access).
++    character(len=*), intent(in) :: ROUND ! Rounding mode to be used: 'UP', 'DOWN', 'ZERO', 'NEAREST', 'COMPATIBLE' or 'PROCESSOR_DEFINED' (default).
++    integer, intent(out) :: SIZE ! Defined with the count of characters transferred.
++end subroutine
++
++subroutine __fortran_statement_WRITE(UNIT, FMT, NML, ADVANCE, ASYNCHRONOUS, DECIMAL, DELIM, ERR, &
++                    ID, IOMSG, IOSTAT, POS, REC, ROUND, SIGN)
++    ! Write data from to UNIT.
++    
++    integer, intent(in) :: UNIT         ! External file unit number.
++    character(len=*), intent(in) :: FMT ! Format specification 
++    type(*), intent(in) :: NML          ! Namelist group name
++    character(len=*), intent(in) :: ADVANCE ! 'YES' or 'NO'. Determines whether advancing write occurs.
++    character(len=*), intent(in) :: ASYNCHRONOUS ! 'YES' or 'NO'. Determines whether this write statement is synchronous or asynchronous.
++    character(len=*), intent(in) :: DECIMAL  ! Controls decimal edit mode: 'POINT' or 'COMMA'.
++    character(len=*), intent(in) :: DELIM    ! 'APOSTROPHE', 'QUOTE', or 'NONE'.
++    integer, intent(out)          :: ERR     ! Statement label to go if error occurs.
++    integer, intent(out)          :: ID      ! Used in an asynchronous write statement.
++    character(len=*), intent(out) :: IOMSG   ! Explanatory message assigned if an error condition occurs.
++    integer, intent(out) :: IOSTAT  ! Zero if no error occurs. Non-zero values in other cases.
++    character(len=*), intent(in) :: PAD      ! Specifies if input record are padded with blanks: 'YES' (default) or 'NO'.
++    integer, intent(in) :: POS      ! Specifies the file position in file storage units (only in stream access). 
++    integer, intent(in) :: REC      ! Specifies the number of the record that is to be written (only in direct access).
++    character(len=*), intent(in) :: ROUND ! Rounding mode to be used: 'UP', 'DOWN', 'ZERO', 'NEAREST', 'COMPATIBLE' or 'PROCESSOR_DEFINED' (default).
++    character(len=*), intent(in) :: SIGN  ! 'PLUS', 'SUPPRESS', or 'PROCESSOR_DEFINED'
++end subroutine
++
++subroutine __fortran_statement_INQUIRE(UNIT, FILE, ACCESS, ACTION, ASYNCHRONOUS, BLANK, DECIMAL, DELIM, DIRECT, ENCODING, ERR, EXIST, &
++                    FORM, FORMATTED, ID, IOMSG, IOSTAT, NAME, NAMED, NEXTREC, NUMBER, OPENED, PAD, PENDING, POS, POSITION, READ, READWRITE, RECL, ROUND, SEQUENTIAL, SIGN, SIZE, STREAM, UNFORMATTED, WRITE)
++    ! Inquire about properties of a particular named FILE or of the connection to UNIT.
++
++    integer, intent(in) :: UNIT         ! External file unit number to be inquired.
++    character(len=*), intent(in) :: FILE   ! The name of the file to be inquired.
++    character(len=*), intent(out) :: ACCESS ! Access mode one from 'SEQUENTIAL', 'DIRECT', 'STREAM' or 'UNDEFINED'.
++    character(len=*), intent(out) :: ACTION ! Assigns value 'READ', 'WRITE' or 'READWRITE' if connected. 'UNDEFINED' if not connected.
++    character(len=*), intent(out) :: ASYNCHRONOUS ! Assigns value 'YES', 'NO'. 'UNDEFINED' if not connected.
++    character(len=*), intent(out) :: BLANK ! Assigns value 'ZERO', 'NULL'. 'UNDEFINED' if not connected.
++    character(len=*), intent(out) :: DECIMAL ! Assigns value 'COMMA' or 'POINT' corresponding to the decimal edit mode in effect. 'UNDEFINED' if not connected, or if the connection is not for formatted input/output.
++    character(len=*), intent(out) :: DELIM ! Assigns value 'APOSTROPHE', 'QUOTE', or 'NONE'  corresponding to the delimiter mode in effect for a connection for formatted input/output. 'UNDEFINED' if not connected, or if the connection is not for formatted input/output.
++    character(len=*), intent(out) :: DIRECT ! Assigns value 'YES', 'NO' corresponding to the allowed access methods for the file. 'UNKNOWN' if it is unable to determine.
++    character(len=*), intent(out) :: ENCODING ! Assigns value 'UTF-8', 'UNDEFINED', or 'UNKNOWN', or other specific encoding form.
++    logical, intent(out) :: EXIST ! Assigns TRUE if file with the name FILE exists, FALSE otherwise.
++    character(len=*), intent(out) :: FORM  ! Value 'FORMATTED', 'UNFORMATTED' or 'UNDEFINED' is assigned.
++    character(len=*), intent(out) :: FORMATTED  ! Value 'YES' if formatted is allowed, 'NO' if formatted is not allowed, or 'UNKNOWN' if is impossible to determine.
++    integer :: ID  
++    character(len=*), intent(out) :: NAME  ! Name of the file is assigned.
++    logical, intent(out) :: NAMED ! TRUE if file has a name, FALSE otherwise.
++    integer, intent(out) :: NEXTREC ! Assigns value of the next record number.
++    integer, intent(out) :: NUMBER ! Assigns value of the external unit number that is connected to the file.
++    logical, intent(out) :: OPENED ! TRUE if the file specified is connected to a unit; otherwise, FALSE is assigned. 
++    character(len=*), intent(out) :: PAD  ! 'YES' or 'NO' corresponding to the pad mode in effect.
++    logical, intent(out) :: PENDING ! Is used to determine whether previously pending asynchronous data transfers are complete.
++    integer, intent(out) :: POS ! Assigns the number of the file storage unit immediately following the current position of a file connected for stream access.
++    character(len=*), intent(out) :: POSITION  ! Values 'REWIND', 'APPEND', 'ASIS' or 'UNDEFINED' are assigned.
++    character(len=*), intent(out) :: READ  ! 'YES' if read is allowed, 'NO' if read is not allowed, 'UNKNOWN' if it is impossible to determine.
++    character(len=*), intent(out) :: READWRITE  ! 'YES' if readwrite is allowed, 'NO' if readwrite is not allowed, 'UNKNOWN' if it is impossible to determine.
++    integer, intent(out) :: RECL ! Assigns the value of the record length of a connection for direct access.
++    character(len=*), intent(out) :: ROUND  ! Assigns the value 'UP', 'DOWN', 'ZERO', 'NEAREST', 'COMPATIBLE', or 'PROCESSOR DEFINED', corresponding to the I/O rounding mode in effect for a connection.
++    character(len=*), intent(out) :: SEQUENTIAL  ! Value 'YES' if SEQUENTIAL is allowed, 'NO' if SEQUENTIAL is not allowed, or 'UNKNOWN' if is impossible to determine.
++    character(len=*), intent(out) :: SIGN  ! Assigns the value 'PLUS', 'SUPPRESS', or 'PROCESSOR DEFINED', corresponding to the sign mode in effect for a connection for formatted input/output.
++    integer, intent(out) :: SIZE ! Assigns the size of the file in file storage units.
++    character(len=*), intent(out) :: STREAM  ! Value 'YES' if STREAM is allowed, 'NO' if STREAM is not allowed, or 'UNKNOWN' if is impossible to determine.
++    character(len=*), intent(out) :: UNFORMATTED  ! Value 'YES' if unformatted is allowed, 'NO' if unformatted is not allowed, or 'UNKNOWN' if is impossible to determine.
++    character(len=*), intent(out) :: WRITE  ! 'YES' if write is allowed, 'NO' if write is not allowed, 'UNKNOWN' if it is impossible to determine.
++    integer, intent(out)          :: ERR     ! Statement label to go if error occurs.
++    character(len=*), intent(out) :: IOMSG   ! Explanatory message assigned if an error condition occurs.
++    integer, intent(out) :: IOSTAT  ! Zero if no error occurs. Non-zero values in other cases.
++end subroutine
++
+ module OpenMP
+     type(keywords) ::  atomic, auto, barrier, capture, collapse, copyin, copyprivate, default, end, &
+                        firstprivate, lastprivate, private, reduction, schedule, shared, critical, &
+diff -Naur old/src/plugins/contrib/FortranProject/indentestimator.cpp new/src/plugins/contrib/FortranProject/indentestimator.cpp
+--- old/src/plugins/contrib/FortranProject/indentestimator.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/indentestimator.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -3,10 +3,11 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+     #include <configmanager.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
+ FormatIndentCodeTree::FormatIndentCodeTree()
+ {
+     Initialize(0);
+diff -Naur old/src/plugins/contrib/FortranProject/moduletokenf.cpp new/src/plugins/contrib/FortranProject/moduletokenf.cpp
+--- old/src/plugins/contrib/FortranProject/moduletokenf.cpp	2018-05-30 21:20:19.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/moduletokenf.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,4 +1,3 @@
+-
+ #include "moduletokenf.h"
+ 
+ ModuleTokenF::ModuleTokenF():
+diff -Naur old/src/plugins/contrib/FortranProject/nativeparserf.cpp new/src/plugins/contrib/FortranProject/nativeparserf.cpp
+--- old/src/plugins/contrib/FortranProject/nativeparserf.cpp	2020-03-21 18:45:12.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/nativeparserf.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -11,7 +11,6 @@
+     #include <wx/regex.h>
+     #include <wx/log.h>
+     #include <wx/string.h>
+-    #include <wx/tokenzr.h>
+     #include <wx/dir.h>
+     #include <wx/wfstream.h>
+     #include <wx/stopwatch.h>
+@@ -27,11 +26,14 @@
+     #include <cbproject.h>
+     #include <cbexception.h>
+     #include <projectloader_hooks.h>
+-    #include <cbstyledtextctrl.h>
+     #include <tinyxml.h>
+ #endif
+ #include <cctype>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "workspacebrowserf.h"
+ #include "workspacebrowserbuilder.h"
+ #include "parserf.h"
+@@ -420,13 +422,59 @@
+ void NativeParserF::UpdateWorkspaceFilesDependency()
+ {
+     ClearWSDependency();
++    UpdateWSFilesDependency();
++}
++
++void NativeParserF::UpdateWSFilesDependency()
++{
+     ProjectsArray* projects = Manager::Get()->GetProjectManager()->GetProjects();
+ 
++    ProjectFilesArray pfs;
+     for (size_t i = 0; i < projects->GetCount(); ++i)
+     {
+         cbProject* proj = projects->Item(i);
+-        if (!proj->IsMakefileCustom())
+-            UpdateProjectFilesDependency(proj);
++        if (proj->IsMakefileCustom()) continue;
++
++        proj->SaveAllFiles();
++
++        FilesList& flist = proj->GetFilesList();
++        for (FilesList::iterator it = flist.begin(); it != flist.end(); ++it)
++        {
++            ProjectFile* pf = *it;
++            if (IsFileFortran(pf->relativeFilename))
++            {
++                pfs.push_back(pf);
++            }
++        }
++    }
++
++    wxString name = _T("### WorkspaceAllFortranFiles ###");
++    WSDependencyMap::iterator pos;
++    pos = m_WSDependency.find(name);
++    if (pos == m_WSDependency.end())
++    {
++        pos = m_WSDependency.insert(std::make_pair(name,new ProjectDependencies())).first;
++    }
++    if (pfs.size() > 0)
++    {
++        ProjectDependencies* projDep = pos->second;
++        projDep->MakeProjectFilesDependencies(pfs, m_Parser);
++        projDep->EnsureUpToDateObjs();
++
++        for (size_t i=0; i<pfs.size(); i++)
++        {
++            wxString fn2 = pfs[i]->file.GetFullPath();
++            unsigned short int wt = projDep->GetFileWeight(fn2);
++            pfs[i]->weight = wt;
++        }
++        if (projDep->HasInfiniteDependences())
++        {
++            wxString msg = _T("Warning. FortranProject plugin:\n");
++            msg << _T("     'It seems you have a circular dependency in Fortran files. Check your USE or INCLUDE statements.'");
++            Manager::Get()->GetLogManager()->Log(msg);
++            cbMessageBox(_("It seems you have a circular dependency in Fortran files. Check your USE or INCLUDE statements."),
++                         _("Warning"));
++        }
+     }
+ }
+ 
+@@ -435,7 +483,8 @@
+     project->SaveAllFiles();
+ 
+     ProjectFilesArray pfs;
+-    for (FilesList::iterator it = project->GetFilesList().begin(); it != project->GetFilesList().end(); ++it)
++    FilesList& flist = project->GetFilesList();
++    for (FilesList::iterator it = flist.begin(); it != flist.end(); ++it)
+     {
+         ProjectFile* pf = *it;
+         if (IsFileFortran(pf->relativeFilename))
+@@ -449,20 +498,21 @@
+     pos = m_WSDependency.find(fn);
+     if (pos == m_WSDependency.end())
+     {
+-        pos = m_WSDependency.insert(std::make_pair(fn,new ProjectDependencies(project))).first;
++        pos = m_WSDependency.insert(std::make_pair(fn,new ProjectDependencies())).first;
+     }
+     if (pfs.size() > 0)
+     {
+-        pos->second->MakeProjectFilesDependencies(pfs, m_Parser);
+-        pos->second->EnsureUpToDateObjs();
++        ProjectDependencies* projDep = pos->second;
++        projDep->MakeProjectFilesDependencies(pfs, m_Parser);
++        projDep->EnsureUpToDateObjs();
+ 
+         for (size_t i=0; i<pfs.size(); i++)
+         {
+             wxString fn2 = pfs[i]->file.GetFullPath();
+-            unsigned short int wt = pos->second->GetFileWeight(fn2);
++            unsigned short int wt = projDep->GetFileWeight(fn2);
+             pfs[i]->weight = wt;
+         }
+-        if (pos->second->HasInfiniteDependences())
++        if (projDep->HasInfiniteDependences())
+         {
+             wxString msg = _T("Warning. FortranProject plugin:\n");
+             msg << _T("     'It seems you have a circular dependency in Fortran files. Check your USE or INCLUDE statements.'");
+diff -Naur old/src/plugins/contrib/FortranProject/nativeparserf.h new/src/plugins/contrib/FortranProject/nativeparserf.h
+--- old/src/plugins/contrib/FortranProject/nativeparserf.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/nativeparserf.h	2020-04-02 20:39:54.000000000 +0300
+@@ -10,12 +10,12 @@
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+     #include <wx/event.h>
+-
+-    #include <cbthreadpool.h>
+ #endif
+ #include <map>
+ #include <set>
+ 
++#include <cbthreadpool.h>
++
+ #include "jumptracker.h"
+ #include "parserf.h"
+ #include "projectdependencies.h"
+@@ -91,6 +91,7 @@
+         void OnEditorClose(EditorBase* editor);
+         void OnProjectActivated(cbProject* project);
+         void UpdateWorkspaceFilesDependency();
++        void UpdateWSFilesDependency();
+         void ClearWSDependency();
+         void RemoveProjectFilesDependency(cbProject* project);
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/parserf.cpp new/src/plugins/contrib/FortranProject/parserf.cpp
+--- old/src/plugins/contrib/FortranProject/parserf.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/parserf.cpp	2020-04-04 18:40:36.000000000 +0300
+@@ -8,13 +8,11 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+     #include <wx/string.h>
+     #include <wx/thread.h>
+     #include <wx/arrstr.h>
+     #include <wx/regex.h>
+ 
+-    #include <cbstyledtextctrl.h>
+     #include <configmanager.h>
+     #include <editormanager.h>
+     #include <globals.h>
+@@ -22,6 +20,10 @@
+ #endif
+ #include <vector>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "workspaceparserthread.h"
+ #include "parserthreadf.h"
+ #include "adddirparserthread.h"
+@@ -2212,8 +2214,10 @@
+ 
+     if (token.m_TokenKind == tkSubroutine)
+     {
+-        if (token.m_Name.IsSameAs(_T("__fortran_statement_open")))
+-            msg << _T("OPEN");
++        if (token.m_Name.StartsWith(_T("__fortran_statement_")))
++        {
++            msg << token.m_Name.Mid(20).Upper();
++        }
+         else
+             msg << _T("subroutine ") << token.m_DisplayName;
+         if (argsNew.IsEmpty())
+diff -Naur old/src/plugins/contrib/FortranProject/parserthreadf.cpp new/src/plugins/contrib/FortranProject/parserthreadf.cpp
+--- old/src/plugins/contrib/FortranProject/parserthreadf.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/parserthreadf.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -8,10 +8,11 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+ #endif
+ #include <set>
+ 
++#include <wx/tokenzr.h>
++
+ #include "usetokenf.h"
+ 
+ ParserThreadF::ParserThreadF(const wxString& projectFilename,
+diff -Naur old/src/plugins/contrib/FortranProject/projectdependencies.cpp new/src/plugins/contrib/FortranProject/projectdependencies.cpp
+--- old/src/plugins/contrib/FortranProject/projectdependencies.cpp	2020-03-21 18:52:38.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/projectdependencies.cpp	2020-03-28 19:47:50.000000000 +0300
+@@ -24,10 +24,10 @@
+ #include "nativeparserf.h"
+ 
+ 
+-ProjectDependencies::ProjectDependencies(cbProject* project)
++ProjectDependencies::ProjectDependencies()
+ {
+-    m_Project = project;
+     //ctor
++    m_WasInfiniteLoop = false;
+ }
+ 
+ ProjectDependencies::~ProjectDependencies()
+@@ -198,6 +198,7 @@
+     {
+         return 0;
+     }
++    cbProject* project = m_prFilesArr[idx]->GetParentProject();
+     unsigned short int wt;
+     unsigned short int wt_max = 0;
+     StringSet* fileUseModules = m_pUseModules[idx];
+@@ -213,6 +214,9 @@
+             size_t fidx = m_ModuleFileIdxMap[*pos];
+             if (fidx == idx)
+                 continue; // module defined and is used in the same file.
++            cbProject* project2 = m_prFilesArr[fidx]->GetParentProject();
++            if (project != project2)
++                continue; // files are from different projects. File weight is limited to the same project.
+             m_Deep++;
+             wt = 1 + GetFileWeightByIndex(fidx);
+             m_Deep--;
+@@ -421,7 +425,8 @@
+         const wxArrayString& btarr = pf->GetBuildTargets();
+         if (btarr.IsEmpty())
+             continue;
+-        ProjectBuildTarget* bTarget = m_Project->GetBuildTarget(btarr[0]);
++        cbProject* curProject = pf->GetParentProject();
++        ProjectBuildTarget* bTarget = curProject->GetBuildTarget(btarr[0]);
+         const pfDetails& pfd = pf->GetFileDetails(bTarget);
+         time_t time_src = wxFileModificationTime(pfd.source_file_absolute_native);
+ 
+@@ -430,12 +435,12 @@
+         for (pos=children->begin(); pos != children->end(); ++pos)
+         {
+             ProjectFile* pfChild = m_prFilesArr[*pos];
+-
++            cbProject* childProject = pfChild->GetParentProject();
+             const wxArrayString& btChild_arr = pfChild->GetBuildTargets();
+             size_t nChTag = btChild_arr.size();
+             for (size_t iCh=0; iCh < nChTag; ++iCh)
+             {
+-                ProjectBuildTarget* bTargetChild = m_Project->GetBuildTarget(btChild_arr[iCh]);
++                ProjectBuildTarget* bTargetChild = childProject->GetBuildTarget(btChild_arr[iCh]);
+                 Compiler* compilerChild = CompilerFactory::GetCompiler(bTargetChild->GetCompilerID());
+                 if(!compilerChild)
+                     continue;
+@@ -514,15 +519,34 @@
+ 
+ void ProjectDependencies::RemoveModFilesWS(NativeParserF* nativeParser)
+ {
+-    //Remove all *.mod files in Workspace
++    //Remove all *.mod and *.smod files in Workspace
++    cbProject* activeProject = Manager::Get()->GetProjectManager()->GetActiveProject();
++    if (!activeProject)
++        return;
++    wxString activeTargetName = activeProject->GetActiveBuildTarget();
+     ProjectsArray* projects = Manager::Get()->GetProjectManager()->GetProjects();
+     for (size_t i = 0; i < projects->GetCount(); ++i)
+     {
+         cbProject* pr = projects->Item(i);
+         if (!pr->IsMakefileCustom())
+         {
+-            ProjectBuildTarget* bTarget = pr->GetBuildTarget(pr->GetActiveBuildTarget());
+-            RemoveModFiles(pr, bTarget, nativeParser);
++            ProjectBuildTarget* bTarget = pr->GetBuildTarget(activeTargetName);
++            if (!bTarget)
++            {
++                const wxArrayString virtTagGroup = pr->GetVirtualBuildTargetGroup(activeTargetName);
++                for (size_t j = 0; j < virtTagGroup.GetCount(); ++j)
++                {
++                    bTarget = pr->GetBuildTarget(virtTagGroup[j]);
++                    if (bTarget)
++                    {
++                        RemoveModFiles(pr, bTarget, nativeParser);
++                    }
++                }
++            }
++            else
++            {
++                RemoveModFiles(pr, bTarget, nativeParser);
++            }
+         }
+     }
+ }
+diff -Naur old/src/plugins/contrib/FortranProject/projectdependencies.h new/src/plugins/contrib/FortranProject/projectdependencies.h
+--- old/src/plugins/contrib/FortranProject/projectdependencies.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/projectdependencies.h	2020-03-28 19:30:39.000000000 +0300
+@@ -34,7 +34,7 @@
+ class ProjectDependencies
+ {
+     public:
+-        ProjectDependencies(cbProject* project);
++        ProjectDependencies();
+         virtual ~ProjectDependencies();
+         void Clear();
+         void MakeProjectFilesDependencies(ProjectFilesArray& prFilesArr, ParserF& parser);
+@@ -53,7 +53,6 @@
+         unsigned short int GetFileWeightByIndex(size_t idx);
+         void MakeFileChildren(IntSet* children, size_t fileIndex);
+ 
+-        cbProject* m_Project;
+         ProjectFilesArray m_prFilesArr;
+     	StringSetPVector m_pUseModules;
+         StringSetPVector m_pDeclaredModules;
+diff -Naur old/src/plugins/contrib/FortranProject/tab2space.cpp new/src/plugins/contrib/FortranProject/tab2space.cpp
+--- old/src/plugins/contrib/FortranProject/tab2space.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/tab2space.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -3,17 +3,18 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+-
+     #include <cbeditor.h>
+     #include <cbproject.h>
+-    #include <cbstyledtextctrl.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+     #include <projectmanager.h>
+ #endif
+ #include <set>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "fortranfileext.h"
+ #include "textcutter.h"
+ 
+@@ -71,7 +72,7 @@
+ 	//*)
+ }
+ 
+-void Tab2Space::OnOK(wxCommandEvent& event)
++void Tab2Space::OnOK(cb_unused wxCommandEvent& event)
+ {
+     Manager::Get()->GetLogManager()->DebugLog(_T("Tab2Space::OnOK is called"));
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/textcutter.cpp new/src/plugins/contrib/FortranProject/textcutter.cpp
+--- old/src/plugins/contrib/FortranProject/textcutter.cpp	2017-05-25 11:19:35.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/textcutter.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -1,4 +1,3 @@
+-
+ #include "textcutter.h"
+ 
+ TextCutter::TextCutter(const wxString& allText, FortranSourceForm fsForm)
+diff -Naur old/src/plugins/contrib/FortranProject/workspacebrowserf.cpp new/src/plugins/contrib/FortranProject/workspacebrowserf.cpp
+--- old/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	2020-04-02 20:39:54.000000000 +0300
+@@ -32,9 +32,10 @@
+     #include <manager.h>
+     #include <pluginmanager.h>
+     #include <projectmanager.h>
+-    #include <cbstyledtextctrl.h>
+ #endif
+ 
++#include <cbstyledtextctrl.h>
++
+ #include "nativeparserf.h"
+ #include "fortranproject.h"
+ 
+diff -Naur old/src/plugins/contrib/FortranProject/workspaceparserthread.h new/src/plugins/contrib/FortranProject/workspaceparserthread.h
+--- old/src/plugins/contrib/FortranProject/workspaceparserthread.h	2020-03-08 16:28:21.000000000 +0300
++++ new/src/plugins/contrib/FortranProject/workspaceparserthread.h	2020-04-02 20:39:54.000000000 +0300
+@@ -5,10 +5,9 @@
+ #ifndef CB_PRECOMP
+     #include <wx/thread.h>
+     #include <wx/event.h>
+-
+-    #include <cbthreadpool.h>
+ #endif
+ 
++#include <cbthreadpool.h>
+ 
+ extern wxMutex s_WorkspaceParserMutex;
+ extern wxMutex s_NewTokensMutex;
