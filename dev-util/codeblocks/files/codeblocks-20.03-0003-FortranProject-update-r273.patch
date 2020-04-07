@@ -1,0 +1,676 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/adddirparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/adddirparserthread.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/adddirparserthread.cpp	(revision 273)
+@@ -1,6 +1,7 @@
+ 
+ #include "adddirparserthread.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <logmanager.h>
+ #endif
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/autoinsert.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/autoinsert.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/autoinsert.cpp	(revision 273)
+@@ -1,10 +1,13 @@
+ #include "autoinsert.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <configmanager.h>
+ #endif
+ #include <algorithm>
+ 
++#include <cbstyledtextctrl.h>
++
+ #include "fortranfileext.h"
+ 
+ extern FortranFileExt g_FortranFileExt;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 273)
+@@ -5,15 +5,14 @@
+ #include <wx/string.h>
+ //*)
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/regex.h>
+-    #include <wx/tokenzr.h>
+     #include <wx/textdlg.h>
+     #include <wx/dirdlg.h>
+     #include <wx/msgdlg.h>
+ 
+     #include <editormanager.h>
+-    #include <cbstyledtextctrl.h>
+     #include <configmanager.h>
+     #include <projectmanager.h>
+     #include <logmanager.h>
+@@ -21,6 +20,10 @@
+     #include <compilerfactory.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ //(*IdInit(Bindto)
+ const long Bindto::ID_BTOACTIVEPROJECT = wxNewId();
+ const long Bindto::ID_BTOCURRENTFILE = wxNewId();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 273)
+@@ -1,6 +1,7 @@
+ 
+ #include "bufferparserthread.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <logmanager.h>
+ #endif
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.h	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.h	(revision 273)
+@@ -6,10 +6,10 @@
+ #ifndef CB_PRECOMP
+     #include <wx/thread.h>
+     #include <wx/event.h>
+-
+-    #include <cbthreadpool.h>
+ #endif
+ 
++#include <cbthreadpool.h>
++
+ class NativeParserF;
+ 
+ class BufferParserThread : public cbThreadedTask
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calledbydict.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calledbydict.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calledbydict.cpp	(revision 273)
+@@ -1,6 +1,7 @@
+ 
+ #include "calledbydict.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+     #include <wx/arrstr.h>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.cpp	(revision 273)
+@@ -15,6 +15,8 @@
+ #endif
+ #include <cmath>
+ 
++#include <cbstyledtextctrl.h>
++
+ #include "fortranproject.h"
+ #include "lineaddress.h"
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/changecase.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/changecase.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/changecase.cpp	(revision 273)
+@@ -1,13 +1,11 @@
+ 
+ #include "changecase.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+-
+     #include <cbauibook.h>
+     #include <cbeditor.h>
+     #include <cbproject.h>
+-    #include <cbstyledtextctrl.h>
+     #include <editormanager.h>
+     #include <editorcolourset.h>
+     #include <logmanager.h>
+@@ -16,6 +14,10 @@
+ #endif
+ #include <set>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "fortranfileext.h"
+ #include "textcutter.h"
+ 
+@@ -76,7 +78,7 @@
+ 	//*)
+ }
+ 
+-void ChangeCase::OnOK(wxCommandEvent& event)
++void ChangeCase::OnOK(cb_unused wxCommandEvent& event)
+ {
+     Manager::Get()->GetLogManager()->DebugLog(_T("ChangeCase::OnOK is called"));
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/docblock.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/docblock.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/docblock.cpp	(revision 273)
+@@ -1,11 +1,15 @@
+ 
+ #include "docblock.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include "cbcolourmanager.h"
+ #endif
+ #include <iostream>
+ 
++#include <wx/html/htmlwin.h>
++
++#include "cbcolourmanager.h"
++
+ DocBlock::DocBlock():
+     m_Description(_T("**description**")),
+     m_Brief(_T("**brief**"))
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/finfowindow.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/finfowindow.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/finfowindow.cpp	(revision 273)
+@@ -10,13 +10,16 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
++    #include <cbeditor.h>
+     #include <configmanager.h>
++    #include <editorcolourset.h>
+     #include <manager.h>
+-    #include <editorcolourset.h>
+-    #include <cbeditor.h>
++
+     #include <wx/sizer.h>
+ #endif
+ 
++#include <cbstyledtextctrl.h>
++
+ FInfoWindow::FInfoWindow()
+     :wxPanel(Manager::Get()->GetAppWindow())
+ {
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/formatindent.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/formatindent.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/formatindent.cpp	(revision 273)
+@@ -1,9 +1,8 @@
+ 
+ #include "formatindent.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+-
+     #include <projectmanager.h>
+     #include <cbproject.h>
+     #include <editormanager.h>
+@@ -12,6 +11,10 @@
+ #endif
+ #include <vector>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "formatindentdlg.h"
+ #include "fortranfileext.h"
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/formatindentdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/formatindentdlg.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/formatindentdlg.cpp	(revision 273)
+@@ -1,13 +1,16 @@
+ 
+ #include "formatindentdlg.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <editormanager.h>
+     #include <configmanager.h>
+-    #include <cbstyledtextctrl.h>
+-    #include "cbeditor.h"
+ #endif
+ 
++#include <manager.h>
++#include <cbstyledtextctrl.h>
++#include <editormanager.h>
++#include "cbeditor.h"
++
+ //(*InternalHeaders(FormatIndentDlg)
+ #include <wx/intl.h>
+ #include <wx/button.h>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranfileext.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranfileext.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranfileext.cpp	(revision 273)
+@@ -1,13 +1,15 @@
+ 
+ #include "fortranfileext.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+     #include <configmanager.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
+ FortranFileExt::FortranFileExt()
+ {
+     m_ExtDone = false;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpimagelist.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpimagelist.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpimagelist.cpp	(revision 273)
+@@ -1,6 +1,7 @@
+ 
+ #include "fpimagelist.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+     #include <wx/bitmap.h>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 273)
+@@ -8,7 +8,6 @@
+ #ifndef CB_PRECOMP
+     #include <wx/intl.h>
+     #include <wx/listbox.h>
+-    #include <wx/xrc/xmlres.h>
+     #include <wx/spinctrl.h>
+     #include <wx/checkbox.h>
+     #include <wx/combobox.h>
+@@ -21,6 +20,7 @@
+     #include <wx/regex.h>
+     #include <wx/colordlg.h>
+     #include <wx/choice.h>
++    #include <wx/window.h>
+ 
+     #include <configmanager.h>
+     #include <manager.h>
+@@ -29,6 +29,8 @@
+ #include <algorithm>
+ #include <vector>
+ 
++#include <wx/xrc/xmlres.h>
++
+ #include "fortranproject.h"
+ 
+ BEGIN_EVENT_TABLE(FPOptionsDlg, wxPanel)
+@@ -181,7 +183,7 @@
+     m_AISelIdx = idx;
+ }
+ 
+-void FPOptionsDlg::OnAISelectionChanged(wxCommandEvent& event)
++void FPOptionsDlg::OnAISelectionChanged(cb_unused wxCommandEvent& event)
+ {
+     int idx = XRCCTRL(*this, "lbAIStatements", wxListBox)->GetSelection();
+     if (idx != wxNOT_FOUND)
+@@ -203,7 +205,7 @@
+     m_AInsert.EditRule(sel, aiType, doAddName, alignToStatement);
+ }
+ 
+-void FPOptionsDlg::OnUpdateUI(wxUpdateUIEvent& event)
++void FPOptionsDlg::OnUpdateUI(cb_unused wxUpdateUIEvent& event)
+ {
+     bool en = XRCCTRL(*this, "chkEnableCC", wxCheckBox)->GetValue();
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.h	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.h	(revision 273)
+@@ -10,10 +10,11 @@
+ #ifndef CB_PRECOMP
+     #include <wx/intl.h>
+ 
+-    #include <configurationpanel.h>
+     #include <settings.h>
+ #endif
+ 
++#include <configurationpanel.h>
++
+ #include "fortranproject.h"
+ #include "workspacebrowserf.h"
+ #include "autoinsert.h"
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	(revision 273)
+@@ -10,9 +10,10 @@
+ #ifndef CB_PRECOMP
+     #include <wx/intl.h>
+     #include <settings.h>
+-    #include <configurationpanel.h>
+ #endif
+ 
++#include <configurationpanel.h>
++
+ #include "nativeparserf.h"
+ #include "parserf.h"
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/indentestimator.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/indentestimator.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/indentestimator.cpp	(revision 273)
+@@ -3,10 +3,11 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+     #include <configmanager.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
+ FormatIndentCodeTree::FormatIndentCodeTree()
+ {
+     Initialize(0);
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/moduletokenf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/moduletokenf.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/moduletokenf.cpp	(revision 273)
+@@ -1,4 +1,3 @@
+-
+ #include "moduletokenf.h"
+ 
+ ModuleTokenF::ModuleTokenF():
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 273)
+@@ -11,7 +11,6 @@
+     #include <wx/regex.h>
+     #include <wx/log.h>
+     #include <wx/string.h>
+-    #include <wx/tokenzr.h>
+     #include <wx/dir.h>
+     #include <wx/wfstream.h>
+     #include <wx/stopwatch.h>
+@@ -27,11 +26,14 @@
+     #include <cbproject.h>
+     #include <cbexception.h>
+     #include <projectloader_hooks.h>
+-    #include <cbstyledtextctrl.h>
+     #include <tinyxml.h>
+ #endif
+ #include <cctype>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "workspacebrowserf.h"
+ #include "workspacebrowserbuilder.h"
+ #include "parserf.h"
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 273)
+@@ -10,12 +10,12 @@
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+     #include <wx/event.h>
+-
+-    #include <cbthreadpool.h>
+ #endif
+ #include <map>
+ #include <set>
+ 
++#include <cbthreadpool.h>
++
+ #include "jumptracker.h"
+ #include "parserf.h"
+ #include "projectdependencies.h"
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tab2space.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tab2space.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tab2space.cpp	(revision 273)
+@@ -3,11 +3,8 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+-
+     #include <cbeditor.h>
+     #include <cbproject.h>
+-    #include <cbstyledtextctrl.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+     #include <projectmanager.h>
+@@ -14,6 +11,10 @@
+ #endif
+ #include <set>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "fortranfileext.h"
+ #include "textcutter.h"
+ 
+@@ -71,7 +72,7 @@
+ 	//*)
+ }
+ 
+-void Tab2Space::OnOK(wxCommandEvent& event)
++void Tab2Space::OnOK(cb_unused wxCommandEvent& event)
+ {
+     Manager::Get()->GetLogManager()->DebugLog(_T("Tab2Space::OnOK is called"));
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/textcutter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/textcutter.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/textcutter.cpp	(revision 273)
+@@ -1,4 +1,3 @@
+-
+ #include "textcutter.h"
+ 
+ TextCutter::TextCutter(const wxString& allText, FortranSourceForm fsForm)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 273)
+@@ -32,9 +32,10 @@
+     #include <manager.h>
+     #include <pluginmanager.h>
+     #include <projectmanager.h>
+-    #include <cbstyledtextctrl.h>
+ #endif
+ 
++#include <cbstyledtextctrl.h>
++
+ #include "nativeparserf.h"
+ #include "fortranproject.h"
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.h	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.h	(revision 273)
+@@ -5,10 +5,9 @@
+ #ifndef CB_PRECOMP
+     #include <wx/thread.h>
+     #include <wx/event.h>
+-
+-    #include <cbthreadpool.h>
+ #endif
+ 
++#include <cbthreadpool.h>
+ 
+ extern wxMutex s_WorkspaceParserMutex;
+ extern wxMutex s_NewTokensMutex;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 273)
+@@ -1,6 +1,7 @@
+ 
+ #include "calltree.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <manager.h>
+ #endif
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	(revision 273)
+@@ -8,6 +8,7 @@
+  */
+ #include "ccsmartfilter.h"
+ 
++#include <sdk.h>
+ #ifndef CB_PRECOMP
+     #include <wx/string.h>
+ #endif
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 273)
+@@ -13,10 +13,11 @@
+     #include <configmanager.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+-    #include <cbstyledtextctrl.h>
+ #endif
+ #include <algorithm>
+ 
++#include <cbstyledtextctrl.h>
++
+ ConstrHighlighter::ConstrHighlighter():
+     m_MakeHighlight(true),
+     m_FullColour(100, 100, 255),
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 273)
+@@ -10,7 +10,6 @@
+ #include <sdk.h> // Code::Blocks SDK
+ #ifndef CB_PRECOMP
+     #include <wx/filename.h>
+-    #include <wx/tokenzr.h>
+     #include <wx/gdicmn.h>
+     #include <wx/xrc/xmlres.h>
+     #include <wx/event.h>
+@@ -18,20 +17,23 @@
+     #include <wx/toolbar.h>
+     #include <wx/choicdlg.h>
+ 
+-    #include <configurationpanel.h>
+     #include <manager.h>
+-    #include <ccmanager.h>
+     #include <editorcolourset.h>
+     #include <editormanager.h>
+     #include <logmanager.h>
+     #include <projectmanager.h>
+-    #include <cbstyledtextctrl.h>
+-    #include <projectloader_hooks.h>
+-    #include <editor_hooks.h>
+     #include <cbeditor.h>
+ #endif
+ #include <vector>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++#include <ccmanager.h>
++#include <configurationpanel.h>
++#include <editor_hooks.h>
++#include <projectloader_hooks.h>
++
+ #include "fortranproject.h"
+ #include "fpoptionsdlg.h"
+ #include "fpoptionsprjdlg.h"
+@@ -595,7 +597,7 @@
+     return false;
+ } // end of EditorHasNameUnderCursor
+ 
+-void FortranProject::BuildModuleMenu(const ModuleType type, wxMenu* menu, const FileTreeData* data)
++void FortranProject::BuildModuleMenu(const ModuleType type, wxMenu* menu, cb_unused const FileTreeData* data)
+ {
+     if (!menu || !IsAttached() || !m_InitDone)
+         return;
+@@ -629,7 +631,7 @@
+ 
+ }
+ 
+-void FortranProject::OnGotoDeclaration(wxCommandEvent& event)
++void FortranProject::OnGotoDeclaration(cb_unused wxCommandEvent& event)
+ {
+     cbEditor* ed = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
+     if (!ed)
+@@ -1965,7 +1967,7 @@
+     }
+ }
+ 
+-void FortranProject::OnJumpBack(wxCommandEvent& event)
++void FortranProject::OnJumpBack(cb_unused wxCommandEvent& event)
+ {
+     JumpTracker* jTr = m_pNativeParser->GetJumpTracker();
+ 
+@@ -2067,7 +2069,7 @@
+     indent.Format();
+ }
+ 
+-void FortranProject::OnReparseEditorTimer(wxTimerEvent& event)
++void FortranProject::OnReparseEditorTimer(cb_unused wxTimerEvent& event)
+ {
+     m_pNativeParser->ReparseCurrentEditor();
+ }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 273)
+@@ -8,13 +8,11 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+     #include <wx/string.h>
+     #include <wx/thread.h>
+     #include <wx/arrstr.h>
+     #include <wx/regex.h>
+ 
+-    #include <cbstyledtextctrl.h>
+     #include <configmanager.h>
+     #include <editormanager.h>
+     #include <globals.h>
+@@ -22,6 +20,10 @@
+ #endif
+ #include <vector>
+ 
++#include <wx/tokenzr.h>
++
++#include <cbstyledtextctrl.h>
++
+ #include "workspaceparserthread.h"
+ #include "parserthreadf.h"
+ #include "adddirparserthread.h"
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 272)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 273)
+@@ -8,10 +8,11 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
+-    #include <wx/tokenzr.h>
+ #endif
+ #include <set>
+ 
++#include <wx/tokenzr.h>
++
+ #include "usetokenf.h"
+ 
+ ParserThreadF::ParserThreadF(const wxString& projectFilename,

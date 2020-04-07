@@ -1,0 +1,12 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_intrinsic_modules.f90
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_intrinsic_modules.f90	(revision 275)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_intrinsic_modules.f90	(revision 276)
+@@ -104,6 +104,7 @@
+     integer, parameter :: stat_locked_other_image
+     integer, parameter :: stat_stopped_image
+     integer, parameter :: stat_unlocked
++    integer, parameter :: current_team
+     integer, parameter :: initial_team
+     integer, parameter :: parent_team
+     integer, parameter :: stat_failed_image

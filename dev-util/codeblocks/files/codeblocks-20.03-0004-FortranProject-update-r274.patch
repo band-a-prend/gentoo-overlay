@@ -1,0 +1,179 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	(revision 273)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	(revision 274)
+@@ -390,7 +390,7 @@
+             kwLw == _T("contiguous") || kwLw == _T("selected_char_kind") || kwLw == _T("selected_int_kind") ||
+             kwLw == _T("selected_real_kind") || kwLw == _T("codimension") || kwLw == _T("size") || kwLw == _T("shape") ||
+             kwLw == _T("intent") || kwLw == _T("optional") || kwLw == _T("save") || kwLw == _T("parameter") ||
+-            kwLw == _T("private") || kwLw == _T("public"))
++            kwLw == _T("private") || kwLw == _T("public") || kwLw == _T("asynchronous"))
+         {
+             kwFits = true;
+         }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 273)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 274)
+@@ -1470,7 +1470,10 @@
+         m_pNativeParser->GetCallTips(lastName, m_LogOnlyUseAssoc, m_LogOnlyPublicNames, callTips, result);
+ 
+         wxString kwName;
+-        if (lastName.IsSameAs(_T("open")))
++        if (lastName.IsSameAs(_T("open")) ||
++            lastName.IsSameAs(_T("read")) ||
++            lastName.IsSameAs(_T("write")) ||
++            lastName.IsSameAs(_T("inquire")) )
+             kwName = _T("__fortran_statement_") + lastName;
+         else
+             kwName = lastName;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	(revision 273)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	(revision 274)
+@@ -22,16 +22,16 @@
+                 default, dimension, direct, do, double, doubleprecision, else, &
+                 elseif, elsewhere, encoding, end, endassociate, endblockdata, enddo, &
+                 endfile, endforall, endfunction, endif, endinterface, endmodule, endprocedure, endprogram, &
+-                endselect, endsubroutine, endtype, endwhere, entry, eor, equivalence, &
+-                err, errmsg, exist, exit, external, final, file, flush, fmt, forall, form, format, &
++                endselect, endsubroutine, endtype, endwhere, entry, equivalence, &
++                err, errmsg, exist, exit, external, final, file, flush, forall, form, format, &
+                 formatted, function, go, goto, if, implicit, in, include, inout, &
+-                integer, inquire, intent, interface, intrinsic, iomsg, iolength, &
+-                iostat, kind, len, logical, module, named, namelist, nextrec, nml, &
++                integer, inquire, intent, interface, intrinsic, &
++                kind, len, logical, module, named, namelist, nextrec, nml, &
+                 none, nopass, nullify, number, only, open, opened, operator, optional, out, pad, &
+                 parameter, pass, pending, pointer, pos, position, precision, &
+                 print, private, program, protected, public, quote, read, readwrite, &
+-                real, rec, recl, recursive, result, return, rewind, save, select, &
+-                selectcase, selecttype, sequential, stat, status, stop, stream, &
++                real, recursive, result, return, rewind, save, select, &
++                selectcase, selecttype, sequential, status, stop, stream, &
+                 subroutine, target, then, to, type, unformatted, unit, use, value, &
+                 volatile, wait, where, while, write, procedure, elemental, pure, sequence, &
+                 import, is, &
+@@ -3410,8 +3410,8 @@
+     character(len=*), intent(in) :: DECIMAL ! Specifies the default decimal edit mode: 'POINT' (default) or 'COMMA'.
+     character(len=*), intent(in) :: DELIM   ! Specifies delimiter for character constants in namelist: 'APOSTROPHE', 'QUOTE' or 'NONE'.
+     character(len=*), intent(in) :: ENCODING ! Shall be: 'DEFAULT' or 'UTF-8'.
+-    integer, intent(in)          :: ERR      ! Statement label to go if error occurs.
+-    character(len=*), intent(in) :: FORM     ! Shall be: 'DEFAULT' or 'UTF-8'.
++    integer, intent(out)         :: ERR      ! Statement label to go if error occurs.
++    character(len=*), intent(in) :: FORM     ! Shall be: 'FORMATTED' or 'UNFORMATTED'.
+     integer, intent(out) :: IOSTAT     ! Returns: a zero value if no error, a positive value if an error.
+     character(len=*), intent(in) :: PAD      ! Specifies if input records are padded with blanks: 'YES' (default) or 'NO'.
+     character(len=*), intent(in) :: POSITION ! Specifies the file position for a file connected: 'ASIS', 'REWIND', 'APPEND'.
+@@ -3421,6 +3421,94 @@
+     character(len=*), intent(in) :: STATUS ! Specifies the status of the file when it is opened: 'OLD', 'NEW', 'SCRATCH', 'REPLACE', or 'UNKNOWN'. 
+ end subroutine
+ 
++subroutine __fortran_statement_READ(UNIT, FMT, NML, ADVANCE, ASYNCHRONOUS, BLANK, DECIMAL, END, EOR, ERR, &
++                    ID, IOMSG, IOSTAT, PAD, POS, REC, ROUND, SIZE )
++    ! Read data from UNIT.
++    
++    integer, intent(in) :: UNIT         ! External file unit number.
++    character(len=*), intent(in) :: FMT ! Format specification 
++    type(*), intent(in) :: NML          ! Namelist group name
++    character(len=*), intent(in) :: ADVANCE ! 'YES' or 'NO'. Determines whether advancing read occurs.
++    character(len=*), intent(in) :: ASYNCHRONOUS ! 'YES' or 'NO'. Determines whether this read statement is synchronous or asynchronous.
++    character(len=*), intent(in) :: BLANK    ! Controls how interpreted blanks. Values: 'NULL' or 'ZERO'.
++    character(len=*), intent(in) :: DECIMAL  ! Controls decimal edit mode: 'POINT' or 'COMMA'.
++    integer, intent(out)          :: END     ! Statement label to go if end-of-file occurs.
++    integer, intent(out)          :: EOR     ! Statement label to go if end-of-record occurs.
++    integer, intent(out)          :: ERR     ! Statement label to go if error occurs.
++    integer, intent(out)          :: ID      ! Used in n asynchronous read statement.
++    character(len=*), intent(out) :: IOMSG   ! Explanatory message assigned if an error, end-of-file, or end-of-record condition occurs.
++    integer, intent(out) :: IOSTAT  ! Zero if no error or end-of-file or end-of-record occurs. Non-zero values in other cases.
++    character(len=*), intent(in) :: PAD      ! Specifies if input record are padded with blanks: 'YES' (default) or 'NO'.
++    integer, intent(in) :: POS      ! Specifies the file position in file storage units (only in stream access). 
++    integer, intent(in) :: REC      ! Specifies the number of the record that is to be read (only in direct access).
++    character(len=*), intent(in) :: ROUND ! Rounding mode to be used: 'UP', 'DOWN', 'ZERO', 'NEAREST', 'COMPATIBLE' or 'PROCESSOR_DEFINED' (default).
++    integer, intent(out) :: SIZE ! Defined with the count of characters transferred.
++end subroutine
++
++subroutine __fortran_statement_WRITE(UNIT, FMT, NML, ADVANCE, ASYNCHRONOUS, DECIMAL, DELIM, ERR, &
++                    ID, IOMSG, IOSTAT, POS, REC, ROUND, SIGN)
++    ! Write data from to UNIT.
++    
++    integer, intent(in) :: UNIT         ! External file unit number.
++    character(len=*), intent(in) :: FMT ! Format specification 
++    type(*), intent(in) :: NML          ! Namelist group name
++    character(len=*), intent(in) :: ADVANCE ! 'YES' or 'NO'. Determines whether advancing write occurs.
++    character(len=*), intent(in) :: ASYNCHRONOUS ! 'YES' or 'NO'. Determines whether this write statement is synchronous or asynchronous.
++    character(len=*), intent(in) :: DECIMAL  ! Controls decimal edit mode: 'POINT' or 'COMMA'.
++    character(len=*), intent(in) :: DELIM    ! 'APOSTROPHE', 'QUOTE', or 'NONE'.
++    integer, intent(out)          :: ERR     ! Statement label to go if error occurs.
++    integer, intent(out)          :: ID      ! Used in an asynchronous write statement.
++    character(len=*), intent(out) :: IOMSG   ! Explanatory message assigned if an error condition occurs.
++    integer, intent(out) :: IOSTAT  ! Zero if no error occurs. Non-zero values in other cases.
++    character(len=*), intent(in) :: PAD      ! Specifies if input record are padded with blanks: 'YES' (default) or 'NO'.
++    integer, intent(in) :: POS      ! Specifies the file position in file storage units (only in stream access). 
++    integer, intent(in) :: REC      ! Specifies the number of the record that is to be written (only in direct access).
++    character(len=*), intent(in) :: ROUND ! Rounding mode to be used: 'UP', 'DOWN', 'ZERO', 'NEAREST', 'COMPATIBLE' or 'PROCESSOR_DEFINED' (default).
++    character(len=*), intent(in) :: SIGN  ! 'PLUS', 'SUPPRESS', or 'PROCESSOR_DEFINED'
++end subroutine
++
++subroutine __fortran_statement_INQUIRE(UNIT, FILE, ACCESS, ACTION, ASYNCHRONOUS, BLANK, DECIMAL, DELIM, DIRECT, ENCODING, ERR, EXIST, &
++                    FORM, FORMATTED, ID, IOMSG, IOSTAT, NAME, NAMED, NEXTREC, NUMBER, OPENED, PAD, PENDING, POS, POSITION, READ, READWRITE, RECL, ROUND, SEQUENTIAL, SIGN, SIZE, STREAM, UNFORMATTED, WRITE)
++    ! Inquire about properties of a particular named FILE or of the connection to UNIT.
++
++    integer, intent(in) :: UNIT         ! External file unit number to be inquired.
++    character(len=*), intent(in) :: FILE   ! The name of the file to be inquired.
++    character(len=*), intent(out) :: ACCESS ! Access mode one from 'SEQUENTIAL', 'DIRECT', 'STREAM' or 'UNDEFINED'.
++    character(len=*), intent(out) :: ACTION ! Assigns value 'READ', 'WRITE' or 'READWRITE' if connected. 'UNDEFINED' if not connected.
++    character(len=*), intent(out) :: ASYNCHRONOUS ! Assigns value 'YES', 'NO'. 'UNDEFINED' if not connected.
++    character(len=*), intent(out) :: BLANK ! Assigns value 'ZERO', 'NULL'. 'UNDEFINED' if not connected.
++    character(len=*), intent(out) :: DECIMAL ! Assigns value 'COMMA' or 'POINT' corresponding to the decimal edit mode in effect. 'UNDEFINED' if not connected, or if the connection is not for formatted input/output.
++    character(len=*), intent(out) :: DELIM ! Assigns value 'APOSTROPHE', 'QUOTE', or 'NONE'  corresponding to the delimiter mode in effect for a connection for formatted input/output. 'UNDEFINED' if not connected, or if the connection is not for formatted input/output.
++    character(len=*), intent(out) :: DIRECT ! Assigns value 'YES', 'NO' corresponding to the allowed access methods for the file. 'UNKNOWN' if it is unable to determine.
++    character(len=*), intent(out) :: ENCODING ! Assigns value 'UTF-8', 'UNDEFINED', or 'UNKNOWN', or other specific encoding form.
++    logical, intent(out) :: EXIST ! Assigns TRUE if file with the name FILE exists, FALSE otherwise.
++    character(len=*), intent(out) :: FORM  ! Value 'FORMATTED', 'UNFORMATTED' or 'UNDEFINED' is assigned.
++    character(len=*), intent(out) :: FORMATTED  ! Value 'YES' if formatted is allowed, 'NO' if formatted is not allowed, or 'UNKNOWN' if is impossible to determine.
++    integer :: ID  
++    character(len=*), intent(out) :: NAME  ! Name of the file is assigned.
++    logical, intent(out) :: NAMED ! TRUE if file has a name, FALSE otherwise.
++    integer, intent(out) :: NEXTREC ! Assigns value of the next record number.
++    integer, intent(out) :: NUMBER ! Assigns value of the external unit number that is connected to the file.
++    logical, intent(out) :: OPENED ! TRUE if the file specified is connected to a unit; otherwise, FALSE is assigned. 
++    character(len=*), intent(out) :: PAD  ! 'YES' or 'NO' corresponding to the pad mode in effect.
++    logical, intent(out) :: PENDING ! Is used to determine whether previously pending asynchronous data transfers are complete.
++    integer, intent(out) :: POS ! Assigns the number of the file storage unit immediately following the current position of a file connected for stream access.
++    character(len=*), intent(out) :: POSITION  ! Values 'REWIND', 'APPEND', 'ASIS' or 'UNDEFINED' are assigned.
++    character(len=*), intent(out) :: READ  ! 'YES' if read is allowed, 'NO' if read is not allowed, 'UNKNOWN' if it is impossible to determine.
++    character(len=*), intent(out) :: READWRITE  ! 'YES' if readwrite is allowed, 'NO' if readwrite is not allowed, 'UNKNOWN' if it is impossible to determine.
++    integer, intent(out) :: RECL ! Assigns the value of the record length of a connection for direct access.
++    character(len=*), intent(out) :: ROUND  ! Assigns the value 'UP', 'DOWN', 'ZERO', 'NEAREST', 'COMPATIBLE', or 'PROCESSOR DEFINED', corresponding to the I/O rounding mode in effect for a connection.
++    character(len=*), intent(out) :: SEQUENTIAL  ! Value 'YES' if SEQUENTIAL is allowed, 'NO' if SEQUENTIAL is not allowed, or 'UNKNOWN' if is impossible to determine.
++    character(len=*), intent(out) :: SIGN  ! Assigns the value 'PLUS', 'SUPPRESS', or 'PROCESSOR DEFINED', corresponding to the sign mode in effect for a connection for formatted input/output.
++    integer, intent(out) :: SIZE ! Assigns the size of the file in file storage units.
++    character(len=*), intent(out) :: STREAM  ! Value 'YES' if STREAM is allowed, 'NO' if STREAM is not allowed, or 'UNKNOWN' if is impossible to determine.
++    character(len=*), intent(out) :: UNFORMATTED  ! Value 'YES' if unformatted is allowed, 'NO' if unformatted is not allowed, or 'UNKNOWN' if is impossible to determine.
++    character(len=*), intent(out) :: WRITE  ! 'YES' if write is allowed, 'NO' if write is not allowed, 'UNKNOWN' if it is impossible to determine.
++    integer, intent(out)          :: ERR     ! Statement label to go if error occurs.
++    character(len=*), intent(out) :: IOMSG   ! Explanatory message assigned if an error condition occurs.
++    integer, intent(out) :: IOSTAT  ! Zero if no error occurs. Non-zero values in other cases.
++end subroutine
++
+ module OpenMP
+     type(keywords) ::  atomic, auto, barrier, capture, collapse, copyin, copyprivate, default, end, &
+                        firstprivate, lastprivate, private, reduction, schedule, shared, critical, &
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 273)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 274)
+@@ -2214,8 +2214,10 @@
+ 
+     if (token.m_TokenKind == tkSubroutine)
+     {
+-        if (token.m_Name.IsSameAs(_T("__fortran_statement_open")))
+-            msg << _T("OPEN");
++        if (token.m_Name.StartsWith(_T("__fortran_statement_")))
++        {
++            msg << token.m_Name.Mid(20).Upper();
++        }
+         else
+             msg << _T("subroutine ") << token.m_DisplayName;
+         if (argsNew.IsEmpty())

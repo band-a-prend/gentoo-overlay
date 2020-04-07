@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86"
 SRC_URI="mirror://sourceforge/${PN}/${P}.tar.xz"
 
-# USE="fortran" enables FortranProject plugin (v1.6 updated to 2020-03-21 [r270])
+# USE="fortran" enables FortranProject plugin (v1.6 updated to 2020-04-06 [r277])
 # that is delivered with Code::Blocks 20.03 source code.
 # https://sourceforge.net/projects/fortranproject
 # http://cbfortran.sourceforge.net
@@ -37,8 +37,13 @@ DEPEND="${RDEPEND}"
 
 PATCHES=(
 	"${FILESDIR}"/${P}-env.patch
-	"${FILESDIR}"/${P}-FortranProject-autotools-build.patch
-	"${FILESDIR}"/${P}-FortranProject-update-r270-to-r275.patch
+	"${FILESDIR}"/${P}-0001-FortranProject-autotools-build.patch
+	"${FILESDIR}"/${P}-0002-FortranProject-update-r271-r272.patch
+	"${FILESDIR}"/${P}-0003-FortranProject-update-r273.patch
+	"${FILESDIR}"/${P}-0004-FortranProject-update-r274.patch
+	"${FILESDIR}"/${P}-0005-FortranProject-update-r275.patch
+	"${FILESDIR}"/${P}-0006-FortranProject-update-r276.patch
+	"${FILESDIR}"/${P}-0007-FortranProject-update-r277.patch
 	)
 
 src_prepare() {

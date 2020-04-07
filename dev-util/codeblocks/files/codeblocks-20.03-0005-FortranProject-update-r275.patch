@@ -1,0 +1,39 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 274)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 275)
+@@ -482,6 +482,34 @@
+                 {
+                     parTok = pCTok;
+                 }
++                else if (pCTok->m_TokenKind == tkUse)
++                {
++                    if (pCTok->m_pParent)
++                    {
++                        if (pCTok->m_pParent->m_TokenKind != tkModule &&
++                            pCTok->m_pParent->m_TokenKind != tkSubmodule)
++                        {
++                            parTok = pCTok->m_pParent;
++                            while (parTok)
++                            {
++                                if ( !parTok->m_pParent ||
++                                     (parTok->m_pParent && parTok->m_pParent->m_TokenKind == tkFile))
++                                {
++                                    break;
++                                }
++                                else if (parTok->m_TokenKind != tkModule &&
++                                         parTok->m_TokenKind != tkSubmodule)
++                                {
++                                    parTok = parTok->m_pParent;
++                                }
++                                else
++                                    break;
++                            }
++                        }
++                        else
++                            parTok = pCTok->m_pParent;
++                    }
++                }
+                 else if (pCTok->m_pParent)
+                 {
+                     if (pCTok->m_pParent->m_TokenKind == tkInterfaceExplicit)

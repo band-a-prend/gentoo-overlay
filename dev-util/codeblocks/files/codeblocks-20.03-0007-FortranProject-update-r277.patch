@@ -1,0 +1,188 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 276)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 277)
+@@ -60,6 +60,7 @@
+     m_KeywordSet.insert(_T("case"));
+     m_KeywordSet.insert(_T("selectcase"));
+     m_KeywordSet.insert(_T("default"));
++    m_KeywordSet.insert(_T("rank"));
+     m_KeywordSet.insert(_T("is"));
+     m_KeywordSet.insert(_T("class"));
+     m_KeywordSet.insert(_T("selecttype"));
+@@ -157,6 +158,10 @@
+     m_FConstructTypeMap[_T("classis")] = FConstruct::ctSelectGroup;
+     m_FConstructTypeMap[_T("classdefault")] = FConstruct::ctSelectGroup;
+ 
++    m_FConstructTypeMap[_T("selectrank")] = FConstruct::ctSelectGroup;
++    m_FConstructTypeMap[_T("rank")] = FConstruct::ctSelectGroup;
++    m_FConstructTypeMap[_T("rankdefault")] = FConstruct::ctSelectGroup;
++
+     m_FConstructTypeMap[_T("type")] = FConstruct::ctType;
+     m_FConstructTypeMap[_T("endtype")] = FConstruct::ctType;
+ 
+@@ -645,7 +650,8 @@
+                         (fcl == FConstruct::fclSelectCase_case && strFound.IsSameAs(_T("selectcase"))) ||
+                         (fcl == FConstruct::fclSelectType_type_is && strFound.IsSameAs(_T("selecttype"))) ||
+                         (fcl == FConstruct::fclSelectType_class_is && strFound.IsSameAs(_T("selecttype"))) ||
+-                        (fcl == FConstruct::fclSelectType_class_default && strFound.IsSameAs(_T("selecttype"))) )
++                        (fcl == FConstruct::fclSelectType_class_default && strFound.IsSameAs(_T("selecttype"))) ||
++                        (fcl == FConstruct::fclSelectRank_rank && strFound.IsSameAs(_T("selectrank"))) )
+                     {
+                         PutToKeywordList(str1, str2, str3, str1Pos, str2Pos, str3Pos, myPairs);
+                         foundEnd = true;
+@@ -1079,6 +1085,7 @@
+     {
+         flidAll.push_back(FConstruct::fclSelectCase_start);
+         flidAll.push_back(FConstruct::fclSelectType_start);
++        flidAll.push_back(FConstruct::fclSelectRank_start);
+     }
+     else
+         return posGK;
+@@ -1555,7 +1562,7 @@
+     }
+     else if (fct== FConstruct::ctSelectGroup)
+     {
+-        if (str.IsSameAs(_T("selectcase")) || str.IsSameAs(_T("selecttype")))
++        if (str.IsSameAs(_T("selectcase")) || str.IsSameAs(_T("selecttype")) || str.IsSameAs(_T("selectrank")))
+         {
+             sdir = sdirForth;
+             unFconForth.AddPart(_T("case"), estr, estr);
+@@ -1563,6 +1570,8 @@
+             unFconForth.AddPart(_T("type"), _T("is"), estr);
+             unFconForth.AddPart(_T("class"), _T("is"), estr);
+             unFconForth.AddPart(_T("class"), _T("default"), estr);
++            unFconForth.AddPart(_T("rank"), estr, estr);
++            unFconForth.AddPart(_T("rank"), _T("default"), estr);
+             unFconForth.AddPart(_T("end"), _T("select"), estr);
+         }
+         else if (str.IsSameAs(_T("endselect")))
+@@ -1574,6 +1583,9 @@
+             unFconBack.AddPart(_T("type"), _T("is"), estr);
+             unFconBack.AddPart(_T("class"), _T("is"), estr);
+             unFconBack.AddPart(_T("class"), _T("default"), estr);
++            unFconBack.AddPart(_T("select"), _T("rank"), estr);
++            unFconBack.AddPart(_T("rank"), estr, estr);
++            unFconBack.AddPart(_T("rank"), _T("default"), estr);
+         }
+         else if (str.IsSameAs(_T("case")) || str.IsSameAs(_T("casedefault")))
+         {
+@@ -1598,6 +1610,16 @@
+             unFconBack.AddPart(_T("class"), _T("is"), estr);
+             unFconBack.AddPart(_T("class"), _T("default"), estr);
+         }
++        else if (str.IsSameAs(_T("rank")) || str.IsSameAs(_T("rankdefault")))
++        {
++            sdir = sdirBackForth;
++            unFconForth.AddPart(_T("rank"), estr, estr);
++            unFconForth.AddPart(_T("rank"), _T("default"), estr);
++            unFconForth.AddPart(_T("end"), _T("select"), estr);
++
++            unFconBack.AddPart(_T("select"), _T("rank"), estr);
++            unFconBack.AddPart(_T("rank"), estr, estr);
++        }
+     }
+     else if (fct == FConstruct::ctIf)
+     {
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.cpp	(revision 276)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.cpp	(revision 277)
+@@ -132,6 +132,13 @@
+     else if (word1.IsSameAs(_T("end")) && word2.IsSameAs(_T("select")) && word3.IsSameAs(wxEmptyString))
+         flid = fclSelect_end;
+ 
++    else if (word1.IsSameAs(_T("select")) && word2.IsSameAs(_T("rank")) && word3.IsSameAs(wxEmptyString))
++        flid = fclSelectRank_start;
++    else if (word1.IsSameAs(_T("rank")) && word2.IsSameAs(wxEmptyString) && word3.IsSameAs(wxEmptyString))
++        flid = fclSelectRank_rank;
++    else if (word1.IsSameAs(_T("rank")) && word2.IsSameAs(_T("default")) && word3.IsSameAs(wxEmptyString))
++        flid = fclSelectRank_rank;
++
+     else if (word1.IsSameAs(_T("type")) && word2.IsSameAs(wxEmptyString) && word3.IsSameAs(wxEmptyString))
+         flid = fclType_type;
+     else if (word1.IsSameAs(_T("end")) && word2.IsSameAs(_T("type")) && word3.IsSameAs(wxEmptyString))
+@@ -219,6 +226,9 @@
+     FCLReMap[fclSelectCase_case] = new wxRegEx(_T("^[\\s\\t]*((case(\\s+)default)|(case(\\s*)\\(.*\\)))([\\s\\t]*[a-z0-9_]+)?([\\s\\t]*)$"), options);
+     FCLReMap[fclSelect_end] = new wxRegEx(_T("^[\\s\\t]*(end(\\s*)select)((\\s)+[a-z0-9_]+)?(\\s*)$"), options);
+ 
++    FCLReMap[fclSelectRank_start] = new wxRegEx(_T("^[\\s\\t]*(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?select(\\s*)rank(\\s*)(\\(.*[\\)&]+)"), options);
++    FCLReMap[fclSelectRank_rank] = new wxRegEx(_T("^[\\s\\t]*((rank(\\s+)default)|(rank(\\s*)\\(.*\\)))([\\s\\t]*[a-z0-9_]+)?([\\s\\t]*)$"), options);
++
+     FCLReMap[fclSelectType_start] = new wxRegEx(_T("^[\\s\\t]*(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?select(\\s*)type(\\s*)(\\(.*[\\)&]+)"), options);
+     FCLReMap[fclSelectType_type_is] = new wxRegEx(_T("^[\\s\\t]*type(\\s+)is(\\s*)(\\(.*[\\)&]+)"), options );
+     FCLReMap[fclSelectType_class_is] = new wxRegEx(_T("^[\\s\\t]*class(\\s+)is(\\s*)(\\(.*[\\)&]+)"), options );
+@@ -392,6 +402,16 @@
+     words[2] = wxEmptyString;
+     FCLWordMap[fclSelect_end] = words;
+ 
++    words[0] = _T("select");
++    words[1] = _T("rank");
++    words[2] = wxEmptyString;
++    FCLWordMap[fclSelectRank_start] = words;
++
++    words[0] = _T("rank");
++    words[1] = _T("default");
++    words[2] = wxEmptyString;
++    FCLWordMap[fclSelectRank_rank] = words;
++
+     words[0] = _T("type");
+     words[1] = wxEmptyString;
+     words[2] = wxEmptyString;
+@@ -670,6 +690,7 @@
+     idv.push_back(fclSelectCase_start);
+     idv.push_back(fclSelect_end);
+     idv.push_back(fclSelectType_start);
++    idv.push_back(fclSelectRank_start);
+     WordFCLidMap[kw] = idv;
+ 
+     idv.clear();
+@@ -697,6 +718,7 @@
+     kw = _T("default");
+     idv.push_back(fclSelectCase_case);
+     idv.push_back(fclSelectType_class_default);
++    idv.push_back(fclSelectRank_rank);
+     WordFCLidMap[kw] = idv;
+ 
+     idv.clear();
+@@ -720,6 +742,12 @@
+     WordFCLidMap[kw] = idv;
+ 
+     idv.clear();
++    kw = _T("rank");
++    idv.push_back(fclSelectRank_start);
++    idv.push_back(fclSelectRank_rank);
++    WordFCLidMap[kw] = idv;
++
++    idv.clear();
+     kw = _T("endtype");
+     idv.push_back(fclType_end_type);
+     WordFCLidMap[kw] = idv;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.h	(revision 276)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.h	(revision 277)
+@@ -40,6 +40,8 @@
+             fclSelectType_type_is,
+             fclSelectType_class_is,
+             fclSelectType_class_default,
++            fclSelectRank_start,
++            fclSelectRank_rank,
+             fclType_type,
+             fclType_end_type,
+             fclEnum_enum,
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 276)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 277)
+@@ -2117,6 +2117,10 @@
+         {
+             HandleSelectCaseConstruct();
+         }
++        else if ( tok_low.Matches(_T("select")) && nex_low.Matches(_T("rank")) )
++        {
++            HandleSelectCaseConstruct();
++        }
+         else if (tok_low.Matches(_T("procedure")) && nex_low(0,1).Matches(_T("(")))
+         {
+             ParseTypeBoundProcedures(token, true, false);
