@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+<longdescription>
+	A simple terminal UI for git commands, written in Go with the gocui library
+</longdescription>
+<upstream>
+	<remote-id type="github">jesseduffield/lazygit</remote-id>
+</upstream>
+</pkgmetadata>
