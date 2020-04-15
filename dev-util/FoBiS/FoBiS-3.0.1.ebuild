@@ -18,15 +18,5 @@ RESTRICT="mirror"
 
 S="${WORKDIR}/${PN}.py-${PV}"
 
-PDEPEND="
-	>=dev-python/sphinx-1.7.2[${PYTHON_USEDEP}]"
-DEPEND="
-	dev-python/setuptools[${PYTHON_USEDEP}]"
-
 # removing "import future" and "from past.utils import old_div" from python scripts
 PATCHES=( "${FILESDIR}/FoBiS-${PV}-remove-import-future_olddiv.patch" )
-
-python_install_all() {
-	distutils-r1_python_install_all
-	find "${ED}" -name '*.pth' -delete || die
-}
