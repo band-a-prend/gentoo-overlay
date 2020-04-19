@@ -30,7 +30,8 @@ S="${WORKDIR}/${PN}-${StringiFor_sha}"
 LICENSE="GPL-3 BSD-2 BSD MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE=""
+
+IUSE="static-libs"
 
 RDEPEND=""
 DEPEND="
@@ -73,14 +74,16 @@ src_prepare() {
 
 src_compile() {
 	FoBiS.py build -verbose ${BUILD_MODE_SHARED}
-	FoBiS.py build -verbose ${BUILD_MODE_STATIC}
+	use static-libs && FoBiS.py build -verbose ${BUILD_MODE_STATIC}
 }
 
 src_install() {
 	mv lib/mod lib/stringifor
 	doheader -r lib/stringifor/
-	dolib.a lib/libstringifor.a
+
 	mv lib/libstringifor.so{,.1}
 	dosym libstringifor.so.1 /usr/$(get_libdir)/libstringifor.so
 	dolib.so lib/libstringifor.so.1
+
+	use static-libs && dolib.a lib/libstringifor.a
 }
