@@ -17,10 +17,10 @@ PENF_sha="d2b27d5652f48584b9468ebd0b11dd44b5fb1638"		# PENF-1.2.2 (11 sep 2019)
 DESCRIPTION="StringiFor, Strings Fortran Manipulator, yet another strings Fortran module"
 HOMEPAGE="https://github.com/szaghi/StringiFor"
 SRC_URI="
-	https://github.com/szaghi/${PN}/archive/${StringiFor_sha}.zip -> ${P}.zip
-	https://github.com/szaghi/FACE/archive/"${FACE_sha}".zip -> FACE-1.1.2.zip
-	https://github.com/szaghi/PENF/archive/"${PENF_sha}".zip -> PENF-1.2.2.zip
-	https://github.com/szaghi/BeFoR64/archive/"${BeFoR64_sha}".zip -> BeFoR64-1.1.4.zip
+	https://github.com/szaghi/${PN}/archive/"${StringiFor_sha}".tar.gz -> ${P}.tar.gz
+	https://github.com/szaghi/FACE/archive/"${FACE_sha}".tar.gz -> FACE-1.1.2.tar.gz
+	https://github.com/szaghi/PENF/archive/"${PENF_sha}".tar.gz -> PENF-1.2.2.tar.gz
+	https://github.com/szaghi/BeFoR64/archive/"${BeFoR64_sha}".tar.gz -> BeFoR64-1.1.4.tar.gz
 "
 
 S="${WORKDIR}/${PN}-${StringiFor_sha}"
