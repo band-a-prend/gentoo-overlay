@@ -34,11 +34,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="static-libs test"
 RESTRICT="!test? ( test )"
 
-RDEPEND=""
-DEPEND="
-	${RDEPEND}
-	dev-util/FoBiS
-"
+DEPEND="dev-util/FoBiS"
 
 PATCHES=(
 	"${FILESDIR}/stringifor-1.1.1_fobos_soname.patch"
