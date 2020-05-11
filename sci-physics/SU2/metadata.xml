@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <use>
+    <flag name="cgns">Build with CGNS support (bundled)</flag>
+    <flag name="mkl">Enable Intel MKL support</flag>
+    <flag name="openblas">Enable OpenBLAS support</flag>
+    <flag name="tecio">Enable TECIO support</flag>
+    <flag name="tutorials">Install Tutorials files</flag>
+  </use>
+  <upstream>
+    <remote-id type="github">su2code/SU2</remote-id>
+  </upstream>
+</pkgmetadata>
