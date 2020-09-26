@@ -1,0 +1,36 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 283)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 284)
+@@ -2766,13 +2766,20 @@
+ void ParserThreadF::TakeFunctionsCallsFromString(const wxString& strIn)
+ {
+     wxString str = strIn;
++    size_t idx_start = 0;
+     for (int i=0; i<20; i++)
+     {
+-        int idx = str.Find(_T("("));
+-        if (idx == wxNOT_FOUND)
++        size_t idxR = str.find(')', idx_start);
++        size_t idx = str.find('(', idx_start);
++        if (idx == wxString::npos)
+         {
+             break;
+         }
++        else if (idxR != wxString::npos && idxR < idx)
++        {
++            idx_start = idxR + 1;
++            continue;
++        }
+         else if (idx > 0)
+         {
+             int idxStart;
+@@ -2819,7 +2826,7 @@
+             else
+                 break; // something is wrong
+         }
+-        str = str.Mid(idx+1);
++        idx_start = idx+1;
+     }
+ }
+ 

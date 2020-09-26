@@ -1,0 +1,138 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 277)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 278)
+@@ -103,10 +103,22 @@
+         }
+     }
+ 
++    m_StopWatch.Start();
+     CalledByDict cByDict;
+     if (!showCallTree)
+         pParser->BuildCalledByDict(cByDict);
+ 
++    wxString msg;
++    if (showCallTree)
++        msg = _("Building Call tree");
++    else
++        msg = _("Building Called-By tree");
++    m_pProgressDlg = new wxProgressDialog(_("Please wait"), msg, 100, Manager::Get()->GetAppWindow(),
++                                          wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME);
++    m_pProgressDlg->Pulse();
++    m_TimeOld = m_StopWatch.Time();
++    m_Cancelled = false;
++
+     TokensArrayClass tokAllTmp;
+     TokensArrayF* tokAll = tokAllTmp.GetTokens();
+ 
+@@ -148,11 +160,15 @@
+         }
+     }
+ 
+-    if (showCallTree)
+-        m_pCallTreeView->ShowCallTree(tokAll);
+-    else
+-        m_pCallTreeView->ShowCalledByTree(tokAll);
++    if (!m_Cancelled)
++    {
++        if (showCallTree)
++            m_pCallTreeView->ShowCallTree(tokAll);
++        else
++            m_pCallTreeView->ShowCalledByTree(tokAll);
++    }
+ 
++    m_pProgressDlg->Destroy();
+ }
+ 
+ void CallTree::FindUsedModules(ParserF* pParser, CallTreeToken* token)
+@@ -255,6 +271,18 @@
+ 
+ void CallTree::FindCalledTokens(ParserF* pParser, CallTreeToken* token, std::set< wxString>& keywordSet)
+ {
++    if (m_Cancelled)
++        return;
++    long timeNew = m_StopWatch.Time();
++    if ((timeNew - m_TimeOld) > 50)
++    {
++        m_TimeOld = timeNew;
++        if (!m_pProgressDlg->Pulse())
++        {
++            m_Cancelled = true;
++            return;
++        }
++    }
+     TokensArrayFlatClass tokensTmp;
+     TokensArrayFlat* callChildren = tokensTmp.GetTokens();
+ 
+@@ -333,6 +361,8 @@
+                 token->AddChild(tok2);
+             }
+         }
++        if (m_Cancelled)
++            break;
+     }
+ }
+ 
+@@ -452,6 +482,19 @@
+ 
+ void CallTree::FindCallingTokens(ParserF* pParser, CallTreeToken* token, CalledByDict& cByDict)
+ {
++    if (m_Cancelled)
++        return;
++    long timeNew = m_StopWatch.Time();
++    if ((timeNew - m_TimeOld) > 50)
++    {
++        m_TimeOld = timeNew;
++        if (!m_pProgressDlg->Pulse())
++        {
++            m_Cancelled = true;
++            return;
++        }
++    }
++
+     std::list<TokenF*>* tokList = cByDict.GetCallingTokens(token->m_Name);
+     if (!tokList)
+         return;
+@@ -542,6 +585,9 @@
+                     token->AddChild(tok2);
+ 
+                     FindCallingTokens(pParser, tok2, cByDict);
++
++                    if (m_Cancelled)
++                        return;
+                 }
+ 
+                 break; // take only first suitable item
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h	(revision 277)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h	(revision 278)
+@@ -1,11 +1,15 @@
+ #ifndef CALLTREE_H
+ #define CALLTREE_H
+ 
++#include <sdk.h>
++#ifndef CB_PRECOMP
++    #include <wx/stopwatch.h>
++#endif
++#include <wx/progdlg.h>
+ #include <set>
+ 
+ #include "calltreeview.h"
+ #include "parserf.h"
+-
+ class CallTree
+ {
+     public:
+@@ -31,6 +35,11 @@
+         CallTreeView* m_pCallTreeView;
+ 
+         std::set<wxString> m_FortranIntrinsicModules;
++
++        wxStopWatch m_StopWatch;
++        long m_TimeOld;
++        wxProgressDialog* m_pProgressDlg;
++        bool m_Cancelled;
+ };
+ 
+ #endif // CALLTREE_H

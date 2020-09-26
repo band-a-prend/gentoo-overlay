@@ -1,0 +1,117 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.cpp	(revision 288)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fconstruct.cpp	(revision 289)
+@@ -196,12 +196,14 @@
+ {
+     int options = wxRE_ADVANCED | wxRE_ICASE;
+ 
+-    FCLReMap[fclIf_if_then] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?((if)(\\s*)(\\()(.+)(\\))(\\s*)(then))((\\s*)!(.*))?(\\s*)$"), options);
++    wxString startLabel = _T("^([\\s\\t]*)(([0-9]+)([\\s\\t]+)|(([a-z0-9_]+)([\\s\\t]*)(:)))?([\\s\\t]*)");
++
++    FCLReMap[fclIf_if_then] = new wxRegEx( startLabel + wxT("((if)(\\s*)(\\()(.+)(\\))(\\s*)(then))((\\s*)!(.*))?(\\s*)$"), options);
+     FCLReMap[fclIf_else_if_then] = new wxRegEx( wxT("^(\\s*)(else)(\\s*)((if)(\\s*)(\\()(.+)(\\))(\\s*)(then)((\\s+)([a-zA-Z0-9_]+))?)((\\s*)!(.*))?(\\s*)$"), options);
+     FCLReMap[fclIf_else] = new wxRegEx( wxT("^(\\s*)(else)(\\s*)((\\s+)([a-zA-Z0-9_]+))?((\\s*)!(.*))?(\\s*)$"), options );
+ 	FCLReMap[fclIf_end_if] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)(if)((\\s+)([a-zA-Z0-9_]+))?(\\s*)"), options );
+ 
+-	FCLReMap[fclDo_do] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(do)(([\\s\\t]*$)|([\\s\\t]+[a-z_]+.*))"), options);
++	FCLReMap[fclDo_do] = new wxRegEx( startLabel + _T("(do)(([\\s\\t]*$)|([\\s\\t]+[a-z_]+.*))"), options);
+ 	FCLReMap[fclDo_end_do] = new wxRegEx(_T("^[\\s\\t]*(end)(\\s*)(do)\\y"), options);
+ 
+     FCLReMap[fclInterf_interf] = new wxRegEx(_T("^[\\s\\t]*(abstract[\\s\\t]+)?interface\\y"), options);
+@@ -222,14 +224,14 @@
+     FCLReMap[fclSubmod_submod] = new wxRegEx(_T("^[\\s\\t]*(submodule)(\\s*)(\\(\\s*[a-z0-9_:]+\\s*\\))(\\s*)([a-z0-9_]+)([\\s\\t]*)$"), options);
+     FCLReMap[fclSubmod_end_submod] = new wxRegEx(_T("^[\\s\\t]*(end|((endsubmodule|(end(\\s+)submodule))((\\s)+[a-z0-9_]+)?))(\\s*)$"), options);
+ 
+-    FCLReMap[fclSelectCase_start] = new wxRegEx(_T("^[\\s\\t]*(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?select(\\s*)case(\\s*)(\\(.*[\\)&]+)"), options);
++    FCLReMap[fclSelectCase_start] = new wxRegEx( startLabel + _T("select(\\s*)case(\\s*)(\\(.*[\\)&]+)"), options);
+     FCLReMap[fclSelectCase_case] = new wxRegEx(_T("^[\\s\\t]*((case(\\s+)default)|(case(\\s*)\\(.*\\)))([\\s\\t]*[a-z0-9_]+)?([\\s\\t]*)$"), options);
+     FCLReMap[fclSelect_end] = new wxRegEx(_T("^[\\s\\t]*(end(\\s*)select)((\\s)+[a-z0-9_]+)?(\\s*)$"), options);
+ 
+-    FCLReMap[fclSelectRank_start] = new wxRegEx(_T("^[\\s\\t]*(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?select(\\s*)rank(\\s*)(\\(.*[\\)&]+)"), options);
++    FCLReMap[fclSelectRank_start] = new wxRegEx( startLabel + _T("select(\\s*)rank(\\s*)(\\(.*[\\)&]+)"), options);
+     FCLReMap[fclSelectRank_rank] = new wxRegEx(_T("^[\\s\\t]*((rank(\\s+)default)|(rank(\\s*)\\(.*\\)))([\\s\\t]*[a-z0-9_]+)?([\\s\\t]*)$"), options);
+ 
+-    FCLReMap[fclSelectType_start] = new wxRegEx(_T("^[\\s\\t]*(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?select(\\s*)type(\\s*)(\\(.*[\\)&]+)"), options);
++    FCLReMap[fclSelectType_start] = new wxRegEx( startLabel + _T("select(\\s*)type(\\s*)(\\(.*[\\)&]+)"), options);
+     FCLReMap[fclSelectType_type_is] = new wxRegEx(_T("^[\\s\\t]*type(\\s+)is(\\s*)(\\(.*[\\)&]+)"), options );
+     FCLReMap[fclSelectType_class_is] = new wxRegEx(_T("^[\\s\\t]*class(\\s+)is(\\s*)(\\(.*[\\)&]+)"), options );
+     FCLReMap[fclSelectType_class_default] = new wxRegEx(_T("^[\\s\\t]*class(\\s+)default((\\s)+[a-z0-9_]+)?(\\s*)$"), options);
+@@ -240,25 +242,25 @@
+     FCLReMap[fclEnum_enum] = new wxRegEx(_T("^[\\s\\t]*enum\\y"), options);
+     FCLReMap[fclEnum_end_enum] = new wxRegEx(_T("^[\\s\\t]*(end)(\\s*)(enum)\\y"), options);
+ 
+-    FCLReMap[fclCritical_critical] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(critical)\\y"), options);
++    FCLReMap[fclCritical_critical] = new wxRegEx(startLabel + _T("(critical)\\y"), options);
+     FCLReMap[fclCritical_end_critical] = new wxRegEx(_T("^[\\s\\t]*(end)(\\s*)(critical)\\y"), options);
+ 
+-    FCLReMap[fclForall_forall] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(forall)(\\s*)(\\([^\\)]+\\))(\\s*)$"), options);
++    FCLReMap[fclForall_forall] = new wxRegEx(startLabel + _T("(forall)(\\s*)(\\([^\\)]+\\))(\\s*)$"), options);
+     FCLReMap[fclForall_end_forall] = new wxRegEx(_T("^[\\s\\t]*(end)(\\s*)(forall)\\y"), options);
+ 
+-    FCLReMap[fclAssoc_associate] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(associate)(\\s*)(\\(.*\\))(\\s*)$"), options);
++    FCLReMap[fclAssoc_associate] = new wxRegEx(startLabel + _T("(associate)(\\s*)(\\(.*\\))(\\s*)$"), options);
+     FCLReMap[fclAssoc_end_associate] = new wxRegEx(_T("^[\\s\\t]*(end)(\\s*)(associate)\\y"), options);
+ 
+-    FCLReMap[fclBlock_block] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)\\s*:\\s*)?(block)(\\s*)$"), options);
++    FCLReMap[fclBlock_block] = new wxRegEx(startLabel + _T("(block)(\\s*)$"), options);
+     FCLReMap[fclBlock_end_block] = new wxRegEx(_T("^[\\s\\t]*([0-9]*)([\\s\\t]*)(end)(\\s*)(block)([\\s\\t]*)(([\\s\\t]+)([a-z0-9_]+)\\s*)?$"), options);
+ 
+-    FCLReMap[fclTeam_change_team] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(change\\s+team)\\s*\\(.*\\)(\\s*)$"), options);
++    FCLReMap[fclTeam_change_team] = new wxRegEx(startLabel + _T("(change\\s+team)\\s*\\(.*\\)(\\s*)$"), options);
+     FCLReMap[fclTeam_end_team] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(end\\s*team)\\y"), options);
+ 
+     FCLReMap[fclBlockdata_blockdata] = new wxRegEx(_T("^([\\s\\t]*)(block\\s*data)(([\\s\\t]+)([a-z0-9_]+))?\\s*$"), options);
+     FCLReMap[fclBlockdata_end_blockdata] = new wxRegEx(_T("^([\\s\\t]*)(end|((end\\s*block\\s*data)(([\\s\\t]+)([a-z0-9_]+))?))\\s*$"), options);
+ 
+-    FCLReMap[fclWhere_where] = new wxRegEx(_T("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(where)(\\s*)(\\([^\\)]+\\))(\\s*)$"), options);
++    FCLReMap[fclWhere_where] = new wxRegEx(startLabel + _T("(where)(\\s*)(\\([^\\)]+\\))(\\s*)$"), options);
+     FCLReMap[fclWhere_else_where] = new wxRegEx(_T("^([\\s\\t]*)(else\\s*where)\\y"), options);
+     FCLReMap[fclWhere_end_where] = new wxRegEx(_T("^[\\s\\t]*(end)(\\s*)(where)\\y"), options);
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/indentestimator.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/indentestimator.cpp	(revision 288)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/indentestimator.cpp	(revision 289)
+@@ -141,6 +141,8 @@
+ 
+ 	DelFormatIndentRegEx();
+ 
++    wxString startLabel = _T("^([\\s\\t]*)(([0-9]+)([\\s\\t]+)|(([a-z0-9_]+)([\\s\\t]*)(:)))?([\\s\\t]*)");
++
+ 	m_RegEx[wxT("regexMultiLines")] = new wxRegEx( wxT("(&)((\r\n)|(\r)|(\n))?$"), options );
+ 	m_RegEx[wxT("regexEndProgram")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)((program)|((block)(\\s*)(data))|(subroutine)|(function))((\\s+)([a-zA-Z0-9_]+))?((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexProgram")] = new wxRegEx( wxT("^(\\s*)((program)|((block)(\\s*)(data)))((\\s+)([a-zA-Z0-9_]+))?((\\s*)!(.*))?(\\s*)$"), options );
+@@ -155,24 +157,24 @@
+ 	m_RegEx[wxT("regexTypeDefine")] = new wxRegEx( wxT("^(\\s*)((type)\\M((\\s*),(\\s*)((public)|(private)|(protected)))?((\\s*),(\\s*)((abstract)|((extends)(\\s*)\\((\\s*)([a-zA-Z0-9_]+)(\\s*)\\))))?((\\s*),(\\s*)((bind)(\\s*)\\((\\s*)([a-z0-9_]+)(\\s*)\\)))?((\\s*)(::)?(\\s*)([a-zA-Z0-9_]+)))(\\s*)"), options );
+ 	m_RegEx[wxT("regexEndType")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)(type)((\\s+)([a-zA-Z0-9_]+))?(\\s*)"), options );
+ 	m_RegEx[wxT("regexEndDo")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)((do)|(forall))((\\s+)([a-zA-Z0-9_]+))?(\\s*)"), options );
+-	m_RegEx[wxT("regexDo")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?(do)((\\s+)([a-zA-Z0-9_])(.+))?((\\s*)!(.*))?(\\s*)$"), options );
+-	m_RegEx[wxT("regexForall")] = new wxRegEx( wxT("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?((forall)|((do)(\\s+)(while)))(\\s*)(\\([^\\)]+\\))(\\s*)$"), options );
++	m_RegEx[wxT("regexDo")] = new wxRegEx( startLabel + wxT("(do)((\\s+)([a-zA-Z0-9_])(.+))?((\\s*)!(.*))?(\\s*)$"), options );
++	m_RegEx[wxT("regexForall")] = new wxRegEx( startLabel + wxT("((forall)|((do)(\\s+)(while)))(\\s*)(\\([^\\)]+\\))(\\s*)$"), options );
+ 	m_RegEx[wxT("regexEndSelect")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)(select)((\\s+)([a-zA-Z0-9_]+))?(\\s*)"), options );
+-	m_RegEx[wxT("regexSelectCase")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?((select)(\\s*)(case))(\\s*)(\\()(.+)(\\))((\\s*)!(.*))?(\\s*)$"), options );
+-	m_RegEx[wxT("regexSelectType")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?((select)(\\s*)(type))(\\s*)(\\()(.+)(\\))((\\s*)!(.*))?(\\s*)$"), options );
++	m_RegEx[wxT("regexSelectCase")] = new wxRegEx( startLabel + wxT("((select)(\\s*)(case))(\\s*)(\\()(.+)(\\))((\\s*)!(.*))?(\\s*)$"), options );
++	m_RegEx[wxT("regexSelectType")] = new wxRegEx( startLabel + wxT("((select)(\\s*)(type))(\\s*)(\\()(.+)(\\))((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexCase")] = new wxRegEx( wxT("^(\\s*)((((case)|(((type)|(class))(\\s+)(is)))(\\s*)(\\()(.+)(\\))((\\s+)([a-zA-Z0-9_]+))?)|(((case)|(class))(\\s+)(default)((\\s+)([a-zA-Z0-9_]+))?))((\\s*)!(.*))?(\\s*)$"), options );
+-	m_RegEx[wxT("regexIfThen")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?((if)(\\s*)(\\()(.+)(\\))(\\s*)(then))((\\s*)!(.*))?(\\s*)$"), options );
++	m_RegEx[wxT("regexIfThen")] = new wxRegEx( startLabel + wxT("((if)(\\s*)(\\()(.+)(\\))(\\s*)(then))((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexElse")] = new wxRegEx( wxT("^(\\s*)(else)(\\s*)(((\\s+)([a-zA-Z0-9_]+))|((if)(\\s*)(\\()(.+)(\\))(\\s*)(then)((\\s+)([a-zA-Z0-9_]+))?))?((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexEndIf")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)(if)((\\s+)([a-zA-Z0-9_]+))?(\\s*)"), options );
+-	m_RegEx[wxT("regexWhere")] = new wxRegEx( wxT("^([\\s\\t]*)([0-9]*)([\\s\\t]*)(([a-z0-9_]+)(\\s*)(:)(\\s*))?(where)(\\s*)(\\([^\\)]+\\))(\\s*)$"), options );
++	m_RegEx[wxT("regexWhere")] = new wxRegEx( startLabel + wxT("(where)(\\s*)(\\([^\\)]+\\))(\\s*)$"), options );
+ 	m_RegEx[wxT("regexElseWhere")] = new wxRegEx( wxT("^(\\s*)(else)(\\s*)(where)(((\\s+)([a-zA-Z0-9_]+))|((\\s*)\\((.+)\\)((\\s+)([a-zA-Z0-9_]+))?))?((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexEndWhere")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)(where)((\\s+)([a-zA-Z0-9_]+))?(\\s*)"), options );
+ 	m_RegEx[wxT("regexEndOnly")] = new wxRegEx( wxT("^(\\s*)(end)((\\s*)!(.*))?(\\s*)$"), options );
+ 
+-	m_RegEx[wxT("regexAssociate")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?(associate)(\\s*)\\((.+)\\)((\\s*)!(.*))?(\\s*)$"), options );
++	m_RegEx[wxT("regexAssociate")] = new wxRegEx( startLabel + wxT("(associate)(\\s*)\\((.+)\\)((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexEndAssociate")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)(associate)((\\s+)([a-zA-Z0-9_]+))?((\\s*)!(.*))?(\\s*)$"), options );
+ 
+-	m_RegEx[wxT("regexCritical")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?((block)|(critical))((\\s*)!(.*))?(\\s*)$"), options );
++	m_RegEx[wxT("regexCritical")] = new wxRegEx( startLabel + wxT("((block)|(critical))((\\s*)!(.*))?(\\s*)$"), options );
+ 	m_RegEx[wxT("regexEndCritical")] = new wxRegEx( wxT("^(\\s*)(end)(\\s*)((block)|(critical))((\\s+)([a-zA-Z0-9_]+))?((\\s*)!(.*))?(\\s*)$"), options );
+ 
+ 	m_RegEx[wxT("regexSubmodule")] = new wxRegEx( wxT("^(\\s*)(([a-zA-Z0-9_]+)(\\s*)(:)(\\s*))?((submodule)(\\s*)\\((.+)\\)(\\s*)([a-zA-Z0-9_]+))((\\s*)!(.*))?(\\s*)$"), options );

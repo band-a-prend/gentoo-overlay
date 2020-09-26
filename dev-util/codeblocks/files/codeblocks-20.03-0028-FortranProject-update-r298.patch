@@ -1,0 +1,22 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 297)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 298)
+@@ -594,7 +594,7 @@
+     m_WriteIncompleteWrapper = cfg->ReadBool(_T("/bind_to/write_incomplete_wrapper"), true);
+     m_OneGProcFile = cfg->ReadBool(_T("/bind_to/one_gproc_file"), true);
+     m_OneGProcFileName = cfg->Read(_T("/bind_to/one_gproc_filename"), _T("procedures_bc.f90"));
+-    m_BindCName = cfg->Read(_T("/bind_to/bind_c_name"), PROCNAME_KEY);
++    m_BindCName = cfg->Read(_T("/bind_to/bind_c_name"), PROCNAME_KEY + _T("_f"));
+     m_CtorStartsWith = cfg->Read(_T("/bind_to/ctor_start"), wxEmptyString);
+     m_CtorEndsWith = cfg->Read(_T("/bind_to/ctor_end"), wxEmptyString);
+     m_DtorStartsWith = cfg->Read(_T("/bind_to/dtor_start"), wxEmptyString);
+@@ -3270,7 +3270,7 @@
+ wxString Bindto::GetCName(const wxString& procName, const wxString& moduleName)
+ {
+     if (m_BindCName.IsEmpty())
+-        return procName;
++        return procName + _T("_f");
+     return GetProcName(procName, moduleName, m_BindCName);
+ }
+ 

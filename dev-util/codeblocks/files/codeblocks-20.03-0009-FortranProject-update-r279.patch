@@ -1,0 +1,13 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/manifest.xml
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/manifest.xml	(revision 278)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/manifest.xml	(revision 279)
+@@ -3,7 +3,7 @@
+     <SdkVersion major="1" minor="11"  release="12" />
+     <Plugin name="FortranProject">
+         <Value title="FortranProject" />
+-        <Value version="1.6" />
++        <Value version="1.7" />
+         <Value description="This plugin adds Fortran support (symbol browser, code-completion etc.) for C::B IDE." />
+         <Value author="Darius Markauskas" />
+         <Value authorEmail="darmar.lt@gmail.com" />

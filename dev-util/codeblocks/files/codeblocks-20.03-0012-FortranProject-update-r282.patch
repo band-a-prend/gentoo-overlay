@@ -1,0 +1,113 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 281)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 282)
+@@ -108,14 +108,7 @@
+     if (!showCallTree)
+         pParser->BuildCalledByDict(cByDict);
+ 
+-    wxString msg;
+-    if (showCallTree)
+-        msg = _("Building Call tree");
+-    else
+-        msg = _("Building Called-By tree");
+-    m_pProgressDlg = new wxProgressDialog(_("Please wait"), msg, 100, Manager::Get()->GetAppWindow(),
+-                                          wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME);
+-    m_pProgressDlg->Pulse();
++    m_pProgressDlg = NULL;
+     m_TimeOld = m_StopWatch.Time();
+     m_Cancelled = false;
+ 
+@@ -168,11 +161,34 @@
+             m_pCallTreeView->ShowCalledByTree(tokAll);
+     }
+ 
+-    m_pProgressDlg->Destroy();
++    if (m_pProgressDlg)
++        m_pProgressDlg->Destroy();
+ }
+ 
+ void CallTree::FindUsedModules(ParserF* pParser, CallTreeToken* token)
+ {
++    if (m_Cancelled)
++        return;
++    long timeNew = m_StopWatch.Time();
++    if (!m_pProgressDlg && ((timeNew - m_TimeOld) > 1000) )
++    {
++        // Show progress dialog only if the processing takes longer than 1s.
++        wxString msg = _("Building Call tree");
++        m_pProgressDlg = new wxProgressDialog(_("Please wait"), msg, 100, Manager::Get()->GetAppWindow(),
++                                          wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME);
++        m_pProgressDlg->Pulse();
++        m_TimeOld = timeNew;
++    }
++    else if (m_pProgressDlg && ((timeNew - m_TimeOld) > 50) )
++    {
++        m_TimeOld = timeNew;
++        if (!m_pProgressDlg->Pulse())
++        {
++            m_Cancelled = true;
++            return;
++        }
++    }
++
+     if (token->m_TokenKind == tkSubmodule)
+     {
+         TokenFlat ctF(token);
+@@ -266,6 +282,8 @@
+                 }
+             }
+         }
++        if (m_Cancelled)
++            break;
+     }
+ }
+ 
+@@ -274,9 +292,18 @@
+     if (m_Cancelled)
+         return;
+     long timeNew = m_StopWatch.Time();
+-    if ((timeNew - m_TimeOld) > 50)
++    if (!m_pProgressDlg && ((timeNew - m_TimeOld) > 1000) )
+     {
++        // Show progress dialog only if the processing takes longer than 1s.
++        wxString msg = _("Building Call tree");
++        m_pProgressDlg = new wxProgressDialog(_("Please wait"), msg, 100, Manager::Get()->GetAppWindow(),
++                                          wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME);
++        m_pProgressDlg->Pulse();
+         m_TimeOld = timeNew;
++    }
++    else if (m_pProgressDlg && ((timeNew - m_TimeOld) > 50) )
++    {
++        m_TimeOld = timeNew;
+         if (!m_pProgressDlg->Pulse())
+         {
+             m_Cancelled = true;
+@@ -283,6 +310,7 @@
+             return;
+         }
+     }
++
+     TokensArrayFlatClass tokensTmp;
+     TokensArrayFlat* callChildren = tokensTmp.GetTokens();
+ 
+@@ -485,9 +513,18 @@
+     if (m_Cancelled)
+         return;
+     long timeNew = m_StopWatch.Time();
+-    if ((timeNew - m_TimeOld) > 50)
++    if (!m_pProgressDlg && ((timeNew - m_TimeOld) > 1000) )
+     {
++        // Show progress dialog only if the processing takes longer than 1s.
++        wxString msg = _("Building Called-By tree");
++        m_pProgressDlg = new wxProgressDialog(_("Please wait"), msg, 100, Manager::Get()->GetAppWindow(),
++                                          wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME);
++        m_pProgressDlg->Pulse();
+         m_TimeOld = timeNew;
++    }
++    else if (m_pProgressDlg && ((timeNew - m_TimeOld) > 50) )
++    {
++        m_TimeOld = timeNew;
+         if (!m_pProgressDlg->Pulse())
+         {
+             m_Cancelled = true;

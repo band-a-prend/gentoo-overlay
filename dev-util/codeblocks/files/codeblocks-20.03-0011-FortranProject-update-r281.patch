@@ -1,0 +1,74 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 280)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 281)
+@@ -29,6 +29,7 @@
+     #include <tinyxml.h>
+ #endif
+ #include <cctype>
++#include <vector>
+ 
+ #include <wx/tokenzr.h>
+ 
+@@ -839,30 +840,45 @@
+     if (asig == wxNOT_FOUND)
+         return;
+ 
++    // Mark every position if it is in a character string.
++    size_t lineLen = line.Len();
++    std::vector<bool> inString;
++    inString.resize(lineLen, false);
++    for (size_t i=0; i<lineLen; ++i)
++    {
++        wxChar c = line.GetChar(i);
++        if (c == '\'' || c == '\"')
++        {
++            wxChar machChar = c;
++            inString[i] = true;
++            i++;
++            while (i<lineLen)
++            {
++                inString[i] = true;
++                if (c == machChar)
++                    break;
++                i++;
++            }
++        }
++    }
++
++    // Take index of '=' (first on the left side from the end)
+     int endIdx = 0;
+     int nest = 0;
+-    bool inA  = false;
+-    bool inDA = false;
+-    for (int i=line.Len()-1; i>=0; --i)
++    for (size_t i=lineLen; i>=0; --i)
+     {
++        if (inString[i]) continue; // we are in a string
+         wxChar c = line.GetChar(i);
+-        if (c == '\'' && !inA && !inDA)
+-            inA = true;
+-        else if (c == '\'' && inA)
+-            inA = false;
+-        else if (c == '"' && !inA && !inDA)
+-            inDA = true;
+-        else if (c == '"' && inDA)
+-            inDA = false;
+-        else if ((c == ')' || c == ']') && !inA && !inDA)
++
++        if ((c == ')' || c == ']'))
+             nest++;
+-        else if ((c == '(' || c == '[') && nest == 0 && !inA && !inDA)
++        else if ((c == '(' || c == '[') && nest == 0)
+             break;
+-        else if ((c == '(' || c == '[') && !inA && !inDA)
++        else if (c == '(' || c == '[')
+             nest--;
+-        else if (c == ',' && nest == 0 && !inA && !inDA)
++        else if (c == ',' && nest == 0)
+             break;
+-        else if (c == '=' && nest == 0 && !inA && !inDA)
++        else if (c == '=' && nest == 0)
+         {
+             endIdx = i;
+             break;

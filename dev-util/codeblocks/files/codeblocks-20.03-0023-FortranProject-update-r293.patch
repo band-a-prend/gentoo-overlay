@@ -1,0 +1,14 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 292)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 293)
+@@ -884,6 +884,9 @@
+     if (isAuto && curChar != wxT('%'))
+         return tokens;
+ 
++    if (isAuto && tknEnd >= 2 && stc->GetCharAt(tknEnd - 2) == wxT(' '))
++        return tokens; // we have "name %|". User uses style where "name % var". Therefore, do not show CC list after '%'.
++
+     const int lineIndentPos = stc->GetLineIndentPosition(stc->GetCurrentLine());
+     const wxChar lineFirstChar = stc->GetCharAt(lineIndentPos);
+ 

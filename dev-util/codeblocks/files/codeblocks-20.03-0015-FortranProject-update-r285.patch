@@ -1,0 +1,200 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 284)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 285)
+@@ -211,6 +211,7 @@
+         return;
+     }
+ 
++    m_TimeMax = 100;
+     m_Watch.Start();
+ 
+     int cpos = control->GetCurrentPos();
+@@ -2160,4 +2161,131 @@
+     return rpEnd;
+ }
+ 
++int ConstrHighlighter::GetConstructStartPos(cbEditor* editor, FortranSourceForm fsForm)
++{
++    //
++    // Returns start position of a construct, which has end before the current position.
++    // Function is assumed to be called after user pressed 'Enter'.
++    //
++    int constStartPos = -1;
++    cbStyledTextCtrl* control = editor->GetControl();
+ 
++    m_TimeMax = 50;
++    m_Watch.Start();
++
++    int nline = control->GetCurrentLine() - 1;
++    if (nline < 2) return constStartPos;
++
++    int lineStartPos = control->PositionFromLine(nline);
++    int lineEndPos = control->GetLineEndPosition(nline);
++
++    // Skip spaces
++    int posWStart = -1;
++    for (int i=lineStartPos; i<lineEndPos; i++)
++    {
++        const wxChar cch = control->GetCharAt(i);
++        if (!isspace(cch))
++        {
++            posWStart = i;
++            break;
++        }
++    }
++    if (posWStart == -1) return constStartPos;
++    int style = control->GetStyleAt(posWStart);
++    if (style != wxSCI_F_WORD)
++        return constStartPos;
++    int posWEnd = control->WordEndPosition(posWStart, true);
++    wxString cword = control->GetTextRange(posWStart,posWEnd).Lower();
++    if (!cword.StartsWith(_T("end")))
++        return constStartPos;
++    else if (m_KeywordSet.count(cword) == 0)
++        return constStartPos;
++
++    Keyword word1;
++    Keyword word2;
++    Keyword word3;
++    FConstruct::FCLid flid;
++    bool foundFull;
++
++    std::vector<FConstruct::FCLid> flidAll;
++    flidAll = FConstruct::WordFCLidMap[cword];
++    if (flidAll.empty())
++        return constStartPos;
++    bool containsK = false;
++    int flineStartPos;
++    int flineEndPos;
++    wxString fLine;
++    GetFortranLine(control, posWStart, fLine, flineStartPos, flineEndPos);
++    for (size_t i=0; i<flidAll.size(); i++)
++    {
++        if (FConstruct::FCLReMap.count(flidAll[i]) == 0)
++            continue;
++
++        bool match = false;
++        if (flidAll[i] == FConstruct::fclBlock_end_block)
++        {
++            if ( FConstruct::FCLReMap[FConstruct::fclBlock_end_block]->Matches(fLine) &&
++                !FConstruct::FCLReMap[FConstruct::fclBlockdata_end_blockdata]->Matches(fLine))
++                    match = true;
++        }
++        else if (FConstruct::FCLReMap[flidAll[i]]->Matches(fLine))
++        {
++            match = true;
++        }
++
++        if (match)
++        {
++            wxString wstr1, wstr2, wstr3;
++            FConstruct::GetWordsFromFCLid(flidAll[i], wstr1, wstr2, wstr3);
++
++            wxString str1, str2, str3;
++            int str1Pos, str2Pos, str3Pos;
++            int pos = FindFKeyword(control, flineStartPos, control->GetLength(), flidAll[i], wstr1, wstr2, wstr3,
++                                   str1, str1Pos, str2, str2Pos, str3, str3Pos);
++            if (m_Watch.Time() > m_TimeMax)
++                return constStartPos;
++            word1.word = str1;
++            word1.posStart = str1Pos;
++            word2.word = str2;
++            word2.posStart = str2Pos;
++            word3.word = str3;
++            word3.posStart = str3Pos;
++
++            if ((str1 + str2 + str3) == _T("end"))
++                flid = FConstruct::fclProgGroup_end;
++            else
++                flid = flidAll[i];
++
++            if (pos == wxSCI_INVALID_POSITION)
++                containsK = false;
++            else
++                containsK = true;
++            break;
++        }
++    }
++    if (!containsK)
++        return constStartPos;
++
++    KeywordList myPairs;
++    FindMyPairs(control, word1, word2, word3, flid, myPairs, foundFull);
++
++    if (!foundFull)
++        return constStartPos;
++
++    // get minimal position
++    int minPos = -1;
++    for (auto myP : myPairs)
++	{
++	    if (minPos == -1)
++            minPos = myP.posStart;
++
++	    minPos = (myP.posStart < minPos) ? myP.posStart : minPos;
++	}
++	if (minPos != -1)
++        constStartPos = minPos;
++
++    return constStartPos;
++}
++
++
++
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.h	(revision 284)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.h	(revision 285)
+@@ -45,6 +45,7 @@
+         void ClearHighlighting(cbStyledTextCtrl* control, bool forceAction=false);
+         void DoWork(cbEditor* editor, FortranSourceForm fsForm);
+         void ReadOptions();
++        int GetConstructStartPos(cbEditor* editor, FortranSourceForm fsForm);
+ 
+     private:
+         bool m_MakeHighlight;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 284)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 285)
+@@ -1055,7 +1055,38 @@
+     {
+         wxChar ch = event.GetKey();
+         if ((ch == _T('\n')) || ( (control->GetEOLMode() == wxSCI_EOL_CR) && (ch == _T('\r')) ))
+-            m_AutoInsert.MakeAutoInsert(editor);
++        {
++            m_AutoInsert.MakeAutoInsert(editor); // insert "end ..."
++            // correct indentation if required
++            int starConstructPos = m_ConstrHighlighter.GetConstructStartPos(editor, fsForm);
++            if (starConstructPos != -1)
++            {
++                // previous line contains "end ..." statement and start of the construct was found at starConstructPos
++                int lineStart = control->PositionFromLine(control->LineFromPosition(starConstructPos));
++                int indentStartCount = starConstructPos - lineStart;
++                int indentEndCount = control->GetLineIndentation(m_CurrentLine-1);
++                if (indentStartCount != indentEndCount)
++                {
++                    control->BeginUndoAction();
++                    wxString spaceStr;
++                    spaceStr.Append(' ',indentStartCount);
++                    int lStartPos = control->PositionFromLine(m_CurrentLine-1);
++                    control->Replace(lStartPos, lStartPos+indentEndCount, spaceStr);
++
++                    // Determine if this call is already after call to SmartIndentFortran plugin.
++                    int curPos = control->GetCurrentPos();
++                    lStartPos = control->PositionFromLine(m_CurrentLine);
++                    if (curPos > lStartPos)
++                    {
++                        // SmartIndent was already called. Adjust current line indent.
++                        control->Replace(lStartPos, curPos, spaceStr);
++                        control->GotoPos(lStartPos+indentStartCount);
++                        control->ChooseCaretX();
++                    }
++                    control->EndUndoAction();
++                }
++            }
++        }
+     }
+ 
+     m_ConstrHighlighter.DoWork(editor, fsForm);

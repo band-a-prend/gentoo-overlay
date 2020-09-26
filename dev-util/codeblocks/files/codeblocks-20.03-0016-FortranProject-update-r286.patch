@@ -1,0 +1,134 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 285)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 286)
+@@ -1051,39 +1051,44 @@
+     if (etyp == wxEVT_SCI_MODIFIED && !m_TimerReparseEditor.IsRunning())
+         m_TimerReparseEditor.Start(1500, wxTIMER_ONE_SHOT);
+ 
+-    if (m_AutoInsertEnabled && etyp == wxEVT_SCI_CHARADDED)
++    if ((m_AutoInsertEnabled || m_AutoCorrectIndentEnabled) && etyp == wxEVT_SCI_CHARADDED)
+     {
+         wxChar ch = event.GetKey();
+         if ((ch == _T('\n')) || ( (control->GetEOLMode() == wxSCI_EOL_CR) && (ch == _T('\r')) ))
+         {
+-            m_AutoInsert.MakeAutoInsert(editor); // insert "end ..."
+-            // correct indentation if required
+-            int starConstructPos = m_ConstrHighlighter.GetConstructStartPos(editor, fsForm);
+-            if (starConstructPos != -1)
++            if (m_AutoInsertEnabled)
++                m_AutoInsert.MakeAutoInsert(editor); // insert "end ..."
++
++            if (m_AutoCorrectIndentEnabled)
+             {
+-                // previous line contains "end ..." statement and start of the construct was found at starConstructPos
+-                int lineStart = control->PositionFromLine(control->LineFromPosition(starConstructPos));
+-                int indentStartCount = starConstructPos - lineStart;
+-                int indentEndCount = control->GetLineIndentation(m_CurrentLine-1);
+-                if (indentStartCount != indentEndCount)
++                // correct indentation if required
++                int starConstructPos = m_ConstrHighlighter.GetConstructStartPos(editor, fsForm);
++                if (starConstructPos != -1)
+                 {
+-                    control->BeginUndoAction();
+-                    wxString spaceStr;
+-                    spaceStr.Append(' ',indentStartCount);
+-                    int lStartPos = control->PositionFromLine(m_CurrentLine-1);
+-                    control->Replace(lStartPos, lStartPos+indentEndCount, spaceStr);
++                    // previous line contains "end ..." statement and start of the construct was found at starConstructPos
++                    int lineStart = control->PositionFromLine(control->LineFromPosition(starConstructPos));
++                    int indentStartCount = starConstructPos - lineStart;
++                    int indentEndCount = control->GetLineIndentation(m_CurrentLine-1);
++                    if (indentStartCount != indentEndCount)
++                    {
++                        control->BeginUndoAction();
++                        wxString spaceStr;
++                        spaceStr.Append(' ',indentStartCount);
++                        int lStartPos = control->PositionFromLine(m_CurrentLine-1);
++                        control->Replace(lStartPos, lStartPos+indentEndCount, spaceStr);
+ 
+-                    // Determine if this call is already after call to SmartIndentFortran plugin.
+-                    int curPos = control->GetCurrentPos();
+-                    lStartPos = control->PositionFromLine(m_CurrentLine);
+-                    if (curPos > lStartPos)
+-                    {
+-                        // SmartIndent was already called. Adjust current line indent.
+-                        control->Replace(lStartPos, curPos, spaceStr);
+-                        control->GotoPos(lStartPos+indentStartCount);
+-                        control->ChooseCaretX();
++                        // Determine if this call is already after call to SmartIndentFortran plugin.
++                        int curPos = control->GetCurrentPos();
++                        lStartPos = control->PositionFromLine(m_CurrentLine);
++                        if (curPos > lStartPos)
++                        {
++                            // SmartIndent was already called. Adjust current line indent.
++                            control->Replace(lStartPos, curPos, spaceStr);
++                            control->GotoPos(lStartPos+indentStartCount);
++                            control->ChooseCaretX();
++                        }
++                        control->EndUndoAction();
+                     }
+-                    control->EndUndoAction();
+                 }
+             }
+         }
+@@ -1961,7 +1966,8 @@
+     else
+         m_DocsShowOption = dsoNot;
+ 
+-    m_AutoInsertEnabled = cfg->ReadBool(_T("/auto_insert_enabled"), true);
++    m_AutoCorrectIndentEnabled = cfg->ReadBool(_T("/acorrect_indent_enabled"), true);
++    m_AutoInsertEnabled = cfg->ReadBool(_T("/ainsert_enable"), true);
+     m_AutoInsert.ReadAIOptions();
+ 
+     if (!m_pFortranLog && m_LogUseWindow)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h	(revision 285)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h	(revision 286)
+@@ -162,6 +162,7 @@
+ 
+         DocsShowOptions                    m_DocsShowOption;
+ 
++        bool                               m_AutoCorrectIndentEnabled;
+         bool                               m_AutoInsertEnabled;
+         AutoInsert                         m_AutoInsert;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 285)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 286)
+@@ -106,6 +106,7 @@
+ 
+     XRCCTRL(*this, "cbAIEnable", wxCheckBox)->SetValue(cfg->ReadBool(_T("/ainsert_enable"), true));
+     FillAutoInsert();
++    XRCCTRL(*this, "cbACorrectIndentEnable", wxCheckBox)->SetValue(cfg->ReadBool(_T("/acorrect_indent_enabled"), true));
+ }
+ 
+ FPOptionsDlg::~FPOptionsDlg()
+@@ -318,6 +319,7 @@
+     cfg->Write(_T("/ainsert_enable"), (bool)XRCCTRL(*this, "cbAIEnable", wxCheckBox)->GetValue());
+     ReadAIChoice();
+     m_AInsert.WriteAIOptions();
++    cfg->Write(_T("/acorrect_indent_enabled"), (bool)XRCCTRL(*this, "cbACorrectIndentEnable", wxCheckBox)->GetValue());
+ 
+     cfg->Write(_T("/do_construct_highlighting"), (bool)XRCCTRL(*this, "chkConstrHighlighterEnable", wxCheckBox)->GetValue());
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 285)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 286)
+@@ -485,6 +485,13 @@
+ 									<flag>wxALL|wxEXPAND</flag>
+ 									<border>5</border>
+ 								</object>
++								<object class="sizeritem">
++									<object class="wxCheckBox" name="cbACorrectIndentEnable">
++										<label>Correct indent of &quot;end ...&quot; statements</label>
++									</object>
++									<flag>wxALL|wxALIGN_LEFT</flag>
++									<border>5</border>
++								</object>
+ 							</object>
+ 						</object>
+ 						<label>Auto insert</label>

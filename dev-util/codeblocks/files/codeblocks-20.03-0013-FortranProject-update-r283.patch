@@ -1,0 +1,73 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	(revision 282)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/ccsmartfilter.cpp	(revision 283)
+@@ -275,6 +275,7 @@
+         onlyFirstSet.insert(_T("implicit"));
+         onlyFirstSet.insert(_T("include"));
+         onlyFirstSet.insert(_T("inquire"));
++        onlyFirstSet.insert(_T("import"));
+         onlyFirstSet.insert(_T("module"));
+         onlyFirstSet.insert(_T("namelist"));
+         onlyFirstSet.insert(_T("nullify"));
+@@ -436,6 +437,8 @@
+     {
+         if (lenFW >= 2 && fWL[lenFW-1] == _T("use"))
+             kwFits = true;
++        else if (lenFW == 1 && fWL[0] == _T("import"))
++            kwFits = true;
+         else
+             kwFits = false;
+     }
+@@ -504,7 +507,7 @@
+     }
+     else if (kwLw == _T("access") || kwLw == _T("action") || kwLw == _T("asynchronous") ||
+             kwLw == _T("blank") || kwLw == _T("decimal") || kwLw == _T("delim") || kwLw == _T("encoding") ||
+-            kwLw == _T("err") || kwLw == _T("file") || kwLw == _T("form") || kwLw == _T("iomsg") || kwLw == _T("iostat") ||
++            kwLw == _T("err") || kwLw == _T("file") || kwLw == _T("iomsg") || kwLw == _T("iostat") ||
+             kwLw == _T("newunit") || kwLw == _T("pad") || kwLw == _T("position") || kwLw == _T("recl") ||
+             kwLw == _T("round") || kwLw == _T("status ") || kwLw == _T("unit") || kwLw == _T("file") ||
+             kwLw == _T("direct") || kwLw == _T("exist") || kwLw == _T("formated") || kwLw == _T("id") || kwLw == _T("name") ||
+@@ -529,6 +532,20 @@
+         else
+             kwFits = false;
+     }
++    else if (lenFW == 1 && fWL[0] == _T("import"))
++    {
++        if (kwLw == _T("none") || kwLw == _T("only") || kwLw == _T("all"))
++            kwFits = true;
++        else
++            kwFits = false;
++    }
++    else if (lenFW == 0 && (kwLw == _T("all") || kwLw == _T("in") || kwLw == _T("inout") || kwLw == _T("out") ||
++                kwLw == _T("none") || kwLw == _T("nopass") || kwLw == _T("pass") || kwLw == _T("all") ||
++                kwLw == _T("non_intrinsic") ||kwLw == _T("non_overridable") || kwLw == _T("non_recursive") ||
++                kwLw == _T("images") || kwLw == _T("memory") || kwLw == _T("team")) )
++    {
++        kwFits = false;
++    }
+     return kwFits;
+ }
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	(revision 282)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	(revision 283)
+@@ -26,7 +26,7 @@
+                 err, errmsg, exist, exit, external, final, file, flush, forall, form, format, &
+                 formatted, function, go, goto, if, implicit, in, include, inout, &
+                 integer, inquire, intent, interface, intrinsic, &
+-                kind, len, logical, module, named, namelist, nextrec, nml, &
++                kind, len, logical, module, named, namelist, nextrec, &
+                 none, nopass, nullify, number, only, open, opened, operator, optional, out, pad, &
+                 parameter, pass, pending, pointer, pos, position, precision, &
+                 print, private, program, protected, public, quote, read, readwrite, &
+@@ -39,7 +39,7 @@
+                 decorate, extends, generic, non_overridable, enum, endenum, enumerator, typealias, &
+                 submodule, endsubmodule, concurrent, contiguous, endblock, non_intrinsic, codimension, &
+                 impure, critical, endcritical, lock, unlock, error, sync, all, memory, images, deferred, &
+-                fail, image, event, post, wait, change, team, endteam, non_recursive
++                fail, image, event, post, wait, change, team, endteam, non_recursive, rank
+ 
+ end function
+ 

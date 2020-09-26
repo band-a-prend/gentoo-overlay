@@ -1,0 +1,46 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 293)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 294)
+@@ -165,6 +165,7 @@
+     pm->RegisterEventSink(cbEVT_PROJECT_CLOSE, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnProjectClosed));
+     pm->RegisterEventSink(cbEVT_PROJECT_SAVE, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnProjectSaved));
+     pm->RegisterEventSink(cbEVT_PROJECT_FILE_ADDED, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnProjectFileAdded));
++    pm->RegisterEventSink(cbEVT_PROJECT_END_ADD_FILES, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnProjectEndAddFiles));
+     pm->RegisterEventSink(cbEVT_PROJECT_FILE_REMOVED, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnProjectFileRemoved));
+     pm->RegisterEventSink(cbEVT_COMPILER_STARTED, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnCompilerStarted));
+     pm->RegisterEventSink(cbEVT_CLEAN_PROJECT_STARTED, new cbEventFunctor<FortranProject, CodeBlocksEvent>(this, &FortranProject::OnCleanProjectStarted));
+@@ -326,12 +327,20 @@
+         {
+             wxString pfn = cbp->GetFilename();
+             m_pNativeParser->AddFileToParser(pfn, event.GetString());
+-            m_pNativeParser->UpdateWorkspaceBrowser();
+         }
+     }
+     event.Skip();
+ }
+ 
++void FortranProject::OnProjectEndAddFiles(CodeBlocksEvent& event)
++{
++    if (IsAttached() && m_InitDone)
++    {
++        m_pNativeParser->UpdateWorkspaceBrowser();
++    }
++    event.Skip();
++}
++
+ void FortranProject::OnProjectFileRemoved(CodeBlocksEvent& event)
+ {
+     if (IsAttached() && m_InitDone)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h	(revision 293)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h	(revision 294)
+@@ -85,6 +85,7 @@
+         void OnProjectClosed(CodeBlocksEvent& event);
+         void OnProjectSaved(CodeBlocksEvent& event);
+         void OnProjectFileAdded(CodeBlocksEvent& event);
++        void OnProjectEndAddFiles(CodeBlocksEvent& event);
+         void OnProjectFileRemoved(CodeBlocksEvent& event);
+         void OnCompilerStarted(CodeBlocksEvent& event);
+         void OnCleanProjectStarted(CodeBlocksEvent& event);

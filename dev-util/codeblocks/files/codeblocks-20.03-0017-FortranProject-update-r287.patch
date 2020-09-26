@@ -1,0 +1,195 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 286)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 287)
+@@ -111,6 +111,9 @@
+     m_pProgressDlg = NULL;
+     m_TimeOld = m_StopWatch.Time();
+     m_Cancelled = false;
++    m_CallDepth = 1;
++    ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("fortran_project"));
++    m_CallDepthMax = cfg->ReadInt(_T("/calltree_depthmax"), 5);
+ 
+     TokensArrayClass tokAllTmp;
+     TokensArrayF* tokAll = tokAllTmp.GetTokens();
+@@ -231,7 +234,12 @@
+                     tok2->m_CallLine     = ctF.m_LineStart;
+                     token->AddChild(tok2);
+ 
+-                    FindUsedModules(pParser, tok2);
++                    if (m_CallDepth < m_CallDepthMax)
++                    {
++                        m_CallDepth++;
++                        FindUsedModules(pParser, tok2);
++                        m_CallDepth--;
++                    }
+                 }
+             }
+         }
+@@ -277,7 +285,12 @@
+                     tok2->m_CallLine     = oneCall->m_LineStart;
+                     token->AddChild(tok2);
+ 
+-                    FindUsedModules(pParser, tok2);
++                    if (m_CallDepth < m_CallDepthMax)
++                    {
++                        m_CallDepth++;
++                        FindUsedModules(pParser, tok2);
++                        m_CallDepth--;
++                    }
+                     break; // take just first suitable result
+                 }
+             }
+@@ -362,19 +375,24 @@
+ 
+                     token->AddChild(tok2);
+ 
+-                    if (tf2->m_ParentTokenKind == tkInterfaceExplicit)
++                    if (m_CallDepth < m_CallDepthMax)
+                     {
+-                        ManageInterfaceExplicit(pParser, tf2, tok2, keywordSet);
++                        m_CallDepth++;
++                        if (tf2->m_ParentTokenKind == tkInterfaceExplicit)
++                        {
++                            ManageInterfaceExplicit(pParser, tf2, tok2, keywordSet);
++                        }
++                        else if (tf2->m_TokenKind == tkProcedure && tf2->m_ParentTokenKind == tkType)
++                        {
++                            // it is type-bound procedure
++                            ManageTBProceduresForCallTree(pParser, tf2, tok2, keywordSet);
++                        }
++                        else
++                        {
++                            FindCalledTokens(pParser, tok2, keywordSet);
++                        }
++                        m_CallDepth--;
+                     }
+-                    else if (tf2->m_TokenKind == tkProcedure && tf2->m_ParentTokenKind == tkType)
+-                    {
+-                        // it is type-bound procedure
+-                        ManageTBProceduresForCallTree(pParser, tf2, tok2, keywordSet);
+-                    }
+-                    else
+-                    {
+-                        FindCalledTokens(pParser, tok2, keywordSet);
+-                    }
+                     tokType = NULL;
+                     break; // take just first suitable result
+                 }
+@@ -503,7 +521,12 @@
+ 
+             token->AddChild(tg);
+ 
+-            FindCalledTokens(pParser, tg, keywordSet);
++            if (m_CallDepth < m_CallDepthMax)
++            {
++                m_CallDepth++;
++                FindCalledTokens(pParser, tg, keywordSet);
++                m_CallDepth--;
++            }
+         }
+     }
+ }
+@@ -621,7 +644,12 @@
+ 
+                     token->AddChild(tok2);
+ 
+-                    FindCallingTokens(pParser, tok2, cByDict);
++                    if (m_CallDepth < m_CallDepthMax)
++                    {
++                        m_CallDepth++;
++                        FindCallingTokens(pParser, tok2, cByDict);
++                        m_CallDepth--;
++                    }
+ 
+                     if (m_Cancelled)
+                         return;
+@@ -650,7 +678,12 @@
+ 
+             token->AddChild(tg);
+ 
+-            FindCalledTokens(pParser, tg, keywordSet);
++            if (m_CallDepth < m_CallDepthMax)
++            {
++                m_CallDepth++;
++                FindCalledTokens(pParser, tg, keywordSet);
++                m_CallDepth--;
++            }
+         }
+     }
+ }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h	(revision 286)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h	(revision 287)
+@@ -40,6 +40,8 @@
+         long m_TimeOld;
+         wxProgressDialog* m_pProgressDlg;
+         bool m_Cancelled;
++        int m_CallDepth;
++        int m_CallDepthMax;
+ };
+ 
+ #endif // CALLTREE_H
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 286)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 287)
+@@ -90,6 +90,8 @@
+         btCHUnfin->Enable(false);
+     }
+ 
++    XRCCTRL(*this, "spnCallTreeDepthLimit", wxSpinCtrl)->SetValue(cfg->ReadInt(_T("/calltree_depthmax"), 5));
++
+     XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->SetValue(cfg->ReadBool(_T("/use_log_window"), true));
+     XRCCTRL(*this, "chkComAbove", wxCheckBox)->SetValue(cfg->ReadBool(_T("/include_comments_above"), true));
+     XRCCTRL(*this, "chkComBelow", wxCheckBox)->SetValue(cfg->ReadBool(_T("/include_comments_below"), true));
+@@ -300,6 +302,8 @@
+     cfg->Write(_T("/chighlighter_full_colour"), XRCCTRL(*this, "btCHFullColour", wxButton)->GetBackgroundColour());
+     cfg->Write(_T("/chighlighter_unfinished_colour"), XRCCTRL(*this, "btCHUnfinColour", wxButton)->GetBackgroundColour());
+ 
++    cfg->Write(_T("/calltree_depthmax"), (int)XRCCTRL(*this, "spnCallTreeDepthLimit", wxSpinCtrl)->GetValue());
++
+     cfg->Write(_T("/use_log_window"), (bool)XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->GetValue());
+     cfg->Write(_T("/include_comments_above"), (bool)XRCCTRL(*this, "chkComAbove", wxCheckBox)->GetValue());
+     cfg->Write(_T("/include_comments_below"), (bool)XRCCTRL(*this, "chkComBelow", wxCheckBox)->GetValue());
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 286)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 287)
+@@ -226,13 +226,33 @@
+ 											</object>
+ 											<flag>wxALL|wxALIGN_LEFT</flag>
+ 											<border>5</border>
+-											<option>1</option>
+ 										</object>
+ 									</object>
+ 									<flag>wxALL|wxALIGN_LEFT</flag>
+ 									<border>8</border>
+-									<option>1</option>
+ 								</object>
++								<object class="sizeritem">
++									<object class="wxBoxSizer">
++										<object class="sizeritem">
++											<object class="wxStaticText" name="ID_STATICTEXT1">
++												<label>Call tree depth limit:</label>
++											</object>
++											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++											<border>5</border>
++											<option>1</option>
++										</object>
++										<object class="sizeritem">
++											<object class="wxSpinCtrl" name="spnCallTreeDepthLimit">
++												<value>5</value>
++												<min>1</min>
++											</object>
++											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++											<border>5</border>
++										</object>
++									</object>
++									<flag>wxALL|wxALIGN_LEFT</flag>
++									<border>5</border>
++								</object>
+ 							</object>
+ 						</object>
+ 						<label>Settings</label>

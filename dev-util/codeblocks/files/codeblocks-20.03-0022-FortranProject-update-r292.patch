@@ -1,0 +1,24 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 291)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 292)
+@@ -1059,7 +1059,7 @@
+             if (m_AutoInsertEnabled)
+                 m_AutoInsert.MakeAutoInsert(editor); // insert "end ..."
+ 
+-            if (m_AutoCorrectIndentEnabled)
++            if (m_AutoCorrectIndentEnabled && m_CurrentLine > 1)
+             {
+                 // correct indentation if required
+                 int starConstructPos = m_ConstrHighlighter.GetConstructStartPos(editor, fsForm);
+@@ -1066,8 +1066,8 @@
+                 if (starConstructPos != -1)
+                 {
+                     // previous line contains "end ..." statement and start of the construct was found at starConstructPos
+-                    int lineStart = control->PositionFromLine(control->LineFromPosition(starConstructPos));
+-                    int indentStartCount = starConstructPos - lineStart;
++                    int lineStart = control->LineFromPosition(starConstructPos);
++                    int indentStartCount = control->GetLineIndentation(lineStart);
+                     int indentEndCount = control->GetLineIndentation(m_CurrentLine-1);
+                     if (indentStartCount != indentEndCount)
+                     {

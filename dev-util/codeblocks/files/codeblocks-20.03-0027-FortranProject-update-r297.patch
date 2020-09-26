@@ -1,0 +1,42 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	(revision 296)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/images/fortranproject/fortran_procedures.f90	(revision 297)
+@@ -1881,6 +1881,8 @@
+     ! Arguments:
+     !    FROM   -ALLOCATABLE, INTENT(INOUT), may be of any type and kind.
+     !    TO     -ALLOCATABLE, INTENT(OUT), shall be of the same type, kind and rank as FROM.
++    !    STAT (optional) -noncoindexed integer scalar.
++    !    ERRMSG (optional) -noncoindexed default character scalar. 
+     ! Standard:
+     !    Fortran 2003 and later
+     type(any_type), allocatable :: FROM(:[,:,...]), TO(:[,:,...])
+@@ -3131,7 +3133,7 @@
+     integer, optional :: TEAM_NUMBER
+ end function
+ 
+-subroutine ATOMIC_DEFINE (ATOM, VALUE)
++subroutine ATOMIC_DEFINE (ATOM, VALUE [, STAT])
+     ! Defines the variable ATOM with the value VALUE atomically.
+     ! Standard:
+     !    Fortan 2008 and later.
+@@ -3138,9 +3140,10 @@
+     ! Arguments:
+     !  ATOM   Scalar coarray or coindexed variable of either integer type with ATOMIC_INT_KIND kind or logical type with ATOMIC_LOGICAL_KIND kind.
+     !  VALUE  Scalar and of the same type as ATOM. If the kind is different, the value is converted to the kind of ATOM.
++    ! STAT (optional) INTENT(OUT) Noncoindexed integer scalar.
+ end subroutine
+ 
+-subroutine ATOMIC_REF (ATOM, VALUE)
++subroutine ATOMIC_REF (ATOM, VALUE [, STAT])
+     ! Atomically assigns the value of the variable ATOM to VALUE.
+     ! Standard:
+     !    Fortan 2008 and later.
+@@ -3147,6 +3150,7 @@
+     ! Arguments:
+     !  ATOM   Scalar coarray or coindexed variable of either integer type with ATOMIC_INT_KIND kind or logical type with ATOMIC_LOGICAL_KIND kind.
+     !  VALUE  Scalar and of the same type as ATOM. If the kind is different, the value is converted to the kind of ATOM.
++    ! STAT (optional) INTENT(OUT) Noncoindexed integer scalar.
+ end subroutine
+ 
+ subroutine ATOMIC_ADD(ATOM, VALUE [, STAT])

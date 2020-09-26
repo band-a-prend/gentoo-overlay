@@ -1,0 +1,49 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserbuilder.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserbuilder.h	(revision 287)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserbuilder.h	(revision 288)
+@@ -112,6 +112,7 @@
+         wxArrayString m_ExpandedNodes;
+ 
+     private:
++        bool m_DeletingTopRootChildren;
+ };
+ 
+ #endif // WORKSPACEBROWSERBUILDER_H
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserbuilder.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserbuilder.cpp	(revision 287)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserbuilder.cpp	(revision 288)
+@@ -23,6 +23,7 @@
+     m_Options()
+ {
+     m_AtWork = false;
++    m_DeletingTopRootChildren = false;
+ 
+     m_pParser = parser;
+     m_pTreeTop = treeTop;
+@@ -159,11 +160,13 @@
+     if (Manager::IsAppShuttingDown())
+         return;
+ 
++    m_DeletingTopRootChildren = true;
+     wxTreeItemId root = m_pTreeTop->GetRootItem();
+     if (root.IsOk())
+     {
+         m_pTreeTop->DeleteChildren(root);
+     }
++    m_DeletingTopRootChildren = false;
+ }
+ 
+ void WorkspaceBrowserBuilder::MakeExpandedNodesArray(wxArrayString &expandedBottomNodes)
+@@ -579,6 +582,10 @@
+         root = m_pTreeBottom->AddRoot(_T("Members"));
+     else
+         m_pTreeBottom->DeleteChildren(root);
++
++    if (m_DeletingTopRootChildren)
++        return false;
++
+     TreeDataF* data = (TreeDataF*)m_pTreeTop->GetItemData(node);
+     if (data)
+     {

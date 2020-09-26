@@ -1,0 +1,71 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 290)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 291)
+@@ -1092,9 +1092,11 @@
+     TokensArrayF tokArr;
+     while (1)
+     {
++        unsigned int ln_tokold = m_Tokens.GetLineNumber();
+         wxString token = m_Tokens.GetToken();
+         m_LastTokenName = token.Lower();
+         wxString next = m_Tokens.PeekToken();
++        wxString next_low = next.Lower();
+         if (m_LastTokenName.IsEmpty())
+         {
+             break;
+@@ -1107,12 +1109,18 @@
+         {
+             HandlePPDirective(token);
+         }
+-        else if (m_LastTokenName.IsSameAs(_T("interface")))
++        else if (m_LastTokenName.IsSameAs(_T("interface")) && ln_tokold != m_Tokens.GetLineNumber())
+         {
+             HandleInterface(taDefKind);
+         }
++        else if (m_LastTokenName.IsSameAs(_T("abstract")) && next_low.IsSameAs(_T("interface")))
++        {
++            token = m_Tokens.GetToken();
++            m_LastTokenName = token.Lower();
++            HandleInterface(taDefKind);
++        }
+         else if (breakAtEnd &&
+-                 ( ((m_Tokens.GetLineNumber() == m_Tokens.GetPeekedLineNumber()) && IsEnd(m_LastTokenName, next.Lower())) ||
++                 ( ((m_Tokens.GetLineNumber() == m_Tokens.GetPeekedLineNumber()) && IsEnd(m_LastTokenName, next_low)) ||
+                    ((m_Tokens.GetLineNumber() != m_Tokens.GetPeekedLineNumber()) && IsEnd(m_LastTokenName, _T(""))) ))
+         {
+             m_Tokens.SkipToOneOfChars(";", true);
+@@ -1145,7 +1153,7 @@
+                 taDefKind = taPublic;
+             }
+         }
+-        else if (m_LastTokenName.IsSameAs(_T("block")) && !next.Lower().IsSameAs(_T("data")))
++        else if (m_LastTokenName.IsSameAs(_T("block")) && !next_low.IsSameAs(_T("data")))
+         {
+             HandleBlockConstruct();
+         }
+@@ -2051,10 +2059,15 @@
+         {
+             HandleUse();
+         }
+-        else if (tok_low.Matches(_T("interface")))
++        else if (tok_low.Matches(_T("interface")) && ln_tokold != m_Tokens.GetLineNumber())
+         {
+             HandleInterface();
+         }
++        else if (tok_low.Matches(_T("abstract")) && nex_low.Matches(_T("interface")))
++        {
++            token = m_Tokens.GetToken();
++            HandleInterface();
++        }
+         else if (tok_low.Matches(_T("include")))
+         {
+             HandleInclude();
+@@ -2138,7 +2151,6 @@
+             {
+                 CheckParseOneDeclaration(token, tok_low, next, nex_low, needDefault, tokTmpArr, hasFunctionInLine);
+             }
+-
+             if (tokTmpArr.size() == 0 && m_pLastParent && !hasFunctionInLine)
+             {
+                 CheckParseCallProcedure(token, tok_low, next);
