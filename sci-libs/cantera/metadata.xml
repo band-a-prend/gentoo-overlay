@@ -2,9 +2,6 @@
 <!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
   <!-- maintainer-needed -->
-  <maintainer type="person">
-    <email>maintainer-needed@gentoo.org</email>
-  </maintainer>
   <longdescription>
     Cantera is an open-source suite of object-oriented software tools
     for problems involving chemical kinetics, thermodynamics, and/or transport processes.

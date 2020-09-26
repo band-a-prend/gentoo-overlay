@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{6,7,8} )
+PYTHON_COMPAT=( python3_{6,7,8,9} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
@@ -36,12 +36,9 @@ RDEPEND="
 			dev-python/ruamel-yaml[${PYTHON_MULTI_USEDEP}]
 		')
 	)
-	<sci-libs/sundials-5.2.0:0=
 	dev-cpp/yaml-cpp
-	dev-python/ruamel-yaml
+	<sci-libs/sundials-5.3.0:0=
 "
-## Currently don't know exactly where yaml-cpp and ruamel-yaml are needed so placed above.
-## Package dev-python/ruamel-yaml is required to be updated to new versions to support python 3.8
 
 DEPEND="
 	${RDEPEND}
@@ -55,12 +52,18 @@ DEPEND="
 	)
 	test? (
 		>=dev-cpp/gtest-1.8.0
+		python? (
+			$(python_gen_cond_dep '
+			dev-python/h5py[${PYTHON_MULTI_USEDEP}]
+			dev-python/pandas[${PYTHON_MULTI_USEDEP}]
+			')
+		)
 	)
 "
 
 S="${WORKDIR}/${P}"
 
-PATCHES=( "${FILESDIR}/${PN}_9999_env.patch" )
+PATCHES=( "${FILESDIR}/${PN}-9999_env.patch" )
 
 pkg_setup() {
 	fortran-2_pkg_setup
@@ -81,7 +84,7 @@ src_configure() {
 		optimize_flags="-Wno-inline"
 		renamed_shared_libraries="no"
 		use_pch=$(usex pch)
-## In some cases other order can break the detection of right location of Boost: ##
+		## In some cases other order can break the detection of right location of Boost: ##
 		system_fmt="y"
 		system_sundials="y"
 		system_eigen="y"
@@ -112,7 +115,7 @@ src_test() {
 }
 
 src_install() {
-	escons install stage_dir="${D}" libdirname="$(get_libdir)"
+	escons install stage_dir="${D}" libdirname="$(get_libdir)" python_prefix="$(python_get_sitedir)"
 	if ! use cti ; then
 		rm -r "${D}/usr/share/man" || die "Can't remove man files."
 	else
