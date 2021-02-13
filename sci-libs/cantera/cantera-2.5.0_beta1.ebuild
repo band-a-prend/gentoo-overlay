@@ -1,9 +1,9 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{6,7,8,9} )
+PYTHON_COMPAT=( python3_{7,8,9} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
@@ -62,7 +62,7 @@ DEPEND="
 
 S="${WORKDIR}/${PN}-${MY_PV}b1"
 
-PATCHES=( "${FILESDIR}/${PN}-${MY_PV}_env.patch" )
+PATCHES=( "${FILESDIR}/${PN}-${MY_PV}_beta1_env.patch" )
 
 pkg_setup() {
 	fortran-2_pkg_setup
