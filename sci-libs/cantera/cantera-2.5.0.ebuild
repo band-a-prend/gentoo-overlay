@@ -10,11 +10,9 @@ FORTRAN_STANDARD="77 90"
 
 inherit desktop fortran-2 python-single-r1 scons-utils toolchain-funcs
 
-MY_PV=$(ver_cut 1-3)
-
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="https://www.cantera.org"
-SRC_URI="https://github.com/Cantera/${PN}/archive/v${MY_PV}.tar.gz -> ${PN}-${MY_PV}.tar.gz"
+SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
@@ -53,14 +51,14 @@ DEPEND="
 		>=dev-cpp/gtest-1.8.0
 		python? (
 			$(python_gen_cond_dep '
-			dev-python/h5py[${PYTHON_MULTI_USEDEP}]
-			dev-python/pandas[${PYTHON_MULTI_USEDEP}]
+				dev-python/h5py[${PYTHON_MULTI_USEDEP}]
+				dev-python/pandas[${PYTHON_MULTI_USEDEP}]
 			')
 		)
 	)
 "
 
-PATCHES=( "${FILESDIR}/${PN}-${MY_PV}_env.patch" )
+PATCHES=( "${FILESDIR}/${P}_env.patch" )
 
 pkg_setup() {
 	fortran-2_pkg_setup
@@ -123,7 +121,7 @@ src_install() {
 
 pkg_postinst() {
 	if use cti && ! use python ; then
-		elog "Cantera was build without 'python' use-flag therefore the CTI tool 'ck2cti'"
+		elog "Cantera was build without 'python' use-flag therefore the CTI tools 'ck2cti' and 'ck2yaml"
 		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
 	fi
 
