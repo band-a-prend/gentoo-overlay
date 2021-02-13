@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -42,12 +42,12 @@ DEPEND="
 BDEPEND="virtual/pkgconfig"
 
 PATCHES=(
-	"${FILESDIR}/${P}-fix-env.patch"
 	"${FILESDIR}/${PN}-7.0.4-unbundle_boost.patch"
+	"${FILESDIR}/${P}-fix-env.patch"
 	"${FILESDIR}/${P}-fix-python-optimize.patch"
 )
 
-DOCS=( "LICENSE.md" "README.md" "SU2_PY/documentation.txt" )
+DOCS=( "README.md" "SU2_PY/documentation.txt" )
 
 src_unpack() {
 	unpack "${P}.tar.gz"
@@ -57,7 +57,7 @@ src_unpack() {
 	fi
 	if use tutorials ; then
 		einfo "Unpacking ${PN}-7.0.7-Tutorials.tar.gz to /var/tmp/portage/sci-physics/${P}/work/${P}"
-		mkdir "${P}"/Tutorials
+		mkdir "${P}"/Tutorials || die
 		tar -C "${P}"/Tutorials --strip-components=1 -xzf "${DISTDIR}/${PN}-7.0.7-Tutorials.tar.gz" || die
 	fi
 }
@@ -103,8 +103,8 @@ src_test() {
 
 src_install() {
 	meson_src_install
-	mkdir -p "${ED}$(python_get_sitedir)"
-	mv "${ED}"/usr/bin/{FSI,SU2,*.py} -t "${ED}$(python_get_sitedir)"
+	mkdir -p "${ED}$(python_get_sitedir)" || die
+	mv "${ED}"/usr/bin/{FSI,SU2,*.py} -t "${ED}$(python_get_sitedir)" || die
 	python_optimize "${D}/$(python_get_sitedir)"
 
 	if use tutorials ; then
