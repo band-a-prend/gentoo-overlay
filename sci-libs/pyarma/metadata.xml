@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<use>
+		<flag name="arpack">
+			Link with <pkg>sci-libs/arpack</pkg> libraries for eigen decomposition
+		</flag>
+		<flag name="bundled-libs">
+			Build agaist upstream bundled Armadillo and PyBind11 libraries.
+		</flag>
+		<flag name="superlu">
+			Use SuperLU for sparse linear equation solving <pkg>sci-libs/superlu</pkg>
+		</flag>
+	</use>
+	<upstream>
+		<remote-id type="sourceforge">pyarma</remote-id>
+	</upstream>
+</pkgmetadata>
