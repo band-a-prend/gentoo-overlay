@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -34,7 +34,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="static-libs test"
 RESTRICT="!test? ( test )"
 
-DEPEND="dev-util/FoBiS"
+BDEPEND="dev-util/FoBiS"
 
 PATCHES=(
 	"${FILESDIR}/stringifor-1.1.1_fobos_soname.patch"
@@ -47,7 +47,7 @@ set_build_mode() {
 			BUILD_MODE_SHARED="-mode stringifor-shared-gnu"
 			BUILD_MODE_STATIC="-mode stringifor-static-gnu"
 			BUILD_MODE_TESTS="-mode tests-gnu" ;;
-		ifort )
+		*ifort* )
 			BUILD_MODE_SHARED="-mode stringifor-shared-intel"
 			BUILD_MODE_STATIC="-mode stringifor-static-intel"
 			BUILD_MODE_TESTS="-mode tests-intel" ;;
@@ -67,18 +67,17 @@ src_prepare() {
 	mv -T "${WORKDIR}"/PENF-"${PENF_sha}" "${S}"/src/third_party/PENF
 	default
 
-	if [ "${FFLAGS}" ] ; then
-		sed -i -e 's:\$OPTIMIZE    = -O2:\$OPTIMIZE    = '"${FFLAGS}"':' fobos || die
-	fi
+	sed -i -e 's:\$OPTIMIZE    = -O2:\$OPTIMIZE    = '"${FFLAGS}"':' \
+		-e '/^\$LSHARED/s:$: '"${LDFLAGS}"':' fobos || die
 }
 
 src_compile() {
-	FoBiS.py build -verbose ${BUILD_MODE_SHARED}
-	use static-libs && FoBiS.py build -verbose ${BUILD_MODE_STATIC}
+	FoBiS.py build -verbose -compiler custom -fc $(tc-getFC) ${BUILD_MODE_SHARED}
+	use static-libs && FoBiS.py build -verbose -compiler custom -fc $(tc-getFC) ${BUILD_MODE_STATIC}
 }
 
 src_test() {
-	FoBiS.py build ${BUILD_MODE_TESTS}
+	FoBiS.py build -compiler custom -fc $(tc-getFC) ${BUILD_MODE_TESTS}
 	for e in $( find ./exe/ -type f -executable -print ); do
 		if [ "$e" != "./exe/stringifor_test_parse_large_csv" ] ; then
 			echo "  run test $e :" && $e
