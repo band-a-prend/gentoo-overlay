@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{7,8,9} )
+PYTHON_COMPAT=( python3_{8..9} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
@@ -16,8 +16,8 @@ SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
-IUSE="+cti fortran pch +python test"
+KEYWORDS="amd64 ~x86"
+IUSE="+cti fortran lapack pch +python test"
 RESTRICT="!test? ( test )"
 
 REQUIRED_USE="
@@ -27,14 +27,19 @@ REQUIRED_USE="
 
 RDEPEND="
 	${PYTHON_DEPS}
+	lapack? ( virtual/lapack )
+	cti? (
+		$(python_gen_cond_dep '
+			dev-python/ruamel-yaml[${PYTHON_USEDEP}]
+		')
+	)
 	python? (
 		$(python_gen_cond_dep '
-			dev-python/numpy[${PYTHON_MULTI_USEDEP}]
-			dev-python/ruamel-yaml[${PYTHON_MULTI_USEDEP}]
+			dev-python/numpy[${PYTHON_USEDEP}]
 		')
 	)
 	dev-cpp/yaml-cpp
-	<sci-libs/sundials-5.3.0:0=
+	<sci-libs/sundials-5.3.0:0=[lapack?]
 "
 
 DEPEND="
@@ -44,21 +49,21 @@ DEPEND="
 	dev-libs/libfmt
 	python? (
 		$(python_gen_cond_dep '
-			dev-python/cython[${PYTHON_MULTI_USEDEP}]
+			dev-python/cython[${PYTHON_USEDEP}]
 		')
 	)
 	test? (
 		>=dev-cpp/gtest-1.8.0
 		python? (
 			$(python_gen_cond_dep '
-				dev-python/h5py[${PYTHON_MULTI_USEDEP}]
-				dev-python/pandas[${PYTHON_MULTI_USEDEP}]
+				dev-python/h5py[${PYTHON_USEDEP}]
+				dev-python/pandas[${PYTHON_USEDEP}]
 			')
 		)
 	)
 "
 
-PATCHES=( "${FILESDIR}/${PN}-2.5.0_env.patch" )
+PATCHES=( "${FILESDIR}/${P}_env.patch" )
 
 pkg_setup() {
 	fortran-2_pkg_setup
@@ -69,6 +74,7 @@ pkg_setup() {
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 src_configure() {
 	scons_vars=(
+		AR="$(tc-getAR)"
 		CC="$(tc-getCC)"
 		CXX="$(tc-getCXX)"
 		cc_flags="${CXXFLAGS}"
@@ -87,6 +93,7 @@ src_configure() {
 		env_vars="all"
 		extra_inc_dirs="/usr/include/eigen3"
 	)
+	use lapack && scons_vars+=( blas_lapack_libs="lapack,blas" )
 	use test || scons_vars+=( googletest="none" )
 
 	scons_targets=(
