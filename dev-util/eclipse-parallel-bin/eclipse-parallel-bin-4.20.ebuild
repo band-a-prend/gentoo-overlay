@@ -17,13 +17,17 @@ S="${WORKDIR}/${MY_PN}"
 
 LICENSE="EPL-2.0"
 SLOT="0"
-KEYWORDS="~amd64 ~arm64"
-IUSE=""
+KEYWORDS="-* ~amd64 ~arm64"
 RESTRICT="mirror"
 
 RDEPEND="
 	|| ( dev-java/openjdk:11 dev-java/openjdk-bin:11 dev-java/openjdk-jre-bin:11 dev-java/openjdk-sts-bin:15 )
 	x11-libs/gtk+:3
+"
+
+QA_FLAGS_IGNORED="
+	/opt/eclipse-parallel-bin/eclipse
+	/opt/eclipse-parallel-bin/plugins/org.eclipse.equinox.launcher.gtk.linux.*/eclipse_*.so
 "
 
 src_install() {
