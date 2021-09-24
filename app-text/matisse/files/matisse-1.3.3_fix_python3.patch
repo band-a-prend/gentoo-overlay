@@ -1,0 +1,379 @@
+From ad05d668a0fbdd4dcc889ce37707b4a459542bd3 Mon Sep 17 00:00:00 2001
+From: Stefano Zaghi <stefano.zaghi@gmail.com>
+Date: Fri, 18 Dec 2020 12:39:31 +0100
+Subject: [PATCH] Fix issue with Python 3
+
+Fix issue with Python 3: it is now working with Python 3, only a minor
+bug with *authors_short* has not been fixed yet.
+---
+Adopted patch for Gentoo package
+---
+
+diff --git a/matisse/box.py b/matisse/box.py
+index 3b5a0a3..d9a0164 100644
+--- a/matisse/box.py
++++ b/matisse/box.py
+@@ -2,9 +2,10 @@
+ """
+ box.py, module definition of Box class.
+ """
++from __future__ import absolute_import
+ import re
+ from yattag import Doc
+-from markdown_utils import markdown2html
++from .markdown_utils import markdown2html
+ 
+ 
+ class Box(object):
+diff --git a/matisse/chapter.py b/matisse/chapter.py
+index 67fd795..a559101 100644
+--- a/matisse/chapter.py
++++ b/matisse/chapter.py
+@@ -3,8 +3,9 @@
+ chapter.py, module definition of Chapter class.
+ """
+ from __future__ import print_function
++from __future__ import absolute_import
+ from collections import OrderedDict
+-from section import Section
++from .section import Section
+ 
+ 
+ class Chapter(object):
+diff --git a/matisse/columns.py b/matisse/columns.py
+index 594f8d6..a7c16b6 100644
+--- a/matisse/columns.py
++++ b/matisse/columns.py
+@@ -2,10 +2,11 @@
+ """
+ columns.py, module definition of Columns class.
+ """
++from __future__ import absolute_import
+ from __future__ import print_function
+ import re
+ from yattag import Doc
+-from markdown_utils import markdown2html
++from .markdown_utils import markdown2html
+ 
+ 
+ __recolumns__ = re.compile(r"(?P<columns>\$columns(?P<env>.*?)\$endcolumns)", re.DOTALL)
+diff --git a/matisse/figure.py b/matisse/figure.py
+index 8be8ac8..5685f0c 100644
+--- a/matisse/figure.py
++++ b/matisse/figure.py
+@@ -2,9 +2,10 @@
+ """
+ figure.py, module definition of Figure class.
+ """
++from __future__ import absolute_import
+ import re
+ from yattag import Doc
+-from box import Box
++from .box import Box
+ 
+ 
+ class Figure(Box):
+diff --git a/matisse/markdown_utils.py b/matisse/markdown_utils.py
+index 6415f57..8b0d991 100644
+--- a/matisse/markdown_utils.py
++++ b/matisse/markdown_utils.py
+@@ -2,9 +2,10 @@
+ """
+ markdown_utils.py, module definition of markdown utils functions.
+ """
++from __future__ import absolute_import
+ import markdown
+-from mdx_mathjax import MathJaxExtension
+-from mdx_custom_span_class import CustomSpanClassExtension
++from .mdx_mathjax import MathJaxExtension
++from .mdx_custom_span_class import CustomSpanClassExtension
+ try:
+   from markdown_checklist.extension import ChecklistExtension
+   __mdx_checklist__ = True
+diff --git a/matisse/matisse.py b/matisse/matisse.py
+index 77ddc09..27819dc 100644
+--- a/matisse/matisse.py
++++ b/matisse/matisse.py
+@@ -2,12 +2,15 @@
+ """
+ MaTiSSe.py, Markdown To Impressive Scientific Slides
+ """
++from __future__ import absolute_import
++from __future__ import division
+ from __future__ import print_function
++from __future__ import unicode_literals
+ import argparse
+ import os
+ import sys
+-from matisse_config import MatisseConfig
+-from presentation import Presentation
++from .matisse_config import MatisseConfig
++from .presentation import Presentation
+ 
+ __appname__ = "MaTiSSe.py"
+ __description__ = "MaTiSSe.py, Markdown To Impressive Scientific Slides"
+diff --git a/matisse/note.py b/matisse/note.py
+index c15e874..eca0ca4 100644
+--- a/matisse/note.py
++++ b/matisse/note.py
+@@ -2,10 +2,11 @@
+ """
+ note.py, module definition of Note class.
+ """
++from __future__ import absolute_import
+ import re
+ from yattag import Doc
+-from box import Box
+-from markdown_utils import markdown2html
++from .box import Box
++from .markdown_utils import markdown2html
+ 
+ 
+ class Note(Box):
+diff --git a/matisse/position.py b/matisse/position.py
+index 9db6c53..f691dbb 100644
+--- a/matisse/position.py
++++ b/matisse/position.py
+@@ -23,6 +23,11 @@ def __init__(self):
+                      'rotx': 0, 'roty': 0, 'rotz': 0,
+                      'scale': 1}
+ 
++  def __update_scale(self, transition):
++    """Update scale."""
++    if transition['scale'] != '':
++      self.position['scale'] = int(transition['scale'])
++
+   def __update_position_absolute(self, transition):
+     """Update position for absolute transition."""
+     if transition['data-x'] != '':
+@@ -37,8 +42,7 @@ def __update_position_absolute(self, transition):
+       self.position['roty'] = int(transition['data-rotate-y'])
+     if transition['data-rotate-z'] != '':
+       self.position['rotz'] = int(transition['data-rotate-z'])
+-    if transition['scale'] != '':
+-      self.position['scale'] = int(transition['scale'])
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_svgpath(self, transition):
+     """Update position for svgpath transition."""
+@@ -46,38 +50,46 @@ def __update_position_svgpath(self, transition):
+   def __update_position_horizontal(self, transition):
+     """Update position for horizontal transition."""
+     self.position['x'] = self.position['x'] + transition['width'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_neg_horizontal(self, transition):
+     """Update position for -horizontal transition."""
+     self.position['x'] = self.position['x'] - transition['width'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_vertical(self, transition):
+     """Update position for vertical transition."""
+     self.position['y'] = self.position['y'] + transition['height'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_neg_vertical(self, transition):
+     """Update position for -vertical transition."""
+     self.position['y'] = self.position['y'] - transition['height'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_diagonal(self, transition):
+     """Update position for diagonal transition."""
+     self.position['x'] = self.position['x'] + transition['width'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
+     self.position['y'] = self.position['y'] + transition['height'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_neg_diagonal(self, transition):
+     """Update position for -diagonal transition."""
+     self.position['x'] = self.position['x'] - transition['width'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
+     self.position['y'] = self.position['y'] - transition['height'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_diagonal_neg_x(self, transition):
+     """Update position for diagonal-x transition."""
+     self.position['x'] = self.position['x'] - transition['width'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
+     self.position['y'] = self.position['y'] + transition['height'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def __update_position_diagonal_neg_y(self, transition):
+     """Update position for diagonal-y transition."""
+     self.position['x'] = self.position['x'] + transition['width'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
+     self.position['y'] = self.position['y'] - transition['height'] * (max(self.position['scale'], transition['scale']) + transition['offset'] / 100.0)
++    self.__update_scale(transition=transition)
+ 
+   def update_position(self, presentation_theme, overtheme=None):
+     """Update the position using theme/overtheme slides-transition data.
+diff --git a/matisse/presentation.py b/matisse/presentation.py
+index da7e220..a77bdf6 100644
+--- a/matisse/presentation.py
++++ b/matisse/presentation.py
+@@ -3,20 +3,21 @@
+ presentation.py, module definition of Presentation class.
+ """
+ from __future__ import print_function
++from __future__ import absolute_import
+ from collections import OrderedDict
+ import logging
+ import os
+ from dirsync import sync
+-from yaml import load_all, YAMLError
++from yaml import load_all, YAMLError, FullLoader
+ from yattag import Doc, indent
+-from chapter import Chapter
+-from metadata import Metadata
+-from parser import Parser
+-from position import Position
+-from section import Section
+-from slide import Slide
+-from subsection import Subsection
+-from theme import Theme
++from .chapter import Chapter
++from .metadata import Metadata
++from .parser import Parser
++from .position import Position
++from .section import Section
++from .slide import Slide
++from .subsection import Subsection
++from .theme import Theme
+ 
+ 
+ class Presentation(object):
+@@ -107,7 +108,7 @@ def __get_metadata(self, source):
+     yamlblocks = self.parser.tokenizer(source=source, re_search=self.parser.regexs['yamlblock'], exclude=codeblocks)
+     try:
+       for block in yamlblocks:
+-        for data in load_all(block['match'].group().strip('---')):
++        for data in load_all(block['match'].group().strip('---'), Loader=FullLoader):
+           if 'metadata' in data:
+             for element in data['metadata']:
+               for key in element:
+diff --git a/matisse/section.py b/matisse/section.py
+index 7fbc402..4f2c85f 100644
+--- a/matisse/section.py
++++ b/matisse/section.py
+@@ -2,9 +2,10 @@
+ """
+ section.py, module definition of Section class.
+ """
++from __future__ import absolute_import
+ from __future__ import print_function
+ from collections import OrderedDict
+-from subsection import Subsection
++from .subsection import Subsection
+ 
+ 
+ class Section(object):
+diff --git a/matisse/slide.py b/matisse/slide.py
+index fd6d5b1..3333900 100644
+--- a/matisse/slide.py
++++ b/matisse/slide.py
+@@ -2,15 +2,16 @@
+ """
+ slide.py, module definition of Slide class.
+ """
++from __future__ import absolute_import
+ from __future__ import print_function
+-from box import Box
+-from columns import Columns
+-from figure import Figure
+-from markdown_utils import markdown2html
+-from note import Note
+-from table import Table
+-from theme import Theme
+-from video import Video
++from .box import Box
++from .columns import Columns
++from .figure import Figure
++from .markdown_utils import markdown2html
++from .note import Note
++from .table import Table
++from .theme import Theme
++from .video import Video
+ 
+ 
+ class Slide(object):
+diff --git a/matisse/subsection.py b/matisse/subsection.py
+index 4446b47..41ea965 100644
+--- a/matisse/subsection.py
++++ b/matisse/subsection.py
+@@ -2,8 +2,9 @@
+ """
+ subsection.py, module definition of Subsection class.
+ """
++from __future__ import absolute_import
+ from __future__ import print_function
+-from slide import Slide
++from .slide import Slide
+ 
+ 
+ class Subsection(object):
+diff --git a/matisse/table.py b/matisse/table.py
+index 2ab3427..58fdae9 100644
+--- a/matisse/table.py
++++ b/matisse/table.py
+@@ -2,10 +2,11 @@
+ """
+ table.py, module definition of Table class.
+ """
++from __future__ import absolute_import
+ import re
+ from yattag import Doc
+-from box import Box
+-from markdown_utils import markdown2html
++from .box import Box
++from .markdown_utils import markdown2html
+ 
+ 
+ class Table(Box):
+diff --git a/matisse/theme.py b/matisse/theme.py
+index 70a5bc6..5eaa07f 100644
+--- a/matisse/theme.py
++++ b/matisse/theme.py
+@@ -3,15 +3,16 @@
+ """
+ theme.py, module definition of Theme class.
+ """
++from __future__ import absolute_import
+ from __future__ import print_function
+ from copy import deepcopy
+ from collections import OrderedDict
+-from yaml import load_all, YAMLError
+-from box import Box
+-from note import Note
+-from figure import Figure
+-from table import Table
+-from video import Video
++from yaml import load_all, YAMLError, FullLoader
++from .box import Box
++from .note import Note
++from .figure import Figure
++from .table import Table
++from .video import Video
+ 
+ 
+ class Theme(object):
+@@ -762,7 +763,7 @@ def get(self, source, name='theme', div_id=''):
+     self.div_id = div_id
+     if len(source) > 0:
+       try:
+-        for data in load_all(source):
++        for data in load_all(source, Loader=FullLoader):
+           if name in data:
+             for element in data[name]:
+               self.__get_copy_from(data=element)
+diff --git a/matisse/video.py b/matisse/video.py
+index c606a84..4aab6ee 100644
+--- a/matisse/video.py
++++ b/matisse/video.py
+@@ -2,9 +2,10 @@
+ """
+ video.py, module definition of Video class.
+ """
++from __future__ import absolute_import
+ import re
+ from yattag import Doc
+-from box import Box
++from .box import Box
+ 
+ 
+ class Video(Box):
