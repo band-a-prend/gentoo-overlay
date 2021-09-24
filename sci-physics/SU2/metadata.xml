@@ -6,10 +6,11 @@
     <flag name="mkl">Enable Intel MKL support</flag>
     <flag name="mpp">Enable Mutation++ library support</flag>
     <flag name="openblas">Enable OpenBLAS support</flag>
+    <flag name="parmetis">Enable Parmetis support (Metis support is always on)</flag>
     <flag name="tecio">Enable TECIO support</flag>
     <flag name="tutorials">Install Tutorials files</flag>
   </use>
-  <longdescription>
+  <longdescription lang="en">
     The SU2 suite is an open-source collection of C++ based software tools
     for performing Partial Differential Equation (PDE) analysis and solving
     PDE-constrained optimization problems.

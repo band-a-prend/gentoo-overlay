@@ -24,8 +24,9 @@ KEYWORDS="~amd64"
 
 # cgns, metis, parmetis are bundled;
 # omp is disable as it's experimental;
-# pastix is disabled as it's try to find bundled libs;
-IUSE="cgns mkl +mpi mpp openblas tecio test tutorials"
+# pastix is disabled as it's require additional external bundled libs;
+# autodiff (medi), directdiff (opti) features require additional external bundled libs.
+IUSE="cgns mkl +mpi mpp openblas parmetis tecio test tutorials"
 RESTRICT="!test? ( test )"
 REQUIRED_USE="
 	${PYTHON_REQUIRED_USE}
@@ -40,7 +41,7 @@ RDEPEND="
 "
 DEPEND="
 	${RDEPEND}
-	tecio? ( dev-libs/boost:= )
+	tecio? ( >=dev-libs/boost-1.76.0:= )
 "
 BDEPEND="virtual/pkgconfig"
 
@@ -71,12 +72,18 @@ src_unpack() {
 src_prepare(){
 	default
 	# boost Geometry requires c++14 since >=boost-1.75
-	if has_version ">=dev-libs/boost-1.75.0" ; then
-		sed -i -e 's:cpp_std=c++11:cpp_std=c++14:' meson.build || die
-	fi
+	sed -i -e 's:cpp_std=c++11:cpp_std=c++14:' meson.build || die
+
+	# Force Disable parmetis support in meson.build (configure.ac has optional switch)
+	use !parmetis && { sed -i -e "/parmetis/Id" meson.build || die ; }
 
 	# Disable python-wrapper tests
 	sed -i "/append(pywrapper_/s/./#&/" TestCases/parallel_regression.py || die
+
+	# Copy absence mesh file
+	if use test ; then
+		cp "${S}/TestCases/nonequilibrium/viscwedge/viscwedge.su2" "${S}/TestCases/nonequilibrium/axi_visccone/" || die
+	fi
 }
 
 src_configure() {
