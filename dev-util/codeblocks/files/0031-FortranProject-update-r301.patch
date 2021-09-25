@@ -1,0 +1,122 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.cpp	(revision 300)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.cpp	(revision 301)
+@@ -51,7 +51,7 @@
+             tok = _T("&%oper_join");
+         else if (funArgSet.count(tok) > 0)
+             tok = _T("&%arg_") + tok;
+-        else if ( knownFunctions && knownFunctions->HasFunction(tok) && (nexTok.starts_with('(') && nexTok.ends_with(')')) )
++        else if ( knownFunctions && knownFunctions->HasFunction(tok) && (nexTok.StartsWith(_T("(")) && nexTok.EndsWith(_T(")"))) )
+         {
+             // it is call to the defined function.
+             tok = knownFunctions->GetFunction(tok)->Interpret(nexTok, knownFunctions, &funArgSet);
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 300)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 301)
+@@ -101,6 +101,7 @@
+ END_EVENT_TABLE()
+ 
+ FortranProject::FortranProject() :
++    m_InitDone(false),
+     m_pNativeParser(0),
+     m_EditorHookId(0),
+     m_TimerCodeCompletion(this, idCodeCompleteTimer),
+@@ -672,11 +673,26 @@
+     TokensArrayFlatClass tokensTmp;
+     TokensArrayFlat* result = tokensTmp.GetTokens();
+ 
+-    wxString includeFilename = GetIncludeFilename(ed->GetControl());
++    wxString includeFilename = GetIncludeFilename(control);
+     if (!includeFilename.IsEmpty())
+     {
+         // was asked to jump to include file.
+-        pParser->FindFile(includeFilename, *result);
++        pParser->FindFile(includeFilename.Lower(), *result);
++
++        if (result->GetCount() == 0)
++        {
++            wxFileName curDirName(ed->GetFilename());
++            wxString curDir = curDirName.GetPath(true, wxPATH_UNIX);
++            wxString incFilenameFull = m_pNativeParser->FindIncludeFile(curDir, includeFilename);
++            if (!incFilenameFull.IsEmpty())
++            {
++                // include file found.
++                TokenFlat* fileTok = new TokenFlat();
++                fileTok->m_Filename = incFilenameFull;
++                fileTok->m_LineStart = 1;
++                result->Add(fileTok);
++            }
++        }
+     }
+     else if (isOperator)
+     {
+@@ -687,7 +703,7 @@
+         pParser->FindMatchTokensForJump(ed, m_LogOnlyUseAssoc, false, *result);
+         // don't jump to intrinsic module
+         size_t ri = 0;
+-        while (ri<result->GetCount())
++        while (ri < result->GetCount())
+         {
+             if (result->Item(ri)->m_Filename.EndsWith(UnixFilename(_T("/images/fortranproject/fortran_intrinsic_modules.f90"))))
+             {
+@@ -2166,9 +2182,10 @@
+     int style = control->GetStyleAt(control->GetCurrentPos());
+     if (style == wxSCI_F_STRING1 || style == wxSCI_F_STRING2 || style == wxSCI_F_PREPROCESSOR)
+     {
+-        wxString curLine = control->GetCurLine().Lower();
+-        if (!curLine.Trim(false).StartsWith(_T("include")) &&
+-            !curLine.Trim(false).StartsWith(_T("#include")))
++        wxString curLine = control->GetCurLine();
++        wxString curLineLow = curLine.Lower();
++        if (!curLineLow.Trim(false).StartsWith(_T("include")) &&
++            !curLineLow.Trim(false).StartsWith(_T("#include")))
+             return wxEmptyString;
+ 
+         int pos   = control->GetCurrentPos();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 300)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 301)
+@@ -444,6 +444,28 @@
+     return &m_AIncludeFiles;
+ }
+ 
++wxString NativeParserF::FindIncludeFile(const wxString& checkDir,  const wxString& filename)
++{
++    // Check if the include file is in checkDir folder.
++    wxFileName fnameInclude(checkDir, wxEmptyString, wxPATH_UNIX);
++    fnameInclude.SetFullName(filename);
++    if (wxFileExists(fnameInclude.GetFullPath()))
++    {
++        return fnameInclude.GetFullPath();
++    }
++    else
++    {
++        // Include file not in the checkDir.
++        // Check if this file is between additional directories for includes.
++        wxFileName fname(filename);
++        wxString filename_ux = fname.GetFullPath(wxPATH_UNIX);
++        if (m_AIncludeFiles.count(filename_ux) == 1)
++            return m_AIncludeFiles[filename_ux];
++    }
++
++    return wxEmptyString;
++}
++
+ void NativeParserF::OnUpdateWorkspaceBrowser(wxCommandEvent& /*event*/)
+ {
+     m_Parser.ConnectToNewTokens();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 300)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 301)
+@@ -75,6 +75,7 @@
+         wxArrayString* GetADirFiles();
+         ArrayOfFortranSourceForm* GetADirFileForms();
+         std::map<wxString,wxString>* GetAdditionalIncludeFiles();
++        wxString FindIncludeFile(const wxString& checkDir,  const wxString& filename);
+         void GetCurrentBuffer(wxString& buffer, wxString& filename, wxString& projFilename);
+         void ReparseCurrentEditor();
+         wxArrayString GetProjectSearchDirs(cbProject* project);

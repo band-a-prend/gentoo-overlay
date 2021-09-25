@@ -1,0 +1,1571 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 313)
+@@ -44,10 +44,13 @@
+     IncludeDB* pIncludeDB = new IncludeDB();
+     std::map<wxString,wxString>* aIncludeFiles = m_pNativeParser->GetAdditionalIncludeFiles();
+     bool interpretCPP = m_pNativeParser->DoInterpretCPP();
++    std::vector<wxString>* strMacrosVec = m_pNativeParser->GetProjectCPPMacrosCopy(projFilename);
+ 
+-    ParserThreadF thread(projFilename, UnixFilename(filename), pTokens, fsForm, pIncludeDB, interpretCPP, aIncludeFiles, buffer);
++    ParserThreadF thread(projFilename, UnixFilename(filename), pTokens, fsForm, pIncludeDB, interpretCPP, aIncludeFiles,
++                         strMacrosVec, buffer);
+     thread.Parse();
+     delete pIncludeDB;
++    delete strMacrosVec;
+ 
+     m_pNativeParser->GetParser()->SetNewCurrentTokens(pTokens);
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 313)
+@@ -23,8 +23,7 @@
+     m_FullColour(100, 100, 255),
+     m_UnfinColour(255, 165, 0),
+     m_CurrentPosition(0),
+-    m_IndicFound(24),
+-    m_IndicNotFound(25),
++    m_IndicHighlight(24),
+     m_WasCleared(true)
+ {
+     m_KeywordSet.insert(_T("if"));
+@@ -190,10 +189,8 @@
+     if (!m_WasCleared || forceAction)
+     {
+         const int old_indic = control->GetIndicatorCurrent();
+-        control->SetIndicatorCurrent(m_IndicFound);
++        control->SetIndicatorCurrent(m_IndicHighlight);
+         control->IndicatorClearRange(0, control->GetLength());
+-        control->SetIndicatorCurrent(m_IndicNotFound);
+-        control->IndicatorClearRange(0, control->GetLength());
+         m_WasCleared = true;
+         control->SetIndicatorCurrent(old_indic);
+         if (forceAction)
+@@ -223,7 +220,7 @@
+     const int old_indic = control->GetIndicatorCurrent();
+     if (!m_WasCleared)
+     {
+-        control->SetIndicatorCurrent(m_IndicFound);
++        control->SetIndicatorCurrent(m_IndicHighlight);
+         control->IndicatorClearRange(0, control->GetLength());
+         m_WasCleared = true;
+         control->SetIndicatorCurrent(old_indic);
+@@ -319,14 +316,14 @@
+         return;
+ 
+     if (foundFull)
+-        control->IndicatorSetForeground(m_IndicFound, m_FullColour);
++        control->IndicatorSetForeground(m_IndicHighlight, m_FullColour);
+     else
+-        control->IndicatorSetForeground(m_IndicFound, m_UnfinColour);
+-    control->IndicatorSetStyle(m_IndicFound, wxSCI_INDIC_ROUNDBOX);
+-    control->IndicatorSetAlpha(m_IndicFound, 100);
+-    control->IndicatorSetOutlineAlpha(m_IndicFound, 255);
+-    control->IndicatorSetUnder(m_IndicFound,true);
+-    control->SetIndicatorCurrent(m_IndicFound);
++        control->IndicatorSetForeground(m_IndicHighlight, m_UnfinColour);
++    control->IndicatorSetStyle(m_IndicHighlight, wxSCI_INDIC_ROUNDBOX);
++    control->IndicatorSetAlpha(m_IndicHighlight, 100);
++    control->IndicatorSetOutlineAlpha(m_IndicHighlight, 255);
++    control->IndicatorSetUnder(m_IndicHighlight,true);
++    control->SetIndicatorCurrent(m_IndicHighlight);
+ 
+     m_WasCleared = false;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.h	(revision 313)
+@@ -53,8 +53,7 @@
+         wxColour m_UnfinColour;
+         int m_CurrentPosition;
+         FortranSourceForm m_CurrentSForm;
+-        int m_IndicFound;
+-        int m_IndicNotFound;
++        int m_IndicHighlight;
+         bool m_WasCleared;
+         std::set<wxString> m_KeywordSet;
+         std::map<wxString, FConstruct::FConstructType> m_FConstructTypeMap;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.cpp	(revision 313)
+@@ -51,6 +51,22 @@
+     control->Clear();
+     for (size_t i = 0; i < m_OldPathsInclude.GetCount(); ++i)
+         control->Append(m_OldPathsInclude[i]);
++
++    m_OldCPPMacros = wxEmptyString;
++    if (m_pProject)
++    {
++        const std::vector<wxString>* strMacrosVec = m_pNativeParser->GetProjectCPPMacros(m_pProject->GetFilename());
++        if (strMacrosVec)
++        {
++            for (const auto& m : *strMacrosVec)
++            {
++                m_OldCPPMacros << (m + "; ");
++            }
++        }
++    }
++
++    wxTextCtrl* txtMacros = XRCCTRL(*this, "txtCPPMacros", wxTextCtrl);
++    txtMacros->SetValue(m_OldCPPMacros);
+ }
+ 
+ FPOptionsProjectDlg::~FPOptionsProjectDlg()
+@@ -206,6 +222,7 @@
+         m_pNativeParser->ForceReparseProjectSearchDirs();
+     }
+ 
++    bool forceReparseWorkspace = false;
+     wxArrayString newpathsInclude;
+     control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
+     for (int i = 0; i < (int)control->GetCount(); ++i)
+@@ -215,6 +232,29 @@
+     {
+         m_pNativeParser->SetProjectIncludeDirs(m_pProject, newpathsInclude);
+         m_pNativeParser->MakeAIncludeFileList();
++        forceReparseWorkspace = true;
++    }
++
++    wxTextCtrl* txtMacros = XRCCTRL(*this, "txtCPPMacros", wxTextCtrl);
++    wxStringTokenizer tokenizer(txtMacros->GetValue(), " ;\t\r\n", wxTOKEN_STRTOK);
++    std::set<wxString> macrosSet;
++    while ( tokenizer.HasMoreTokens() )
++    {
++        wxString token = tokenizer.GetNextToken();
++        macrosSet.insert(token);
++    }
++    wxString strMacros;
++    for (auto m : macrosSet)
++    {
++        strMacros << (m + "; ");
++    }
++
++    if (strMacros != m_OldCPPMacros)
++    {
++        m_pNativeParser->SetProjectCPPMacros(m_pProject, strMacros);
++        forceReparseWorkspace = true;
++    }
++
++    if (forceReparseWorkspace)
+         m_pNativeParser->ForceReparseWorkspace();
+-    }
+ }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	(revision 313)
+@@ -45,6 +45,7 @@
+     NativeParserF* m_pNativeParser;
+     wxArrayString m_OldPaths;
+     wxArrayString m_OldPathsInclude;
++    wxString      m_OldCPPMacros;
+ 
+     DECLARE_EVENT_TABLE()
+ };
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/keywordsparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/keywordsparserf.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/keywordsparserf.cpp	(revision 313)
+@@ -31,7 +31,7 @@
+         Manager::Get()->GetLogManager()->Log(_T("FortranProject plugin error: file ")+filename+_T(" was not found."));
+         return;
+     }
+-    m_Parser.Reparse(filename, filename, fsfFree);
++    m_Parser.Reparse(filename, filename, fsfFree, nullptr);
+ 
+     TokensArrayF* pTokensArr = m_Parser.GetTokens();
+     TokensArrayF* pTokens = &pTokensArr->Item(0)->m_Children;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 313)
+@@ -44,7 +44,15 @@
+ #include "bufferparserthread.h"
+ #include "adddirparserthread.h"
+ 
++#define DISABLED_LINE_STYLE wxSCI_MARK_BACKGROUND
++// C_MARKER_MARGIN is defined in cbeditor.cpp (not accessible here). Should it be used or a new can be defined?
++#define C_MARKER_MARGIN 1
++// Marker number can be between 8 and 24. 1-7 are used by C::B (see cbeditor.cpp)
++#define DISABLED_LINE_MARKER    10
++
++
+ static wxCriticalSection s_CurrentBufferCritSect;
++static wxCriticalSection s_ProjCPPMacrosSect;
+ 
+ 
+ int idWSPThreadEvent          = wxNewId();
+@@ -53,7 +61,7 @@
+ int idWorkspaceReparseTimer   = wxNewId();
+ int idASearchDirsReparseTimer = wxNewId();
+ BEGIN_EVENT_TABLE(NativeParserF, wxEvtHandler)
+-    EVT_COMMAND(idWSPThreadEvent, wxEVT_COMMAND_ENTER, NativeParserF::OnUpdateWorkspaceBrowser)
++    EVT_COMMAND(idWSPThreadEvent, wxEVT_COMMAND_ENTER, NativeParserF::OnWSParserThreadFinished)
+     EVT_COMMAND(idADirPThreadEvent, wxEVT_COMMAND_ENTER, NativeParserF::OnUpdateADirTokens)
+     EVT_COMMAND(idBPThreadEvent, wxEVT_COMMAND_ENTER, NativeParserF::OnUpdateCurrentFileTokens)
+     EVT_TIMER(idWorkspaceReparseTimer, NativeParserF::OnReparseWorkspaceTimer)
+@@ -201,7 +209,8 @@
+     FortranSourceForm fsForm;
+     if (IsFileFortran(filename, fsForm))
+     {
+-        m_Parser.Reparse(projectFilename, filename, fsForm);
++        const std::vector<wxString>* pCppMacros = GetProjectCPPMacros(projectFilename);
++        m_Parser.Reparse(projectFilename, filename, fsForm, pCppMacros);
+     }
+ }
+ 
+@@ -231,7 +240,8 @@
+     }
+     if (!files.IsEmpty())
+     {
+-        m_Parser.BatchParse(prFilenameArr, files, fileForms);
++        const std::vector<wxString>* pCppMacros = GetProjectCPPMacros(prFName);
++        m_Parser.BatchParse(prFilenameArr, files, fileForms, pCppMacros);
+     }
+ }
+ 
+@@ -240,8 +250,18 @@
+     bool wasReparsed = false;
+     FortranSourceForm fsForm;
+     if (IsFileFortran(filename, fsForm))
+-        wasReparsed = m_Parser.Reparse(projectFilename, filename, fsForm);
++    {
++        const std::vector<wxString>* pCppMacros = GetProjectCPPMacros(projectFilename);
++        wasReparsed = m_Parser.Reparse(projectFilename, filename, fsForm, pCppMacros);
+ 
++        if (m_CppShadow)
++        {
++            // Mark (shadow) skipped lines.
++            cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
++            if(editor)
++                MarkDisabledLines(editor);
++        }
++    }
+     return wasReparsed;
+ }
+ 
+@@ -476,10 +496,17 @@
+     return wxEmptyString;
+ }
+ 
+-void NativeParserF::OnUpdateWorkspaceBrowser(wxCommandEvent& /*event*/)
++void NativeParserF::OnWSParserThreadFinished(wxCommandEvent& /*event*/)
+ {
+     m_Parser.ConnectToNewTokens();
+     UpdateWorkspaceBrowser();
++
++    // Mark skipped lines.
++    m_Parser.ConnectToNewSkippedLines();
++    cbEditor* editor = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
++    if(!editor)
++        return;
++    MarkDisabledLines(editor);
+ }
+ 
+ void NativeParserF::OnUpdateADirTokens(wxCommandEvent& /*event*/)
+@@ -520,6 +547,46 @@
+     }
+ }
+ 
++void NativeParserF::MarkDisabledLines(cbEditor* editor)
++{
++    if (!m_CppShadow)
++        return;
++
++    if (!editor)
++        return;
++
++    cbStyledTextCtrl* control = editor->GetControl();
++    if (!control)
++        return;
++
++    // C_MARKER_MARGIN
++    control->SetMarginMask(C_MARKER_MARGIN,
++                           control->GetMarginMask(1) | (1 << DISABLED_LINE_MARKER) );
++    control->MarkerDefine(DISABLED_LINE_MARKER, DISABLED_LINE_STYLE);
++
++    std::vector<int>* skippedLines = m_Parser.GetSkippedLines(editor->GetFilename());
++    if (!skippedLines || skippedLines->empty())
++    {
++        control->MarkerDeleteAll(DISABLED_LINE_MARKER);
++        return;
++    }
++
++    control->MarkerDeleteAll(DISABLED_LINE_MARKER);
++    control->MarkerSetBackground(DISABLED_LINE_MARKER, m_CppShadowColour);
++    //control->MarkerSetForeground(DISABLED_LINE_MARKER, wxColour(214, 69, 49)); -it makes no difference.
++    control->MarkerSetAlpha(DISABLED_LINE_MARKER, m_CppShadowOpacity);
++
++    int edLineCount = control->GetLineCount();
++    int skipCount = skippedLines->size();
++    for (int i=0; i<skipCount; ++i)
++    {
++        if ((*skippedLines)[i] > edLineCount)
++            break;
++
++        control->MarkerAdd((*skippedLines)[i], DISABLED_LINE_MARKER);
++    }
++}
++
+ void NativeParserF::UpdateWorkspaceFilesDependency()
+ {
+     ClearWSDependency();
+@@ -1299,10 +1366,13 @@
+     projFilename = m_CurrentEditorProjectFN;
+ }
+ 
+-void NativeParserF::SetInterpretCPP(bool interpretCPP)
++void NativeParserF::SetInterpretCPP(bool interpretCPP, bool cppShadow, const wxColour& cppShadowColour, int cppShadowOpacity)
+ {
+     m_InterpretCPP = interpretCPP;
+     m_Parser.SetInterpretCPP(interpretCPP);
++    m_CppShadow = cppShadow;
++    m_CppShadowColour = cppShadowColour;
++    m_CppShadowOpacity = cppShadowOpacity;
+ }
+ 
+ bool NativeParserF::DoInterpretCPP()
+@@ -1397,7 +1467,46 @@
+     m_AIncludeDirs.erase(project->GetFilename());
+ }
+ 
++const std::vector<wxString>* NativeParserF::GetProjectCPPMacros(const wxString& projFilename)
++{
++    if (m_CPPMacros.count(projFilename) == 0)
++        return NULL; // No macros for this project.
+ 
++    return &m_CPPMacros[projFilename];
++}
++
++std::vector<wxString>* NativeParserF::GetProjectCPPMacrosCopy(const wxString& projFilename)
++{
++    wxCriticalSectionLocker locker(s_ProjCPPMacrosSect);
++    if (m_CPPMacros.count(projFilename) == 0)
++        return NULL; // No macros for this project.
++
++    std::vector<wxString>* strMacrosVec = new std::vector<wxString>();
++    *strMacrosVec = m_CPPMacros[projFilename];
++
++    return strMacrosVec;
++}
++
++void NativeParserF::SetProjectCPPMacros(cbProject* project, const wxString& strMacros)
++{
++    if (!project)
++        return;
++
++    wxStringTokenizer tokenizer(strMacros, " ;\t\r\n", wxTOKEN_STRTOK);
++    std::set<wxString> macrosSet;
++    while ( tokenizer.HasMoreTokens() )
++    {
++        macrosSet.insert(tokenizer.GetNextToken());
++    }
++    std::vector<wxString> strMacrosVec;
++    for (auto m : macrosSet)
++    {
++        strMacrosVec.push_back(m);
++    }
++    wxCriticalSectionLocker locker(s_ProjCPPMacrosSect);
++    m_CPPMacros[project->GetFilename()] = strMacrosVec;
++}
++
+ bool NativeParserF::HasFortranFiles(cbProject* project)
+ {
+     if (!project)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 313)
+@@ -77,7 +77,7 @@
+         std::map<wxString,wxString>* GetAdditionalIncludeFiles();
+         wxString FindIncludeFile(const wxString& checkDir,  const wxString& filename);
+         void GetCurrentBuffer(wxString& buffer, wxString& filename, wxString& projFilename);
+-        void SetInterpretCPP(bool interpretCPP);
++        void SetInterpretCPP(bool interpretCPP, bool cppShadow, const wxColour& cppShadowColour, int cppShadowOpacity);
+         bool DoInterpretCPP();
+         void ReparseCurrentEditor();
+         wxArrayString GetProjectSearchDirs(cbProject* project);
+@@ -86,6 +86,9 @@
+         void MakeAIncludeFileList();
+         wxArrayString GetProjectIncludeDirs(cbProject* project);
+         void DelProjectIncludeDirs(cbProject* project);
++        const std::vector<wxString>* GetProjectCPPMacros(const wxString& projFilename);
++        std::vector<wxString>* GetProjectCPPMacrosCopy(const wxString& projFilename);
++        void SetProjectCPPMacros(cbProject* project, const wxString& strMacros);
+         bool HasFortranFiles(cbProject* project);
+         void DelProjectSearchDirs(cbProject* project);
+         void ForceReparseProjectSearchDirs();
+@@ -97,6 +100,7 @@
+ 
+         void OnEditorActivated(EditorBase* editor);
+         void OnEditorClose(EditorBase* editor);
++        void MarkDisabledLines(cbEditor* editor);
+         void OnProjectActivated(cbProject* project);
+         void UpdateWorkspaceFilesDependency();
+         void UpdateWSFilesDependency();
+@@ -110,7 +114,7 @@
+         void MakeWSFileList();
+         void MakeADirFileList();
+ 
+-        void OnUpdateWorkspaceBrowser(wxCommandEvent& event);
++        void OnWSParserThreadFinished(wxCommandEvent& event);
+         void OnUpdateADirTokens(wxCommandEvent& event);
+         void OnUpdateCurrentFileTokens(wxCommandEvent& event);
+ 
+@@ -146,6 +150,10 @@
+         std::map<wxString,wxArrayString> m_AIncludeDirs; ///< dirs with additional include files for each project
+         std::map<wxString,wxString> m_AIncludeFiles;     ///< additional include files
+         bool m_InterpretCPP;
++        bool m_CppShadow;
++        wxColour m_CppShadowColour;
++        int m_CppShadowOpacity;
++        std::map<wxString,std::vector<wxString>> m_CPPMacros;     ///< project_name->macros
+ 
+         DECLARE_EVENT_TABLE();
+ };
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 313)
+@@ -89,29 +89,51 @@
+         delete m_pBufferTokens;
+     if (m_pCurrentBufferTokensNew)
+         delete m_pCurrentBufferTokensNew;
++
++    for (auto const& mPair : m_SkippedLinesMap)
++    {
++        delete mPair.second;
++    }
++
++    for (auto const& mPair : m_NewSkippedLinesMap)
++    {
++        delete mPair.second;
++    }
+ }
+ 
+-bool ParserF::Parse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm)
++bool ParserF::Parse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm,
++                    const std::vector<wxString>* pCppMacros)
+ {
+     wxCriticalSectionLocker locker(s_CritSect);
+     wxString fn = UnixFilename(filename);
+-    ParserThreadF* thread = new ParserThreadF(projectFilename, fn, m_pTokens, fsForm, false, m_pIncludeDB, m_InterpretCPP, m_pAIncludeFiles);
++    ParserThreadF* thread = new ParserThreadF(projectFilename, fn, m_pTokens, fsForm, false, m_pIncludeDB,
++                                              m_InterpretCPP, m_pAIncludeFiles, pCppMacros);
+     bool res = thread->Parse();
++
++    std::vector<wxString> parsedFileNames = thread->GetParsedFileNames();
++    for (const auto& fileName: parsedFileNames)
++    {
++        TokenizerPP::SkippedLinesStruct* skipStruct = thread->GetSkippedLines(fileName);
++        if (skipStruct)
++            SetSkippedLines(fileName, skipStruct->lineStarts, skipStruct->lineEnds);
++    }
++
+     delete thread;
+-
+     return res;
+ }
+ 
+-bool ParserF::Reparse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm)
++bool ParserF::Reparse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm,
++                      const std::vector<wxString>* pCppMacros)
+ {
+     m_Done = false;
+     RemoveFile(filename);
+-    bool res = Parse(projectFilename, filename, fsForm);
++    bool res = Parse(projectFilename, filename, fsForm, pCppMacros);
+     m_Done = true;
+     return res;
+ }
+ 
+-bool ParserF::BatchParse(const wxArrayString& projectFilenames, const wxArrayString& filenames, ArrayOfFortranSourceForm& fileForms)
++bool ParserF::BatchParse(const wxArrayString& projectFilenames, const wxArrayString& filenames, ArrayOfFortranSourceForm& fileForms,
++                         const std::vector<wxString>* pCppMacros)
+ {
+     m_Done = false;
+     bool res = true;
+@@ -119,7 +141,7 @@
+         return false;
+     for (size_t i=0; i<filenames.size(); i++)
+     {
+-        if(!Parse(projectFilenames[i], filenames[i], fileForms[i]))
++        if(!Parse(projectFilenames[i], filenames[i], fileForms[i], pCppMacros))
+         {
+             res = false;
+             //break;
+@@ -4525,5 +4547,63 @@
+     m_InterpretCPP = interpretCPP;
+ }
+ 
++void ParserF::SetSkippedLines(const wxString& fileName, std::vector<int>& skipLineStart, std::vector<int>& skipLineEnd)
++{
++    FillSkippedLines(m_SkippedLinesMap, fileName, skipLineStart, skipLineEnd);
++}
+ 
++void ParserF::SetNewSkippedLines(const wxString& fileName, std::vector<int>& skipLineStart, std::vector<int>& skipLineEnd)
++{
++    FillSkippedLines(m_NewSkippedLinesMap, fileName, skipLineStart, skipLineEnd);
++}
+ 
++void ParserF::FillSkippedLines(std::map<wxString,std::vector<int>*>& fileLineMap, const wxString& fileName,
++                                 std::vector<int>& skipLineStart, std::vector<int>& skipLineEnd)
++{
++    if (fileLineMap.count(fileName) > 0)
++    {
++        std::vector<int> *oldSkippedLines = fileLineMap[fileName];
++        delete oldSkippedLines;
++        fileLineMap[fileName] = NULL;
++    }
++    if (skipLineStart.empty() || skipLineEnd.empty())
++        return;
++
++    size_t nSkip = skipLineStart.size();
++    if (nSkip != skipLineEnd.size())
++        return; // It should not happen.
++
++    std::vector<int> *skippedLines = new std::vector<int>();
++    for (size_t i=0; i<nSkip; ++i)
++    {
++        int jEnd = skipLineEnd[i];
++        for (int j=skipLineStart[i]; j<=jEnd; ++j)
++        {
++            skippedLines->push_back(j);
++        }
++    }
++    fileLineMap[fileName] = skippedLines;
++}
++
++void ParserF::ConnectToNewSkippedLines()
++{
++    wxMutexLocker mlocker(s_NewSkippedLinesMutex);
++    for (auto const& mPair : m_SkippedLinesMap)
++    {
++        delete mPair.second;
++    }
++    m_SkippedLinesMap.clear();
++    for (auto const& mPair : m_NewSkippedLinesMap)
++    {
++        m_SkippedLinesMap[mPair.first] = mPair.second;
++    }
++    m_NewSkippedLinesMap.clear();
++}
++
++std::vector<int>* ParserF::GetSkippedLines(const wxString& fileName)
++{
++    if (fileName.IsEmpty() || m_SkippedLinesMap.count(fileName) == 0)
++        return NULL;
++
++    return m_SkippedLinesMap[fileName];
++}
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 313)
+@@ -34,9 +34,10 @@
+     public:
+         ParserF(bool withIntrinsicModules=true);
+         ~ParserF();
+-        bool Parse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm);
+-        bool Reparse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm);
+-        bool BatchParse(const wxArrayString& projectFilenames, const wxArrayString& filenames, ArrayOfFortranSourceForm& fileForms);
++        bool Parse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm, const std::vector<wxString>* pCppMacros);
++        bool Reparse(const wxString& projectFilename, const wxString& filename, FortranSourceForm fsForm, const std::vector<wxString>* pCppMacros);
++        bool BatchParse(const wxArrayString& projectFilenames, const wxArrayString& filenames, ArrayOfFortranSourceForm& fileForms,
++                        const std::vector<wxString>* pCppMacros);
+         bool RemoveFile(const wxString& filename);
+         void RemoveBuffer(const wxString& filename);
+         TokensArrayF* GetTokens(){return m_pTokens;};
+@@ -109,6 +110,9 @@
+         void ChangeAddressWithInclude(TokensArrayFlat& tokArr);
+         void BuildCalledByDict(CalledByDict& cByDict);
+         void SetInterpretCPP(bool interpretCPP);
++        std::vector<int>* GetSkippedLines(const wxString& fileName);
++        void SetNewSkippedLines(const wxString& fileName, std::vector<int>& skipLineStart, std::vector<int>& skipLineEnd);
++        void ConnectToNewSkippedLines();
+ 
+     protected:
+     private:
+@@ -150,6 +154,9 @@
+         void FindSubmodulesWhichExtends(const wxString& moduleName, TokensArrayF* result);
+         void FindMatchTokensAtInclude(cbEditor* ed, const wxString& findName, bool onlyPublicNames, bool partialMach, TokensArrayFlat& result);
+         void GetChildrenAssociateConstruct(TokenF* token, int tokenKindMask, TokensArrayFlat& result);
++        void SetSkippedLines(const wxString& fileName, std::vector<int>& skipLineStart, std::vector<int>& skipLineEnd);
++        void FillSkippedLines(std::map<wxString,std::vector<int>*>& fileLineMap, const wxString& fileName,
++                                 std::vector<int>& skipLineStart, std::vector<int>& skipLineEnd);
+ 
+         TokensArrayF* m_pTokens;
+         TokensArrayF* m_pIntrinsicModuleTokens;
+@@ -189,7 +196,9 @@
+         TokensArrayF* m_pBufferTokens;
+         TokensArrayF* m_pCurrentBufferTokensNew;
+ 
+-        std::map<wxString,wxString>* m_pAIncludeFiles;     ///< additional include files
++        std::map<wxString,wxString>* m_pAIncludeFiles;     ///< Additional include files.
++        std::map<wxString,std::vector<int>*> m_SkippedLinesMap;  ///< Skipped line indexes in the parsed files.
++        std::map<wxString,std::vector<int>*> m_NewSkippedLinesMap;  ///< New skipped line indexes in the parsed files from separate thread.
+ };
+ 
+ #endif // PARSERF_H
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 313)
+@@ -32,7 +32,8 @@
+                              bool isBuffer=false,
+                              IncludeDB* includeDB=NULL,
+                              bool interpretCPP=true,
+-                             std::map<wxString,wxString>* aIncludeFiles=NULL);
++                             std::map<wxString,wxString>* aIncludeFiles=NULL,
++                             const std::vector<wxString>* projPPDefineTokens=NULL);
+         ParserThreadF(const wxString& projectFilename,
+                              const wxString& filename,
+                              TokensArrayF* tokens,
+@@ -40,6 +41,7 @@
+                              IncludeDB* includeDB,
+                              bool interpretCPP,
+                              std::map<wxString,wxString>* aIncludeFiles,
++                             const std::vector<wxString>* projPPDefineTokens,
+                              const wxString& buffer);
+         virtual ~ParserThreadF();
+         bool Parse();
+@@ -46,6 +48,9 @@
+         void ParseDeclarations(bool breakAtEnd=false, bool breakAtContains=false);
+         static void SplitAssociateConstruct(const wxString& argLine, std::map<wxString,wxString>& assocMap);
+         wxString GetAdditionalIncludeFile(wxString filename);
++        std::vector<wxString> GetParsedFileNames();
++        TokenizerPP::SkippedLinesStruct* GetSkippedLines(const wxString& fileName);
++        bool HasProjPPDefineTokens(const wxString& token);
+     protected:
+     private:
+         TokenF* DoAddToken(TokenKindF kind, const wxString& name, const wxString& args=wxEmptyString, const wxString& typeDefinition=wxEmptyString);
+@@ -123,6 +128,7 @@
+         void GetWordBefore(const wxString& str, int idxEnd, wxString& funName, int& idxStart);
+ 
+         std::set<wxString> m_KnownEndSecPart;
++        std::vector<wxString> m_ProjPPDefineTokens; // In project properties defined CPP directives.
+ };
+ 
+ #endif // PARSERTHREADF_H
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/project_settings_fortran.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/project_settings_fortran.xrc	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/project_settings_fortran.xrc	(revision 313)
+@@ -93,6 +93,22 @@
+ 				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+ 				<border>8</border>
+ 			</object>
++			<object class="sizeritem">
++				<object class="wxStaticText" name="ID_STATICTEXT3">
++					<label>Preprocessor macros to be used by the parser (macro1; macro2; ...):</label>
++				</object>
++				<flag>wxALL|wxALIGN_LEFT</flag>
++				<border>8</border>
++			</object>
++			<object class="sizeritem">
++				<object class="wxTextCtrl" name="txtCPPMacros">
++					<value>Text</value>
++					<style>wxTE_MULTILINE</style>
++				</object>
++				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
++				<border>8</border>
++				<option>1</option>
++			</object>
+ 		</object>
+ 	</object>
+ </resource>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp	(revision 313)
+@@ -13,6 +13,7 @@
+ 
+ wxMutex s_WorkspaceParserMutex;
+ wxMutex s_NewTokensMutex;
++wxMutex s_NewSkippedLinesMutex;
+ 
+ WorkspaceParserThread::WorkspaceParserThread(NativeParserF* parent, int idWSPThreadEvent) :
+     m_pNativeParser(parent),
+@@ -45,17 +46,33 @@
+     ArrayOfFortranSourceForm* pWSFileForms = m_pNativeParser->GetWSFileForms();
+     wxArrayString* pWSProjFilenames = m_pNativeParser->GetWSFileProjFilenames();
+     bool interpretCPP = m_pNativeParser->DoInterpretCPP();
++    ParserF* pParser = m_pNativeParser->GetParser();
+ 
+     for (size_t i=0; i<pWSFiles->size(); i++)
+     {
++        const std::vector<wxString>* aCPPMacros = m_pNativeParser->GetProjectCPPMacros(pWSProjFilenames->Item(i));
+         ParserThreadF* thread = new ParserThreadF(pWSProjFilenames->Item(i), UnixFilename(pWSFiles->Item(i)), pTokens,
+-                                                  pWSFileForms->at(i), false, pIncludeDB, interpretCPP, aIncludeFiles);
++                                                  pWSFileForms->at(i), false, pIncludeDB, interpretCPP, aIncludeFiles, aCPPMacros);
+         thread->Parse();
++
++        // Take skipped lines in the parsed files.
++        std::vector<wxString> parsedFileNames = thread->GetParsedFileNames();
++        s_NewSkippedLinesMutex.Lock();
++        for (const auto& fileName: parsedFileNames)
++        {
++            TokenizerPP::SkippedLinesStruct* skipStruct = thread->GetSkippedLines(fileName);
++            if (skipStruct)
++            {
++                pParser->SetNewSkippedLines(fileName, skipStruct->lineStarts, skipStruct->lineEnds);
++            }
++        }
++        s_NewSkippedLinesMutex.Unlock();
++
+         delete thread;
+     }
+     s_NewTokensMutex.Lock();
+-    m_pNativeParser->GetParser()->SetNewTokens(pTokens);
+-    m_pNativeParser->GetParser()->SetNewIncludeDB(pIncludeDB);
++    pParser->SetNewTokens(pTokens);
++    pParser->SetNewIncludeDB(pIncludeDB);
+     s_NewTokensMutex.Unlock();
+ 
+     wxCommandEvent event( wxEVT_COMMAND_ENTER, m_idWSPThreadEvent );
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.h	(revision 313)
+@@ -11,6 +11,7 @@
+ 
+ extern wxMutex s_WorkspaceParserMutex;
+ extern wxMutex s_NewTokensMutex;
++extern wxMutex s_NewSkippedLinesMutex;
+ 
+ class NativeParserF;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 313)
+@@ -405,6 +405,7 @@
+             cbStyledTextCtrl* control = editor->GetControl();
+             m_ConstrHighlighter.ClearHighlighting(control, true);
+             m_ConstrHighlighter.DoWork(editor, fsForm);
++            m_pNativeParser->MarkDisabledLines(editor);
+         }
+     }
+ 
+@@ -1964,6 +1965,14 @@
+             {
+                 adirsInclude.Add(cbC2U(e->Attribute("dir")));
+             }
++
++            // Read defined CPP macros
++            TiXmlElement* macrosElem = node->FirstChildElement("cpp_macros");
++            if (macrosElem)
++            {
++                wxString strMacros = cbC2U(macrosElem->Attribute("names"));
++                m_pNativeParser->SetProjectCPPMacros(prj, strMacros);
++            }
+         }
+         m_pNativeParser->SetProjectSearchDirs(prj, adirs);
+         m_pNativeParser->SetProjectIncludeDirs(prj, adirsInclude);
+@@ -1990,6 +1999,19 @@
+             TiXmlElement* e = node->InsertEndChild(TiXmlElement("additional_include_dir"))->ToElement();
+             e->SetAttribute("dir", cbU2C(adirsInclude.Item(i)));
+         }
++
++        // Save defined CPP macros
++        const std::vector<wxString>* strMacrosVec = m_pNativeParser->GetProjectCPPMacros(prj->GetFilename());
++        wxString strMacros;
++        if (strMacrosVec && strMacrosVec->size() > 0)
++        {
++            for (const auto& m : *strMacrosVec)
++            {
++                strMacros << (m + "; ");
++            }
++            TiXmlElement* e = node->InsertEndChild(TiXmlElement("cpp_macros"))->ToElement();
++            e->SetAttribute("names", cbU2C(strMacros));
++        }
+     }
+ }
+ 
+@@ -2045,8 +2067,14 @@
+ 
+     m_ConstrHighlighter.ReadOptions();
+     bool interpretCPP = cfg->ReadBool(_T("/interpret_cpreproc"), true);
++    bool cppShadow = cfg->ReadBool(_T("/make_cpp_shadow"), true);
++    wxColour cppShadowColour = cfg->ReadColour(_T("/cpp_shadow_colour"),wxColour(240, 240, 240));
++    int cppShadowOpacity = cfg->ReadInt(_T("/cpp_shadow_opacity"), 45);
++    cppShadowOpacity = int(cppShadowOpacity * 2.55); // Convert from range 0-100 to range 0-255.
++    cppShadowOpacity = cppShadowOpacity>255 ? 255 : cppShadowOpacity; // Limit value to 10-255
++    cppShadowOpacity = cppShadowOpacity<10 ? 10 : cppShadowOpacity;
+     if (m_pNativeParser)
+-        m_pNativeParser->SetInterpretCPP(interpretCPP);
++        m_pNativeParser->SetInterpretCPP(interpretCPP, cppShadow, cppShadowColour, cppShadowOpacity);
+ }
+ 
+ void FortranProject::WriteToLog(const wxString& text)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 313)
+@@ -38,6 +38,7 @@
+     EVT_LISTBOX(XRCID("lbAIStatements"), FPOptionsDlg::OnAISelectionChanged)
+     EVT_BUTTON(XRCID("btCHFullColour"), FPOptionsDlg::OnChooseColour)
+     EVT_BUTTON(XRCID("btCHUnfinColour"), FPOptionsDlg::OnChooseColour)
++    EVT_BUTTON(XRCID("btCPPShadowColour"), FPOptionsDlg::OnChooseColour)
+ END_EVENT_TABLE()
+ 
+ FPOptionsDlg::FPOptionsDlg(wxWindow* parent, NativeParserF* np, FortranProject* fp)
+@@ -92,7 +93,20 @@
+ 
+     XRCCTRL(*this, "spnCallTreeDepthLimit", wxSpinCtrl)->SetValue(cfg->ReadInt(_T("/calltree_depthmax"), 5));
+ 
+-    XRCCTRL(*this, "chkInterpretCPP", wxCheckBox)->SetValue(cfg->ReadBool(_T("/interpret_cpreproc"), true));
++    bool interpretCPP = cfg->ReadBool(_T("/interpret_cpreproc"), true);
++    XRCCTRL(*this, "chkInterpretCPP", wxCheckBox)->SetValue(interpretCPP);
++    XRCCTRL(*this, "chkShadowInactiveCPP", wxCheckBox)->SetValue(cfg->ReadBool(_T("/make_cpp_shadow"), true));
++    wxButton* btCPPShadowColour = XRCCTRL(*this, "btCPPShadowColour", wxButton);
++    btCPPShadowColour->SetBackgroundColour(cfg->ReadColour(_T("/cpp_shadow_colour"),wxColour(240, 240, 240)));
++    XRCCTRL(*this, "spnCPPShadowOpacity", wxSpinCtrl)->SetValue(cfg->ReadInt(_T("/cpp_shadow_opacity"), 45));
++    if (!interpretCPP)
++    {
++        XRCCTRL(*this, "chkShadowInactiveCPP", wxCheckBox)->Enable(false);
++        XRCCTRL(*this, "stCPPShadowColour", wxStaticText)->Enable(false);
++        btCPPShadowColour->Enable(false);
++        XRCCTRL(*this, "stCPPShadowOpacity", wxStaticText)->Enable(false);
++        XRCCTRL(*this, "spnCPPShadowOpacity", wxSpinCtrl)->Enable(false);
++    }
+ 
+     XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->SetValue(cfg->ReadBool(_T("/use_log_window"), true));
+     XRCCTRL(*this, "chkComAbove", wxCheckBox)->SetValue(cfg->ReadBool(_T("/include_comments_above"), true));
+@@ -243,6 +257,13 @@
+     XRCCTRL(*this, "stCHFullColour", wxStaticText)->Enable(chkCH_en);
+     XRCCTRL(*this, "stCHUnfinColour", wxStaticText)->Enable(chkCH_en);
+ 
++    bool interpretCPP = XRCCTRL(*this, "chkInterpretCPP", wxCheckBox)->GetValue();
++    XRCCTRL(*this, "chkShadowInactiveCPP", wxCheckBox)->Enable(interpretCPP);
++    XRCCTRL(*this, "stCPPShadowColour", wxStaticText)->Enable(interpretCPP);
++    XRCCTRL(*this, "btCPPShadowColour", wxButton)->Enable(interpretCPP);
++    XRCCTRL(*this, "stCPPShadowOpacity", wxStaticText)->Enable(interpretCPP);
++    XRCCTRL(*this, "spnCPPShadowOpacity", wxSpinCtrl)->Enable(interpretCPP);
++
+     en = XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->GetValue();
+     XRCCTRL(*this, "chkComAbove", wxCheckBox)->Enable(en);
+     XRCCTRL(*this, "chkComBelow", wxCheckBox)->Enable(en);
+@@ -307,6 +328,9 @@
+     cfg->Write(_T("/calltree_depthmax"), (int)XRCCTRL(*this, "spnCallTreeDepthLimit", wxSpinCtrl)->GetValue());
+ 
+     cfg->Write(_T("/interpret_cpreproc"), (bool)XRCCTRL(*this, "chkInterpretCPP", wxCheckBox)->GetValue());
++    cfg->Write(_T("/make_cpp_shadow"), (bool)XRCCTRL(*this, "chkShadowInactiveCPP", wxCheckBox)->GetValue());
++    cfg->Write(_T("/cpp_shadow_colour"), XRCCTRL(*this, "btCPPShadowColour", wxButton)->GetBackgroundColour());
++    cfg->Write(_T("/cpp_shadow_opacity"), (int)XRCCTRL(*this, "spnCPPShadowOpacity", wxSpinCtrl)->GetValue());
+ 
+     cfg->Write(_T("/use_log_window"), (bool)XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->GetValue());
+     cfg->Write(_T("/include_comments_above"), (bool)XRCCTRL(*this, "chkComAbove", wxCheckBox)->GetValue());
+@@ -347,6 +371,5 @@
+     {
+         wxColour colour = dlg.GetColourData().GetColour();
+         sender->SetBackgroundColour(colour);
+-        //sender->SetLabel(wxEmptyString);
+     }
+ }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 313)
+@@ -22,7 +22,8 @@
+                              bool isBuffer,
+                              IncludeDB* includeDB,
+                              bool interpretCPP,
+-                             std::map<wxString,wxString>* aIncludeFiles)
++                             std::map<wxString,wxString>* aIncludeFiles,
++                             const std::vector<wxString>* projPPDefineTokens)
+     :
+     m_pTokens(tokens),
+     m_pLastParent(0L),
+@@ -55,6 +56,11 @@
+     }
+     m_Tokens.SetParent(this);
+     InitSecondEndPart();
++
++    if (projPPDefineTokens)
++    {
++        m_ProjPPDefineTokens = *projPPDefineTokens;
++    }
+ }
+ 
+ ParserThreadF::ParserThreadF(const wxString& projectFilename,
+@@ -64,6 +70,7 @@
+                              IncludeDB* includeDB,
+                              bool interpretCPP,
+                              std::map<wxString,wxString>* aIncludeFiles,
++                             const std::vector<wxString>* projPPDefineTokens,
+                              const wxString& buffer)
+     :
+     m_pTokens(tokens),
+@@ -89,6 +96,11 @@
+     m_pLastParent = DoAddFileToken(filename.AfterLast(sep), projectFilename);
+ 
+     InitSecondEndPart();
++
++    if (projPPDefineTokens)
++    {
++        m_ProjPPDefineTokens = *projPPDefineTokens;
++    }
+ }
+ 
+ ParserThreadF::~ParserThreadF()
+@@ -304,7 +316,6 @@
+ {
+     FileTokenF* newToken = new FileTokenF;
+     newToken->m_Name = filename.Lower();
+-
+     newToken->m_TokenKind = tkFile;
+     newToken->m_pParent = m_pLastParent;
+     newToken->m_Filename = m_Tokens.GetFilename();
+@@ -1875,15 +1886,30 @@
+     if (token.IsEmpty())
+         return; // something wrong
+ 
++    bool found = false;
+     for (size_t i=0; i<m_pPPDefineTokens->size(); ++i)
+     {
+-        if (m_pPPDefineTokens->Item(i)->m_DisplayName == token)
++        if (m_pPPDefineTokens->Item(i)->m_DisplayName.IsSameAs(token))
+         {
+             m_pPPDefineTokens->Item(i)->m_LineEnd = m_Tokens.GetLineNumber();
++            found = true;
+             break;
+         }
+     }
+     m_Tokens.SkipToEOL();
++
++    if (!found)
++    {
++        size_t nDef = m_ProjPPDefineTokens.size();
++        for (size_t i=0; i<nDef; ++i)
++        {
++            if (m_ProjPPDefineTokens[i].IsSameAs(token))
++            {
++                m_ProjPPDefineTokens[i] = _T("+++---"); // Just write something. It should work as erase.
++                break;
++            }
++        }
++    }
+ }
+ 
+ void ParserThreadF::HandlePPIfdef(wxString& ifToken)
+@@ -1965,6 +1991,19 @@
+     return false;
+ }
+ 
++bool ParserThreadF::HasProjPPDefineTokens(const wxString& token)
++{
++    size_t nDef = m_ProjPPDefineTokens.size();
++    for (size_t i=0; i<nDef; ++i)
++    {
++        if (m_ProjPPDefineTokens[i].IsSameAs(token))
++        {
++            return true;
++        }
++    }
++    return false;
++}
++
+ void ParserThreadF::SkipPPIfdef(wxString& tokenAtEnd)
+ {
+     // Skip to the next corresponding #elif, #else or #endif
+@@ -2884,7 +2923,6 @@
+     }
+ }
+ 
+-
+ void ParserThreadF::GetWordBefore(const wxString& str, int idxEnd, wxString& funName, int& idxStart)
+ {
+     funName = wxEmptyString;
+@@ -2923,7 +2961,6 @@
+     funName = str.Mid(idxStart, idxEnd-idxStart+1);
+ }
+ 
+-
+ wxString ParserThreadF::GetAdditionalIncludeFile(wxString filename)
+ {
+     wxFileName fname(filename);
+@@ -2941,3 +2978,14 @@
+ 
+     return wxEmptyString;
+ }
++
++std::vector<wxString> ParserThreadF::GetParsedFileNames()
++{
++    return m_Tokens.GetParsedFileNames();
++}
++
++TokenizerPP::SkippedLinesStruct* ParserThreadF::GetSkippedLines(const wxString& fileName)
++{
++    return m_Tokens.GetSkippedLines(fileName);
++}
++
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 313)
+@@ -18,7 +18,7 @@
+ 												<label>Enable Fortran code-completion</label>
+ 											</object>
+ 											<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+-											<border>8</border>
++											<border>5d</border>
+ 										</object>
+ 										<object class="sizeritem">
+ 											<object class="wxBoxSizer">
+@@ -28,7 +28,7 @@
+ 														<label>Use smart code-completion (makes CC list shorter)</label>
+ 													</object>
+ 													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxCheckBox" name="chkOnlyUseAssociated">
+@@ -35,7 +35,7 @@
+ 														<label>Follow use-assiciation and include-file path</label>
+ 													</object>
+ 													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxCheckBox" name="chkShowHiddenEntities">
+@@ -42,7 +42,7 @@
+ 														<label>Show private entities</label>
+ 													</object>
+ 													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxCheckBox" name="chkShowTypeVariables">
+@@ -49,7 +49,7 @@
+ 														<label>Show type of variables</label>
+ 													</object>
+ 													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxFlexGridSizer">
+@@ -61,6 +61,7 @@
+ 																<label>Maximum allowed code-completion matches:</label>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
++															<border>0d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxSpinCtrl" name="spnMaxMatches">
+@@ -69,10 +70,11 @@
+ 																<max>100000</max>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_TOP</flag>
++															<border>0d</border>
+ 														</object>
+ 													</object>
+ 													<flag>wxALL|wxALIGN_LEFT</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxStaticBoxSizer">
+@@ -82,7 +84,7 @@
+ 																<label>1</label>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_2">
+@@ -89,7 +91,7 @@
+ 																<label>2</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_3">
+@@ -96,7 +98,7 @@
+ 																<label>3</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_4">
+@@ -103,7 +105,7 @@
+ 																<label>4</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_5">
+@@ -110,7 +112,7 @@
+ 																<label>5</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_6">
+@@ -117,7 +119,7 @@
+ 																<label>6</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_7">
+@@ -124,7 +126,7 @@
+ 																<label>7</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_8">
+@@ -131,7 +133,7 @@
+ 																<label>8</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxCheckBox" name="chkKL_9">
+@@ -138,12 +140,11 @@
+ 																<label>9</label>
+ 															</object>
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>8</border>
++															<border>5d</border>
+ 														</object>
+ 													</object>
+-													<flag>wxALL|wxEXPAND</flag>
+-													<border>8</border>
+-													<option>1</option>
++													<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxRadioBox" name="rbCase">
+@@ -157,18 +158,17 @@
+ 														<default>-1</default>
+ 														<style>wxRA_SPECIFY_ROWS</style>
+ 													</object>
+-													<flag>wxALL|wxEXPAND</flag>
+-													<border>8</border>
+-													<option>1</option>
++													<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<border>4d</border>
+ 												</object>
+ 											</object>
+ 											<flag>wxLEFT|wxEXPAND</flag>
+-											<border>25</border>
++											<border>20d</border>
+ 											<option>1</option>
+ 										</object>
+ 									</object>
+ 									<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+-									<border>8</border>
++									<border>5d</border>
+ 								</object>
+ 								<object class="sizeritem">
+ 									<object class="wxBoxSizer">
+@@ -180,7 +180,7 @@
+ 														<label>Show call-tips for arrays</label>
+ 													</object>
+ 													<flag>wxALL|wxALIGN_LEFT</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxBoxSizer">
+@@ -190,6 +190,7 @@
+ 																<label>Highlight matching statement of construct</label>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_LEFT</flag>
++															<border>0d</border>
+ 														</object>
+ 														<object class="sizeritem">
+ 															<object class="wxFlexGridSizer">
+@@ -199,7 +200,7 @@
+ 																		<label>Colour of full construct</label>
+ 																	</object>
+ 																	<flag>wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+-																	<border>25</border>
++																	<border>20d</border>
+ 																	<option>1</option>
+ 																</object>
+ 																<object class="sizeritem">
+@@ -208,7 +209,7 @@
+ 																		<bg>wxSYS_COLOUR_ACTIVECAPTION</bg>
+ 																	</object>
+ 																	<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-																	<border>5</border>
++																	<border>4d</border>
+ 																	<option>1</option>
+ 																</object>
+ 																<object class="sizeritem">
+@@ -216,7 +217,7 @@
+ 																		<label>Colour of unfinished construct</label>
+ 																	</object>
+ 																	<flag>wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+-																	<border>25</border>
++																	<border>20d</border>
+ 																	<option>1</option>
+ 																</object>
+ 																<object class="sizeritem">
+@@ -225,16 +226,16 @@
+ 																		<bg>wxSYS_COLOUR_ACTIVECAPTION</bg>
+ 																	</object>
+ 																	<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-																	<border>5</border>
++																	<border>4d</border>
+ 																	<option>1</option>
+ 																</object>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_LEFT</flag>
+-															<border>5</border>
++															<border>4d</border>
+ 														</object>
+ 													</object>
+ 													<flag>wxALL|wxALIGN_LEFT</flag>
+-													<border>8</border>
++													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxBoxSizer">
+@@ -243,7 +244,7 @@
+ 																<label>Call tree depth limit:</label>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5</border>
++															<border>4d</border>
+ 															<option>1</option>
+ 														</object>
+ 														<object class="sizeritem">
+@@ -252,15 +253,15 @@
+ 																<min>1</min>
+ 															</object>
+ 															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5</border>
++															<border>4d</border>
+ 														</object>
+ 													</object>
+ 													<flag>wxALL|wxALIGN_LEFT</flag>
+-													<border>5</border>
++													<border>4d</border>
+ 												</object>
+ 											</object>
+ 											<flag>wxALIGN_TOP</flag>
+-											<border>5</border>
++											<border>4d</border>
+ 											<option>1</option>
+ 										</object>
+ 										<object class="sizeritem">
+@@ -270,17 +271,64 @@
+ 													<object class="wxCheckBox" name="chkInterpretCPP">
+ 														<label>Interpret preprocessor directives</label>
+ 													</object>
+-													<flag>wxALL|wxALIGN_LEFT</flag>
+-													<border>8</border>
++													<flag>wxTOP|wxRIGHT|wxALIGN_LEFT</flag>
++													<border>4d</border>
++												</object>
++												<object class="sizeritem">
++													<object class="wxCheckBox" name="chkShadowInactiveCPP">
++														<label>Shadow inactive code lines</label>
++													</object>
++													<flag>wxLEFT|wxALIGN_LEFT</flag>
++													<border>20d</border>
++												</object>
++												<object class="sizeritem">
++													<object class="wxFlexGridSizer">
++														<cols>2</cols>
++														<object class="sizeritem">
++															<object class="wxStaticText" name="stCPPShadowColour">
++																<label>Shadow colour</label>
++															</object>
++															<flag>wxLEFT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<border>1d</border>
++															<option>1</option>
++														</object>
++														<object class="sizeritem">
++															<object class="wxButton" name="btCPPShadowColour">
++																<label>...</label>
++															</object>
++															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<border>2d</border>
++														</object>
++														<object class="sizeritem">
++															<object class="wxStaticText" name="stCPPShadowOpacity">
++																<label>Opacity</label>
++															</object>
++															<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
++															<border>0d</border>
++															<option>1</option>
++														</object>
++														<object class="sizeritem">
++															<object class="wxSpinCtrl" name="spnCPPShadowOpacity">
++																<value>0</value>
++																<min>10</min>
++																<max>80</max>
++															</object>
++															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<border>2d</border>
++															<option>1</option>
++														</object>
++													</object>
++													<flag>wxLEFT|wxALIGN_LEFT</flag>
++													<border>20d</border>
+ 													<option>1</option>
+ 												</object>
+ 											</object>
+ 											<flag>wxLEFT|wxALIGN_TOP</flag>
+-											<border>5d</border>
++											<border>4d</border>
+ 										</object>
+ 									</object>
+ 									<flag>wxALIGN_LEFT</flag>
+-									<border>5</border>
++									<border>4d</border>
+ 									<option>1</option>
+ 								</object>
+ 							</object>
+@@ -548,7 +596,7 @@
+ 					</object>
+ 				</object>
+ 				<flag>wxLEFT|wxEXPAND</flag>
+-				<border>8</border>
++				<border>5d</border>
+ 				<option>1</option>
+ 			</object>
+ 		</object>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 313)
+@@ -18,6 +18,7 @@
+     m_PocketWasPeeked = false;
+     m_PeekedFromPocket = false;
+     m_PocketLineNumber = 0;
++    m_SkippedLinesMap[m_TokensFiles[0]->GetFilename()] = new SkippedLinesStruct;
+ }
+ 
+ TokenizerPP::~TokenizerPP()
+@@ -27,6 +28,12 @@
+     {
+         delete m_TokensFiles[i];
+     }
++
++    for (auto const& mPair : m_SkippedLinesMap)
++    {
++        if (mPair.second)
++            delete mPair.second;
++    }
+ }
+ 
+ void TokenizerPP::SetParent(ParserThreadF* parent)
+@@ -39,7 +46,11 @@
+     m_ActiveFileIdx = 0;
+     m_PocketSize = 0;
+     m_interpretPPDirectives = interpretPPDirectives;
+-    return m_TokensFiles[0]->Init(filename, sourceForm);
++    bool success = m_TokensFiles[0]->Init(filename, sourceForm);
++    if (success && m_SkippedLinesMap.count(m_TokensFiles[0]->GetFilename()) == 0)
++        m_SkippedLinesMap[m_TokensFiles[0]->GetFilename()] = new SkippedLinesStruct;
++
++    return success;
+ }
+ 
+ bool TokenizerPP::InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm, bool interpretPPDirectives)
+@@ -47,6 +58,9 @@
+     m_ActiveFileIdx = 0;
+     m_PocketSize = 0;
+     m_interpretPPDirectives = interpretPPDirectives;
++    if (m_SkippedLinesMap.count(wxEmptyString) == 0)
++        m_SkippedLinesMap[wxEmptyString] = new SkippedLinesStruct; // Add empty filename.
++                                                                   // It saves checking every time if filename exists in the map.
+     return m_TokensFiles[0]->InitFromBuffer(buffer, sourceForm);
+ }
+ 
+@@ -73,8 +87,20 @@
+     {
+         token = m_TokensFiles[m_ActiveFileIdx]->GetToken();
+ 
+-        if (m_interpretPPDirectives && token.GetChar(0) == '#')
++        if (token.IsEmpty())
+         {
++            // assume the end of file was reached
++            if (m_ActiveFileIdx > 0)
++            {
++                delete m_TokensFiles[m_ActiveFileIdx];
++                m_TokensFiles.pop_back();
++                m_ActiveFileIdx = m_TokensFiles.size() - 1;
++            }
++            else
++                return wxEmptyString; // no more tokens
++        }
++        else if (m_interpretPPDirectives && token.GetChar(0) == '#')
++        {
+             if (token.IsSameAs(_T("#define")))
+                 HandlePPDefine();
+             else if (token.IsSameAs(_T("#undefine")) || token.IsSameAs(_T("#undef")))
+@@ -90,18 +116,6 @@
+             else
+                 break;  // don't know what it is
+         }
+-        else if (token.IsEmpty())
+-        {
+-            // assume the end of file was reached
+-            if (m_ActiveFileIdx > 0)
+-            {
+-                delete m_TokensFiles[m_ActiveFileIdx];
+-                m_TokensFiles.pop_back();
+-                m_ActiveFileIdx = m_TokensFiles.size() - 1;
+-            }
+-            else
+-                return wxEmptyString; // no more tokens
+-        }
+         else
+             break;
+     }
+@@ -410,7 +424,7 @@
+         }
+ 
+ // TODO (darmar#1#): Implementation does not consider case "#ifdef a || b".
+-        bool hasDef = (m_DefineTokens.count(token) > 0);
++        bool hasDef = (m_DefineTokens.count(token) > 0) || HasProjectCPPDefine(token);
+ 
+         if ((ifToken.IsSameAs(_T("#ifdef")) && hasDef) || (ifToken.IsSameAs(_T("#ifndef")) && !hasDef))
+         {
+@@ -557,6 +571,7 @@
+ void TokenizerPP::SkipPPIfdef(wxString& tokenAtEnd)
+ {
+     // Skip to the next corresponding #elif, #else or #endif
++    int skipStart = m_TokensFiles[m_ActiveFileIdx]->GetLineNumber();
+     tokenAtEnd.clear();
+     int inIfdef = 0;
+     while (true)
+@@ -591,8 +606,28 @@
+         else
+             m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
+     }
++
++    int skipEnd = m_TokensFiles[m_ActiveFileIdx]->GetLineNumber() - 1; // Make line index start from 0.
++    if (!tokenAtEnd.IsEmpty())
++        skipEnd -= 1;
++
++    SkippedLinesStruct* pSkippedLines = m_SkippedLinesMap[m_TokensFiles[m_ActiveFileIdx]->GetFilename()];
++    if (pSkippedLines && skipStart <= skipEnd)
++    {
++        pSkippedLines->lineStarts.push_back(skipStart);
++        pSkippedLines->lineEnds.push_back(skipEnd);
++    }
+ }
+ 
++bool TokenizerPP::HasProjectCPPDefine(const wxString& name)
++{
++    if (m_pParent)
++    {
++        return m_pParent->HasProjPPDefineTokens(name);
++    }
++    return false;
++}
++
+ void TokenizerPP::HandleInclude()
+ {
+     wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
+@@ -637,10 +672,19 @@
+     }
+ 
+     // Activate parsing of the include file.
+-    // SourceForm of file take the same as of the current file.
++    // SourceForm of the include file take the same as of the current file.
+     Tokenizerf* pFileTokens = new Tokenizerf(fileName.GetFullPath(wxPATH_UNIX), m_TokensFiles[m_ActiveFileIdx]->GetSourceForm());
+     m_TokensFiles.push_back(pFileTokens);
+     m_ActiveFileIdx = m_TokensFiles.size() - 1;
++
++    // Create SkippedLinesStruct structure.
++    // The same file can be included several times in another file.
++    // It is preserved only last parsing.
++    if (m_SkippedLinesMap.count(m_TokensFiles[m_ActiveFileIdx]->GetFilename()) > 0)
++    {
++        delete m_SkippedLinesMap[m_TokensFiles[m_ActiveFileIdx]->GetFilename()];
++    }
++    m_SkippedLinesMap[m_TokensFiles[m_ActiveFileIdx]->GetFilename()] = new SkippedLinesStruct;
+ }
+ 
+ wxString TokenizerPP::GetTokenSameLine()
+@@ -887,3 +931,21 @@
+     }
+ }
+ 
++std::vector<wxString> TokenizerPP::GetParsedFileNames()
++{
++    std::vector<wxString> parsedFiles;
++    for (auto const& mPair : m_SkippedLinesMap)
++    {
++        parsedFiles.push_back(mPair.first);
++    }
++    return parsedFiles;
++}
++
++TokenizerPP::SkippedLinesStruct* TokenizerPP::GetSkippedLines(const wxString& fileName)
++{
++    if (m_SkippedLinesMap.count(fileName) > 0)
++        return m_SkippedLinesMap[fileName];
++
++    return NULL;
++}
++
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 312)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 313)
+@@ -61,7 +61,14 @@
+ 		void SetParent(ParserThreadF* parent);
+         void UngetToken() { return m_TokensFiles[m_ActiveFileIdx]->UngetToken(); }
+ 		bool SkipToEOL() { return m_TokensFiles[m_ActiveFileIdx]->SkipToEOL(); }
++		std::vector<wxString> GetParsedFileNames();
+ 
++        typedef struct {
++            std::vector<int> lineStarts;
++            std::vector<int> lineEnds;
++        } SkippedLinesStruct;
++		SkippedLinesStruct* GetSkippedLines(const wxString& fileName);
++
+     private:
+         bool HandlePPMacro(const wxString& token);
+         void HandlePPDefine();
+@@ -68,6 +75,7 @@
+         void HandlePPUndefine();
+         void HandlePPIfdef(const wxString& inToken, bool skipElif=true);
+         void SkipPPIfdef(wxString& tokenAtEnd);
++        bool HasProjectCPPDefine(const wxString& name);
+         void HandleInclude();
+         wxString InterpretDefinedFunction(const wxString& funName, const wxString& paramsIn);
+         wxString ChangeWithDefinedValue(const wxString& token);
+@@ -88,6 +96,8 @@
+         bool m_PocketWasPeeked;
+         bool m_PeekedFromPocket;
+         unsigned int m_PocketLineNumber;
++
++        std::map<wxString,SkippedLinesStruct*> m_SkippedLinesMap; // fileName to SkippedLinesStruct Map.
+ };
+ 
+ #endif // TOKENIZERPP_H

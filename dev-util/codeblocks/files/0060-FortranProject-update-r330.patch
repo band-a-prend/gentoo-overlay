@@ -1,0 +1,34 @@
+Index: calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 329)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 330)
+@@ -677,12 +677,14 @@
+                         parTok = pCTok;
+                     else if (pCTok->m_pParent->m_TokenKind == tkType)
+                         parTok = pCTok;
+-                    else if (pCTok->m_pParent->m_TokenKind == tkAssociateConstruct)
++                    else if (pCTok->m_pParent->m_TokenKind == tkAssociateConstruct ||
++                             pCTok->m_pParent->m_TokenKind == tkBlockConstruct)
+                     {
+                         parTok = pCTok->m_pParent;
+                         while (parTok)
+                         {
+-                            if (parTok->m_TokenKind == tkAssociateConstruct)
++                            if (parTok->m_TokenKind == tkAssociateConstruct ||
++                                parTok->m_TokenKind == tkBlockConstruct)
+                             {
+                                 parTok = parTok->m_pParent;
+                             }
+Index: parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 329)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 330)
+@@ -4493,7 +4493,7 @@
+         {
+             GetChildrenAssociateConstruct(pChildren->Item(i), tokenKindMask, result);
+         }
+-        if (level < levelMax)
++        if (level < levelMax || pChildren->Item(i)->m_TokenKind == tkBlockConstruct)
+             GetChildren(pChildren->Item(i), tokenKindMask, result, level+1, levelMax);
+     }
+ }

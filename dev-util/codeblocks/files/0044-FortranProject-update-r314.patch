@@ -1,0 +1,264 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h	(revision 313)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.h	(revision 314)
+@@ -149,7 +149,8 @@
+         int                                m_ActiveCalltipsNest;
+         int                                m_ActiveCalltipsPosition;
+         int                                m_CurrentLine;
+-        bool                               m_LexerKeywordsToInclude[9];
++        bool                               m_LexerKeywordsToInclude[4];
++        bool                               m_ReplaceAlwaysCC;
+         bool                               m_UseSmartCC;
+         size_t                             m_MaxMatch;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 313)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 314)
+@@ -50,6 +50,7 @@
+     wxXmlResource::Get()->LoadPanel(this, parent, _T("dlgFPSettings"));
+ 
+     XRCCTRL(*this, "chkEnableCC", wxCheckBox)->SetValue(cfg->ReadBool(_T("/use_code_completion"), true));
++    XRCCTRL(*this, "chkReplaceAlwaysCodeCompletion", wxCheckBox)->SetValue(cfg->ReadBool(_T("/use_replace_always_code_completion"), false));
+     XRCCTRL(*this, "chkSmartCodeCompletion", wxCheckBox)->SetValue(cfg->ReadBool(_T("/use_smart_code_completion"), true));
+     XRCCTRL(*this, "chkOnlyUseAssociated", wxCheckBox)->SetValue(cfg->ReadBool(_T("/only_use_associated"), true));
+     XRCCTRL(*this, "chkShowHiddenEntities", wxCheckBox)->SetValue(cfg->ReadBool(_T("/show_hidden_entities"), false));
+@@ -67,11 +68,6 @@
+     XRCCTRL(*this, "chkKL_2", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set2"), true));
+     XRCCTRL(*this, "chkKL_3", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set3"), false));
+     XRCCTRL(*this, "chkKL_4", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set4"), false));
+-    XRCCTRL(*this, "chkKL_5", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set5"), false));
+-    XRCCTRL(*this, "chkKL_6", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set6"), false));
+-    XRCCTRL(*this, "chkKL_7", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set7"), false));
+-    XRCCTRL(*this, "chkKL_8", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set8"), false));
+-    XRCCTRL(*this, "chkKL_9", wxCheckBox)->SetValue(cfg->ReadBool(_T("/lexer_keywords_set9"), false));
+ 
+     XRCCTRL(*this, "rbCase", wxRadioBox)->SetSelection(cfg->ReadInt(_T("/keywords_case"), 0));
+ 
+@@ -228,6 +224,7 @@
+ {
+     bool en = XRCCTRL(*this, "chkEnableCC", wxCheckBox)->GetValue();
+ 
++    XRCCTRL(*this, "chkReplaceAlwaysCodeCompletion", wxCheckBox)->Enable(en);
+     XRCCTRL(*this, "chkSmartCodeCompletion", wxCheckBox)->Enable(en);
+     XRCCTRL(*this, "chkOnlyUseAssociated", wxCheckBox)->Enable(en);
+     XRCCTRL(*this, "chkShowHiddenEntities", wxCheckBox)->Enable(en);
+@@ -238,11 +235,6 @@
+     XRCCTRL(*this, "chkKL_2", wxCheckBox)->Enable(en);
+     XRCCTRL(*this, "chkKL_3", wxCheckBox)->Enable(en);
+     XRCCTRL(*this, "chkKL_4", wxCheckBox)->Enable(en);
+-    XRCCTRL(*this, "chkKL_5", wxCheckBox)->Enable(en);
+-    XRCCTRL(*this, "chkKL_6", wxCheckBox)->Enable(en);
+-    XRCCTRL(*this, "chkKL_7", wxCheckBox)->Enable(en);
+-    XRCCTRL(*this, "chkKL_8", wxCheckBox)->Enable(en);
+-    XRCCTRL(*this, "chkKL_9", wxCheckBox)->Enable(en);
+ 
+     en = XRCCTRL(*this, "chkEnableSB", wxCheckBox)->GetValue();
+     XRCCTRL(*this, "chkFloatSB", wxCheckBox)->Enable(en);
+@@ -295,6 +287,7 @@
+     cfg->Write(_T("/use_code_completion"), (bool)XRCCTRL(*this, "chkEnableCC", wxCheckBox)->GetValue());
+ 
+     // set all other member options
++    cfg->Write(_T("/use_replace_always_code_completion"), (bool)XRCCTRL(*this, "chkReplaceAlwaysCodeCompletion", wxCheckBox)->GetValue());
+     cfg->Write(_T("/use_smart_code_completion"), (bool)XRCCTRL(*this, "chkSmartCodeCompletion", wxCheckBox)->GetValue());
+     cfg->Write(_T("/only_use_associated"), (bool)XRCCTRL(*this, "chkOnlyUseAssociated", wxCheckBox)->GetValue());
+     cfg->Write(_T("/show_hidden_entities"), (bool)XRCCTRL(*this, "chkShowHiddenEntities", wxCheckBox)->GetValue());
+@@ -312,11 +305,6 @@
+     cfg->Write(_T("/lexer_keywords_set2"), (bool)XRCCTRL(*this, "chkKL_2", wxCheckBox)->GetValue());
+     cfg->Write(_T("/lexer_keywords_set3"), (bool)XRCCTRL(*this, "chkKL_3", wxCheckBox)->GetValue());
+     cfg->Write(_T("/lexer_keywords_set4"), (bool)XRCCTRL(*this, "chkKL_4", wxCheckBox)->GetValue());
+-    cfg->Write(_T("/lexer_keywords_set5"), (bool)XRCCTRL(*this, "chkKL_5", wxCheckBox)->GetValue());
+-    cfg->Write(_T("/lexer_keywords_set6"), (bool)XRCCTRL(*this, "chkKL_6", wxCheckBox)->GetValue());
+-    cfg->Write(_T("/lexer_keywords_set7"), (bool)XRCCTRL(*this, "chkKL_7", wxCheckBox)->GetValue());
+-    cfg->Write(_T("/lexer_keywords_set8"), (bool)XRCCTRL(*this, "chkKL_8", wxCheckBox)->GetValue());
+-    cfg->Write(_T("/lexer_keywords_set9"), (bool)XRCCTRL(*this, "chkKL_9", wxCheckBox)->GetValue());
+ 
+     cfg->Write(_T("/keywords_case"), (int)XRCCTRL(*this, "rbCase", wxRadioBox)->GetSelection());
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 313)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 314)
+@@ -24,10 +24,18 @@
+ 											<object class="wxBoxSizer">
+ 												<orient>wxVERTICAL</orient>
+ 												<object class="sizeritem">
++													<object class="wxCheckBox" name="chkReplaceAlwaysCodeCompletion">
++														<label>Always replace word under caret</label>
++													</object>
++													<flag>wxLEFT|wxRIGHT|wxALIGN_LEFT</flag>
++													<border>4d</border>
++													<option>1</option>
++												</object>
++												<object class="sizeritem">
+ 													<object class="wxCheckBox" name="chkSmartCodeCompletion">
+ 														<label>Use smart code-completion (makes CC list shorter)</label>
+ 													</object>
+-													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
+ 													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+@@ -34,7 +42,7 @@
+ 													<object class="wxCheckBox" name="chkOnlyUseAssociated">
+ 														<label>Follow use-assiciation and include-file path</label>
+ 													</object>
+-													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
+ 													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+@@ -41,7 +49,7 @@
+ 													<object class="wxCheckBox" name="chkShowHiddenEntities">
+ 														<label>Show private entities</label>
+ 													</object>
+-													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
+ 													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+@@ -48,7 +56,7 @@
+ 													<object class="wxCheckBox" name="chkShowTypeVariables">
+ 														<label>Show type of variables</label>
+ 													</object>
+-													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
+ 													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+@@ -73,7 +81,7 @@
+ 															<border>0d</border>
+ 														</object>
+ 													</object>
+-													<flag>wxALL|wxALIGN_LEFT</flag>
++													<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_LEFT</flag>
+ 													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+@@ -107,43 +115,8 @@
+ 															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+ 															<border>5d</border>
+ 														</object>
+-														<object class="sizeritem">
+-															<object class="wxCheckBox" name="chkKL_5">
+-																<label>5</label>
+-															</object>
+-															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5d</border>
+-														</object>
+-														<object class="sizeritem">
+-															<object class="wxCheckBox" name="chkKL_6">
+-																<label>6</label>
+-															</object>
+-															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5d</border>
+-														</object>
+-														<object class="sizeritem">
+-															<object class="wxCheckBox" name="chkKL_7">
+-																<label>7</label>
+-															</object>
+-															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5d</border>
+-														</object>
+-														<object class="sizeritem">
+-															<object class="wxCheckBox" name="chkKL_8">
+-																<label>8</label>
+-															</object>
+-															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5d</border>
+-														</object>
+-														<object class="sizeritem">
+-															<object class="wxCheckBox" name="chkKL_9">
+-																<label>9</label>
+-															</object>
+-															<flag>wxRIGHT|wxALIGN_CENTER_VERTICAL</flag>
+-															<border>5d</border>
+-														</object>
+ 													</object>
+-													<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
++													<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
+ 													<border>4d</border>
+ 												</object>
+ 												<object class="sizeritem">
+@@ -230,7 +203,7 @@
+ 																	<option>1</option>
+ 																</object>
+ 															</object>
+-															<flag>wxALL|wxALIGN_LEFT</flag>
++															<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_LEFT</flag>
+ 															<border>4d</border>
+ 														</object>
+ 													</object>
+@@ -256,7 +229,7 @@
+ 															<border>4d</border>
+ 														</object>
+ 													</object>
+-													<flag>wxALL|wxALIGN_LEFT</flag>
++													<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_LEFT</flag>
+ 													<border>4d</border>
+ 												</object>
+ 											</object>
+@@ -296,7 +269,7 @@
+ 															<object class="wxButton" name="btCPPShadowColour">
+ 																<label>...</label>
+ 															</object>
+-															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+ 															<border>2d</border>
+ 														</object>
+ 														<object class="sizeritem">
+@@ -319,7 +292,7 @@
+ 														</object>
+ 													</object>
+ 													<flag>wxLEFT|wxALIGN_LEFT</flag>
+-													<border>20d</border>
++													<border>30d</border>
+ 													<option>1</option>
+ 												</object>
+ 											</object>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 313)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 314)
+@@ -960,8 +960,12 @@
+     int endPos = control->WordEndPosition(pos, true);
+     const wxString& textUnder = control->GetTextRange(start, endPos);
+     bool replaceWord = false;
+-    if (!textUnder.IsEmpty() && (start != pos || (pos != 0 && control->GetCharAt(pos-1) == _T('%'))))
++    if (m_ReplaceAlwaysCC)
+     {
++        replaceWord = true;
++    }
++    else if (!textUnder.IsEmpty() && (start != pos || (pos != 0 && control->GetCharAt(pos-1) == _T('%'))))
++    {
+         TokensArrayFlat* ts = m_TokensCCList.GetTokens();
+         for (size_t i=0; i < ts->size(); ++i)
+         {
+@@ -1351,7 +1355,7 @@
+             HighlightLanguage lang = theme->GetLanguageForFilename(_T(".")+wxFileName(ed->GetFilename()).GetExt());
+ 
+             int kwcase = cfg->ReadInt(_T("/keywords_case"), 0);
+-            for (int i = 0; i <= wxSCI_KEYWORDSET_MAX; ++i)
++            for (int i = 0; i <= 4; ++i)
+             {
+                 if (!m_LexerKeywordsToInclude[i])
+                     continue;
+@@ -2023,16 +2027,12 @@
+     m_LexerKeywordsToInclude[1] = cfg->ReadBool(_T("/lexer_keywords_set2"), true);
+     m_LexerKeywordsToInclude[2] = cfg->ReadBool(_T("/lexer_keywords_set3"), false);
+     m_LexerKeywordsToInclude[3] = cfg->ReadBool(_T("/lexer_keywords_set4"), false);
+-    m_LexerKeywordsToInclude[4] = cfg->ReadBool(_T("/lexer_keywords_set5"), false);
+-    m_LexerKeywordsToInclude[5] = cfg->ReadBool(_T("/lexer_keywords_set6"), false);
+-    m_LexerKeywordsToInclude[6] = cfg->ReadBool(_T("/lexer_keywords_set7"), false);
+-    m_LexerKeywordsToInclude[7] = cfg->ReadBool(_T("/lexer_keywords_set8"), false);
+-    m_LexerKeywordsToInclude[8] = cfg->ReadBool(_T("/lexer_keywords_set9"), false);
+ 
+     m_MaxMatch = cfg->ReadInt(_T("/max_matches"), 1000);
+     if (m_MaxMatch < 1)
+         m_MaxMatch = 1;
+ 
++    m_ReplaceAlwaysCC= cfg->ReadBool(_T("/use_replace_always_code_completion"), false);
+     m_UseSmartCC = cfg->ReadBool(_T("/use_smart_code_completion"), true);
+     m_LogOnlyUseAssoc = cfg->ReadBool(_T("/only_use_associated"), true);
+     m_LogOnlyPublicNames = !cfg->ReadBool(_T("/show_hidden_entities"), false);

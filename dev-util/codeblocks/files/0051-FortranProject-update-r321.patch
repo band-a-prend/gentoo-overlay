@@ -1,0 +1,55 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 320)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 321)
+@@ -477,11 +477,17 @@
+         }
+         else
+         {
+-            // Handle:  "PETSC_INT == 4"
++            // Handle:  if "PETSC_INT == 4"
++            //    or:   if PETSC_INT
+             wxArrayString conToks;
+             MakeSaparateTokens(condition, conToks);
+-            if (conToks.size() == 3)
++            if (conToks.size() == 1)
+             {
++                // if PETSC_INT. Definition of PETSC_INT was already checked and not found.
++                answer = false;
++            }
++            else if (conToks.size() == 3)
++            {
+                 for (size_t i=0; i<3; i+=2)
+                 {
+                     if (m_DefineTokens.count(conToks[i]) > 0)
+@@ -917,7 +923,7 @@
+     return m_TokensFiles[m_ActiveFileIdx]->GetLine(nl);
+ }
+ 
+-void TokenizerPP::MakeSaparateTokens(const wxString& line, wxArrayString tokenArr)
++void TokenizerPP::MakeSaparateTokens(const wxString& line, wxArrayString& tokenArr)
+ {
+     Tokenizerf tokens;
+     tokens.InitFromBuffer(line+_T(" "), fsfFree);
+@@ -927,7 +933,7 @@
+         if (token.IsEmpty())
+             break;
+ 
+-        tokenArr.Add(token.Lower());
++        tokenArr.Add(token);
+     }
+ }
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 320)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 321)
+@@ -83,7 +83,7 @@
+         wxString CheckSaveInPocket(const wxString& token);
+         void InterpretArrayString(const wxArrayString& tokenArrIn, wxArrayString& tokenArrOut,
+                                        wxArrayString* arrStrLinesIn, wxArrayString* arrStrLinesOut);
+-        void MakeSaparateTokens(const wxString& line, wxArrayString tokenArr);
++        void MakeSaparateTokens(const wxString& line, wxArrayString& tokenArr);
+ 
+         ParserThreadF* m_pParent;
+         bool m_interpretPPDirectives;

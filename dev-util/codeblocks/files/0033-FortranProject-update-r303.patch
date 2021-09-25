@@ -1,0 +1,564 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/adddirparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/adddirparserthread.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/adddirparserthread.cpp	(revision 303)
+@@ -37,11 +37,12 @@
+     IncludeDB* pIncludeDB = new IncludeDB();
+     wxArrayString* pADirFiles = m_pNativeParser->GetADirFiles();
+     ArrayOfFortranSourceForm* pADirFileForms = m_pNativeParser->GetADirFileForms();
++    bool interpretCPP = m_pNativeParser->DoInterpretCPP();
+ 
+     for (size_t i=0; i<pADirFiles->size(); i++)
+     {
+         ParserThreadF* thread = new ParserThreadF(_T("#%&ThisIsAdditionalFileSearchDirectory&%#"), UnixFilename(pADirFiles->Item(i)), pTokens,
+-                                                  pADirFileForms->at(i), false, pIncludeDB);
++                                                  pADirFileForms->at(i), false, pIncludeDB, interpretCPP);
+         thread->Parse();
+         delete thread;
+     }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 303)
+@@ -43,8 +43,9 @@
+     TokensArrayF* pTokens = new TokensArrayF();
+     IncludeDB* pIncludeDB = new IncludeDB();
+     std::map<wxString,wxString>* aIncludeFiles = m_pNativeParser->GetAdditionalIncludeFiles();
++    bool interpretCPP = m_pNativeParser->DoInterpretCPP();
+ 
+-    ParserThreadF thread(projFilename, UnixFilename(filename), pTokens, fsForm, pIncludeDB, aIncludeFiles, buffer);
++    ParserThreadF thread(projFilename, UnixFilename(filename), pTokens, fsForm, pIncludeDB, interpretCPP, aIncludeFiles, buffer);
+     thread.Parse();
+     delete pIncludeDB;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 303)
+@@ -2040,6 +2040,9 @@
+     }
+ 
+     m_ConstrHighlighter.ReadOptions();
++    bool interpretCPP = cfg->ReadBool(_T("/interpret_cpreproc"), true);
++    if (m_pNativeParser)
++        m_pNativeParser->SetInterpretCPP(interpretCPP);
+ }
+ 
+ void FortranProject::WriteToLog(const wxString& text)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsdlg.cpp	(revision 303)
+@@ -92,6 +92,8 @@
+ 
+     XRCCTRL(*this, "spnCallTreeDepthLimit", wxSpinCtrl)->SetValue(cfg->ReadInt(_T("/calltree_depthmax"), 5));
+ 
++    XRCCTRL(*this, "chkInterpretCPP", wxCheckBox)->SetValue(cfg->ReadBool(_T("/interpret_cpreproc"), true));
++
+     XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->SetValue(cfg->ReadBool(_T("/use_log_window"), true));
+     XRCCTRL(*this, "chkComAbove", wxCheckBox)->SetValue(cfg->ReadBool(_T("/include_comments_above"), true));
+     XRCCTRL(*this, "chkComBelow", wxCheckBox)->SetValue(cfg->ReadBool(_T("/include_comments_below"), true));
+@@ -304,6 +306,8 @@
+ 
+     cfg->Write(_T("/calltree_depthmax"), (int)XRCCTRL(*this, "spnCallTreeDepthLimit", wxSpinCtrl)->GetValue());
+ 
++    cfg->Write(_T("/interpret_cpreproc"), (bool)XRCCTRL(*this, "chkInterpretCPP", wxCheckBox)->GetValue());
++
+     cfg->Write(_T("/use_log_window"), (bool)XRCCTRL(*this, "chkFortranInfo", wxCheckBox)->GetValue());
+     cfg->Write(_T("/include_comments_above"), (bool)XRCCTRL(*this, "chkComAbove", wxCheckBox)->GetValue());
+     cfg->Write(_T("/include_comments_below"), (bool)XRCCTRL(*this, "chkComBelow", wxCheckBox)->GetValue());
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 303)
+@@ -447,8 +447,10 @@
+ wxString NativeParserF::FindIncludeFile(const wxString& checkDir,  const wxString& filename)
+ {
+     // Check if the include file is in checkDir folder.
++    wxFileName fpart(filename);
+     wxFileName fnameInclude(checkDir, wxEmptyString, wxPATH_UNIX);
+-    fnameInclude.SetFullName(filename);
++    fnameInclude.AppendDir(fpart.GetPath());
++    fnameInclude.SetFullName(fpart.GetFullName());
+     if (wxFileExists(fnameInclude.GetFullPath()))
+     {
+         return fnameInclude.GetFullPath();
+@@ -1289,6 +1291,17 @@
+     projFilename = m_CurrentEditorProjectFN;
+ }
+ 
++void NativeParserF::SetInterpretCPP(bool interpretCPP)
++{
++    m_InterpretCPP = interpretCPP;
++    m_Parser.SetInterpretCPP(interpretCPP);
++}
++
++bool NativeParserF::DoInterpretCPP()
++{
++    return m_InterpretCPP;
++}
++
+ void NativeParserF::ReparseCurrentEditor()
+ {
+     cbEditor* ed = Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 303)
+@@ -77,6 +77,8 @@
+         std::map<wxString,wxString>* GetAdditionalIncludeFiles();
+         wxString FindIncludeFile(const wxString& checkDir,  const wxString& filename);
+         void GetCurrentBuffer(wxString& buffer, wxString& filename, wxString& projFilename);
++        void SetInterpretCPP(bool interpretCPP);
++        bool DoInterpretCPP();
+         void ReparseCurrentEditor();
+         wxArrayString GetProjectSearchDirs(cbProject* project);
+         void SetProjectSearchDirs(cbProject* project, wxArrayString& searchDirs);
+@@ -143,6 +145,7 @@
+ 
+         std::map<wxString,wxArrayString> m_AIncludeDirs; ///< dirs with additional include files for each project
+         std::map<wxString,wxString> m_AIncludeFiles;     ///< additional include files
++        bool m_InterpretCPP;
+ 
+         DECLARE_EVENT_TABLE();
+ };
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 303)
+@@ -55,6 +55,7 @@
+     m_pBufferTokens = new TokensArrayF();
+     m_pCurrentBufferTokensNew = NULL;
+     m_pAIncludeFiles = NULL;
++    m_InterpretCPP = true;
+ 
+     if (withIntrinsicModules)
+     {
+@@ -94,7 +95,7 @@
+ {
+     wxCriticalSectionLocker locker(s_CritSect);
+     wxString fn = UnixFilename(filename);
+-    ParserThreadF* thread = new ParserThreadF(projectFilename, fn, m_pTokens, fsForm, false, m_pIncludeDB, m_pAIncludeFiles);
++    ParserThreadF* thread = new ParserThreadF(projectFilename, fn, m_pTokens, fsForm, false, m_pIncludeDB, m_InterpretCPP, m_pAIncludeFiles);
+     bool res = thread->Parse();
+     delete thread;
+ 
+@@ -936,7 +937,7 @@
+     int chUntil = 0;
+     TokensArrayClass tTemp;
+     TokensArrayF* pRes = tTemp.GetTokens();
+-    ParserThreadF parsTh = ParserThreadF(wxEmptyString, strRange, pRes, fsForm, true);
++    ParserThreadF parsTh = ParserThreadF(wxEmptyString, strRange, pRes, fsForm, true, NULL, m_InterpretCPP);
+     bool res = parsTh.Parse();
+     if (res)
+     {
+@@ -2189,7 +2190,7 @@
+     //Parse
+     TokensArrayClass tokensTmp;
+     TokensArrayF* parsResult = tokensTmp.GetTokens();
+-    ParserThreadF thread = ParserThreadF(wxEmptyString, txtRange, parsResult, fsForm, true);
++    ParserThreadF thread = ParserThreadF(wxEmptyString, txtRange, parsResult, fsForm, true, NULL, m_InterpretCPP);
+ 
+     if (logComAbove)
+     {
+@@ -4516,4 +4517,10 @@
+     cByDict.Build(m_pTokens);
+ }
+ 
++void ParserF::SetInterpretCPP(bool interpretCPP)
++{
++    m_InterpretCPP = interpretCPP;
++}
+ 
++
++
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 303)
+@@ -108,6 +108,7 @@
+         void FindImplementedProcInMySubmodules(TokenFlat* tok, const wxString& search, TokensArrayFlat& result);
+         void ChangeAddressWithInclude(TokensArrayFlat& tokArr);
+         void BuildCalledByDict(CalledByDict& cByDict);
++        void SetInterpretCPP(bool interpretCPP);
+ 
+     protected:
+     private:
+@@ -155,6 +156,7 @@
+         IncludeDB* m_pIncludeDB;
+         TokensArrayF* m_pAdditionalDirTokens;
+         IncludeDB* m_pIncludeDBADir;
++        bool m_InterpretCPP;
+         bool m_Done;
+ 
+         wxString m_Buff;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 303)
+@@ -21,11 +21,13 @@
+                              FortranSourceForm fsForm,
+                              bool isBuffer,
+                              IncludeDB* includeDB,
++                             bool interpretCPP,
+                              std::map<wxString,wxString>* aIncludeFiles)
+     :
+     m_pTokens(tokens),
+     m_pLastParent(0L),
+     m_pIncludeDB(includeDB),
++    m_interpretCPP(interpretCPP),
+     m_pAIncludeFiles(aIncludeFiles),
+     m_Briefend(_T("@brief_end@"))
+ {
+@@ -42,7 +44,7 @@
+         if (!bufferOrFilename.IsEmpty())
+         {
+             m_Filename = bufferOrFilename;
+-            m_Tokens.Init(m_Filename, fsForm);
++            m_Tokens.Init(m_Filename, fsForm, m_interpretCPP);
+             wxChar sep = wxFileName::GetPathSeparator();
+             m_pLastParent = DoAddFileToken(bufferOrFilename.AfterLast(sep), projectFilename);
+         }
+@@ -49,7 +51,7 @@
+     }
+     else
+     {
+-        m_Tokens.InitFromBuffer(bufferOrFilename, fsForm);
++        m_Tokens.InitFromBuffer(bufferOrFilename, fsForm, m_interpretCPP);
+     }
+     m_Tokens.SetParent(this);
+     InitSecondEndPart();
+@@ -60,6 +62,7 @@
+                              TokensArrayF* tokens,
+                              FortranSourceForm fsForm,
+                              IncludeDB* includeDB,
++                             bool interpretCPP,
+                              std::map<wxString,wxString>* aIncludeFiles,
+                              const wxString& buffer)
+     :
+@@ -66,6 +69,7 @@
+     m_pTokens(tokens),
+     m_pLastParent(0L),
+     m_pIncludeDB(includeDB),
++    m_interpretCPP(interpretCPP),
+     m_pAIncludeFiles(aIncludeFiles),
+     m_Briefend(_T("@brief_end@"))
+ {
+@@ -78,7 +82,7 @@
+     m_inIfdef = 0;
+ 
+     m_Filename = filename;
+-    m_Tokens.InitFromBuffer(buffer, fsForm);
++    m_Tokens.InitFromBuffer(buffer, fsForm, m_interpretCPP);
+     m_Tokens.SetFilename(filename);
+     m_Tokens.SetParent(this);
+     wxChar sep = wxFileName::GetPathSeparator();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 303)
+@@ -31,6 +31,7 @@
+                              FortranSourceForm fsForm,
+                              bool isBuffer=false,
+                              IncludeDB* includeDB=NULL,
++                             bool interpretCPP=true,
+                              std::map<wxString,wxString>* aIncludeFiles=NULL);
+         ParserThreadF(const wxString& projectFilename,
+                              const wxString& filename,
+@@ -37,6 +38,7 @@
+                              TokensArrayF* tokens,
+                              FortranSourceForm fsForm,
+                              IncludeDB* includeDB,
++                             bool interpretCPP,
+                              std::map<wxString,wxString>* aIncludeFiles,
+                              const wxString& buffer);
+         virtual ~ParserThreadF();
+@@ -59,6 +61,7 @@
+         wxString m_Filename;
+         wxArrayString m_IncludeList;
+         IncludeDB* m_pIncludeDB;
++        bool m_interpretCPP;
+         std::map<wxString,wxString>* m_pAIncludeFiles;  // additional include files
+ 
+         int m_NumberOfBlockConstruct;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 303)
+@@ -171,87 +171,117 @@
+ 									<border>8</border>
+ 								</object>
+ 								<object class="sizeritem">
+-									<object class="wxCheckBox" name="chkCallTipsArrays">
+-										<label>Show call-tips for arrays</label>
+-									</object>
+-									<flag>wxALL|wxALIGN_LEFT</flag>
+-									<border>8</border>
+-								</object>
+-								<object class="sizeritem">
+ 									<object class="wxBoxSizer">
+-										<orient>wxVERTICAL</orient>
+ 										<object class="sizeritem">
+-											<object class="wxCheckBox" name="chkConstrHighlighterEnable">
+-												<label>Highlight matching statement of construct</label>
+-											</object>
+-											<flag>wxALL|wxALIGN_LEFT</flag>
+-										</object>
+-										<object class="sizeritem">
+-											<object class="wxFlexGridSizer">
+-												<cols>2</cols>
++											<object class="wxBoxSizer">
++												<orient>wxVERTICAL</orient>
+ 												<object class="sizeritem">
+-													<object class="wxStaticText" name="stCHFullColour">
+-														<label>Colour of full construct</label>
++													<object class="wxCheckBox" name="chkCallTipsArrays">
++														<label>Show call-tips for arrays</label>
+ 													</object>
+-													<flag>wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+-													<border>25</border>
+-													<option>1</option>
++													<flag>wxALL|wxALIGN_LEFT</flag>
++													<border>8</border>
+ 												</object>
+ 												<object class="sizeritem">
+-													<object class="wxButton" name="btCHFullColour">
+-														<label>...</label>
+-														<bg>wxSYS_COLOUR_ACTIVECAPTION</bg>
++													<object class="wxBoxSizer">
++														<orient>wxVERTICAL</orient>
++														<object class="sizeritem">
++															<object class="wxCheckBox" name="chkConstrHighlighterEnable">
++																<label>Highlight matching statement of construct</label>
++															</object>
++															<flag>wxALL|wxALIGN_LEFT</flag>
++														</object>
++														<object class="sizeritem">
++															<object class="wxFlexGridSizer">
++																<cols>2</cols>
++																<object class="sizeritem">
++																	<object class="wxStaticText" name="stCHFullColour">
++																		<label>Colour of full construct</label>
++																	</object>
++																	<flag>wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
++																	<border>25</border>
++																	<option>1</option>
++																</object>
++																<object class="sizeritem">
++																	<object class="wxButton" name="btCHFullColour">
++																		<label>...</label>
++																		<bg>wxSYS_COLOUR_ACTIVECAPTION</bg>
++																	</object>
++																	<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++																	<border>5</border>
++																	<option>1</option>
++																</object>
++																<object class="sizeritem">
++																	<object class="wxStaticText" name="stCHUnfinColour">
++																		<label>Colour of unfinished construct</label>
++																	</object>
++																	<flag>wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
++																	<border>25</border>
++																	<option>1</option>
++																</object>
++																<object class="sizeritem">
++																	<object class="wxButton" name="btCHUnfinColour">
++																		<label>...</label>
++																		<bg>wxSYS_COLOUR_ACTIVECAPTION</bg>
++																	</object>
++																	<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++																	<border>5</border>
++																	<option>1</option>
++																</object>
++															</object>
++															<flag>wxALL|wxALIGN_LEFT</flag>
++															<border>5</border>
++														</object>
+ 													</object>
+-													<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-													<border>5</border>
+-													<option>1</option>
++													<flag>wxALL|wxALIGN_LEFT</flag>
++													<border>8</border>
+ 												</object>
+ 												<object class="sizeritem">
+-													<object class="wxStaticText" name="stCHUnfinColour">
+-														<label>Colour of unfinished construct</label>
++													<object class="wxBoxSizer">
++														<object class="sizeritem">
++															<object class="wxStaticText" name="ID_STATICTEXT1">
++																<label>Call tree depth limit:</label>
++															</object>
++															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<border>5</border>
++															<option>1</option>
++														</object>
++														<object class="sizeritem">
++															<object class="wxSpinCtrl" name="spnCallTreeDepthLimit">
++																<value>5</value>
++																<min>1</min>
++															</object>
++															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<border>5</border>
++														</object>
+ 													</object>
+-													<flag>wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+-													<border>25</border>
+-													<option>1</option>
+-												</object>
+-												<object class="sizeritem">
+-													<object class="wxButton" name="btCHUnfinColour">
+-														<label>...</label>
+-														<bg>wxSYS_COLOUR_ACTIVECAPTION</bg>
+-													</object>
+-													<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++													<flag>wxALL|wxALIGN_LEFT</flag>
+ 													<border>5</border>
+-													<option>1</option>
+ 												</object>
+ 											</object>
+-											<flag>wxALL|wxALIGN_LEFT</flag>
++											<flag>wxALIGN_TOP</flag>
+ 											<border>5</border>
+-										</object>
+-									</object>
+-									<flag>wxALL|wxALIGN_LEFT</flag>
+-									<border>8</border>
+-								</object>
+-								<object class="sizeritem">
+-									<object class="wxBoxSizer">
+-										<object class="sizeritem">
+-											<object class="wxStaticText" name="ID_STATICTEXT1">
+-												<label>Call tree depth limit:</label>
+-											</object>
+-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-											<border>5</border>
+ 											<option>1</option>
+ 										</object>
+ 										<object class="sizeritem">
+-											<object class="wxSpinCtrl" name="spnCallTreeDepthLimit">
+-												<value>5</value>
+-												<min>1</min>
++											<object class="wxBoxSizer">
++												<orient>wxVERTICAL</orient>
++												<object class="sizeritem">
++													<object class="wxCheckBox" name="chkInterpretCPP">
++														<label>Interpret preprocessor directives</label>
++													</object>
++													<flag>wxALL|wxALIGN_LEFT</flag>
++													<border>8</border>
++													<option>1</option>
++												</object>
+ 											</object>
+-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+-											<border>5</border>
++											<flag>wxLEFT|wxALIGN_TOP</flag>
++											<border>5d</border>
+ 										</object>
+ 									</object>
+-									<flag>wxALL|wxALIGN_LEFT</flag>
++									<flag>wxALIGN_LEFT</flag>
+ 									<border>5</border>
++									<option>1</option>
+ 								</object>
+ 							</object>
+ 						</object>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 303)
+@@ -6,7 +6,7 @@
+ #include <wx/filefn.h>
+ 
+ 
+-TokenizerPP::TokenizerPP(const wxString& filename, FortranSourceForm sourceForm)
++TokenizerPP::TokenizerPP(const wxString& filename, FortranSourceForm sourceForm, bool interpretPPDirectives)
+ {
+     //ctor
+     Tokenizerf* pFileTokens = new Tokenizerf(filename, sourceForm);
+@@ -13,6 +13,7 @@
+     m_TokensFiles.push_back(pFileTokens);
+     m_ActiveFileIdx = 0;
+     m_pParent = 0;
++    m_interpretPPDirectives = interpretPPDirectives;
+     m_PocketSize = 0;
+     m_PocketWasPeeked = false;
+     m_PeekedFromPocket = false;
+@@ -33,17 +34,19 @@
+     m_pParent = parent;
+ }
+ 
+-bool TokenizerPP::Init(const wxString& filename, FortranSourceForm sourceForm)
++bool TokenizerPP::Init(const wxString& filename, FortranSourceForm sourceForm, bool interpretPPDirectives)
+ {
+     m_ActiveFileIdx = 0;
+     m_PocketSize = 0;
++    m_interpretPPDirectives = interpretPPDirectives;
+     return m_TokensFiles[0]->Init(filename, sourceForm);
+ }
+ 
+-bool TokenizerPP::InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm)
++bool TokenizerPP::InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm, bool interpretPPDirectives)
+ {
+     m_ActiveFileIdx = 0;
+     m_PocketSize = 0;
++    m_interpretPPDirectives = interpretPPDirectives;
+     return m_TokensFiles[0]->InitFromBuffer(buffer, sourceForm);
+ }
+ 
+@@ -70,7 +73,7 @@
+     {
+         token = m_TokensFiles[m_ActiveFileIdx]->GetToken();
+ 
+-        if (token.GetChar(0) == '#')
++        if (m_interpretPPDirectives && token.GetChar(0) == '#')
+         {
+             if (token.IsSameAs(_T("#define")))
+                 HandlePPDefine();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 303)
+@@ -26,11 +26,12 @@
+ //        };
+ 
+     public:
+-        TokenizerPP(const wxString& filename = wxEmptyString, FortranSourceForm sourceForm = fsfFree);
++        TokenizerPP(const wxString& filename = wxEmptyString, FortranSourceForm sourceForm = fsfFree,
++                    bool interpretPPDirectives = true);
+         ~TokenizerPP();
+ 
+-        bool Init(const wxString& filename, FortranSourceForm sourceForm);
+-		bool InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm);
++        bool Init(const wxString& filename, FortranSourceForm sourceForm, bool interpretPPDirectives);
++		bool InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm, bool interpretPPDirectives);
+ 		wxString GetToken();
+ 		wxString GetTokenSameLine();
+ 		wxString GetTokenSameFortranLine();
+@@ -77,7 +78,7 @@
+         void MakeSaparateTokens(const wxString& line, wxArrayString tokenArr);
+ 
+         ParserThreadF* m_pParent;
+-        //std::map<wxString,TokenPP> m_DefineTokens;
++        bool m_interpretPPDirectives;
+         std::map<wxString,wxString> m_DefineTokens;
+         std::vector<Tokenizerf*> m_TokensFiles;  // every file has own Tokenizerf
+         size_t m_ActiveFileIdx;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp	(revision 302)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp	(revision 303)
+@@ -44,11 +44,12 @@
+     wxArrayString* pWSFiles = m_pNativeParser->GetWSFiles();
+     ArrayOfFortranSourceForm* pWSFileForms = m_pNativeParser->GetWSFileForms();
+     wxArrayString* pWSProjFilenames = m_pNativeParser->GetWSFileProjFilenames();
++    bool interpretCPP = m_pNativeParser->DoInterpretCPP();
+ 
+     for (size_t i=0; i<pWSFiles->size(); i++)
+     {
+         ParserThreadF* thread = new ParserThreadF(pWSProjFilenames->Item(i), UnixFilename(pWSFiles->Item(i)), pTokens,
+-                                                  pWSFileForms->at(i), false, pIncludeDB, aIncludeFiles);
++                                                  pWSFileForms->at(i), false, pIncludeDB, interpretCPP, aIncludeFiles);
+         thread->Parse();
+         delete thread;
+     }

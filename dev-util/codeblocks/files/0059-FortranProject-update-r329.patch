@@ -1,0 +1,309 @@
+Index: tokenizerf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h	(revision 328)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h	(revision 329)
+@@ -60,6 +60,7 @@
+         void UngetToken();
+ 		bool SkipToEOL();
+ 		FortranSourceForm GetSourceForm() { return m_SourceForm; }
++		bool MoveToNextChar();
+ 	protected:
+ 		void BaseInit();
+ 		wxString DoGetToken();
+@@ -69,7 +70,6 @@
+ 		bool SkipBlock(const wxChar& ch, int maxLines = 0);
+ 		bool SkipUnwanted(); // skips comments, assignments, preprocessor etc.
+ 		bool IsEOF(){ return m_TokenIndex >= m_BufferLen; }
+-		bool MoveToNextChar();
+ 		void AdjustLineNumber();
+ 		wxChar CurrentChar();
+ 		wxChar NextChar();
+Index: tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 328)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 329)
+@@ -402,32 +402,118 @@
+ 
+ void TokenizerPP::HandlePPIfdef(const wxString& inToken, bool skipElif)
+ {
++    // Handle #ifdef, #ifndef, #if, #if defined constructs.
+     wxString ifToken = inToken;
+-    // Handle #ifdef, #ifndef, #if, #if defined constructs.
+-    wxString ptok = PeekToken();
+ 
+-    if ( (ifToken.IsSameAs(_T("#if")) || (ifToken.IsSameAs(_T("#elif")) && !skipElif) )
+-        && ptok.IsSameAs(_T("defined")) )
++    size_t curLineNum = GetLineNumber();
++    if (!m_TokensFiles[m_ActiveFileIdx]->SkipToEOL())
++        return; // end-of-file is reached.
++    m_TokensFiles[m_ActiveFileIdx]->MoveToNextChar(); // move to the next line
++    wxString line = GetLine(curLineNum).Trim(false).Trim(true);
++    if (!line.StartsWith(ifToken))
+     {
+-        GetToken(); // consume peeked token.
++        // Something is wrong.
++        return;
++    }
++
++    line = line.Mid(ifToken.size()); // Skip ifToken.
++    while (line.EndsWith(_T("\\")))  // Continuation.
++    {
++        if (!m_TokensFiles[m_ActiveFileIdx]->SkipToEOL())
++            return; // end-of-file is reached.
++        m_TokensFiles[m_ActiveFileIdx]->MoveToNextChar(); // move to the next line
++
++        line = line.Mid(0,line.size()-1); // Remove continuation.
++        curLineNum += 1;
++        wxString nextLine = GetLine(curLineNum).Trim(false).Trim(true);
++        if (nextLine.IsEmpty())
++            break;
++        line << _T(" ") << nextLine;
++    }
++
++    // Remove C comments.
++    int comIdx = line.Find(_T("/*"));
++    if (comIdx == wxNOT_FOUND)
++        comIdx = line.Find(_T("//"));
++    if (comIdx != wxNOT_FOUND)
++        line = line.Mid(0, comIdx);
++
++    // Change C "not" to something.
++    line.Replace(_T("!"), _T("$$$"));
++    line.Replace(_T("&&"), _T(" $$and$$ "));
++    line.Replace(_T("||"), _T(" $$or$$ "));
++    line.Replace(_T("<="), _T(" $$le$$ "));
++    line.Replace(_T(">="), _T(" $$ge$$ "));
++    line.Replace(_T("=="), _T(" $$ee$$ "));
++    line.Replace(_T("!="), _T(" $$ne$$ "));
++    line << "\n";
++
++    Tokenizerf lineSplitter = Tokenizerf();
++    lineSplitter.InitFromBuffer(line, fsfFree);
++
++    wxString ptok = lineSplitter.PeekToken();
++    if ( ( ifToken.IsSameAs(_T("#if")) || (ifToken.IsSameAs(_T("#elif")) && !skipElif) )
++        && (ptok.IsSameAs(_T("defined")) || ptok.IsSameAs(_T("$$$defined"))) )
++    {
+         ifToken = _T("#ifdef");
+     }
+ 
+     if ( ifToken.IsSameAs(_T("#ifdef")) || ifToken.IsSameAs(_T("#ifndef")) )
+     {
+-        wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
+-        if (token.IsEmpty())
+-            return; // something is wrong
++        bool hasDef = false;
++        bool combineOr = false;
++        bool combineAnd = false;
++        bool ifDef = true;
++        if (ifToken.IsSameAs(_T("#ifndef")))
++            ifDef = false;
+ 
+-        if (token.StartsWith('(') && token.EndsWith(')'))
++        while (1)
+         {
+-            token = token.Mid(1,token.Length()-2).Trim(true).Trim(false);
++            wxString token = lineSplitter.GetToken();
++            if (token.IsSameAs(_T("defined")))
++            {
++                ifDef = true;
++                token = lineSplitter.GetToken();
++            }
++            else if (token.IsSameAs(_T("$$$defined")))
++            {
++                ifDef = false;
++                token = lineSplitter.GetToken();
++            }
++
++            if (token.IsEmpty())
++                return; // something is wrong
++
++            if (token.StartsWith('(') && token.EndsWith(')'))
++            {
++                token = token.Mid(1,token.Length()-2).Trim(true).Trim(false);
++            }
++
++            bool hasDef_1 = (m_DefineTokens.count(token) > 0) || HasProjectCPPDefine(token);
++            bool checkedDef = ifDef ? hasDef_1 : !hasDef_1;
++            if (combineOr)
++                hasDef = hasDef || checkedDef;
++            else if (combineAnd)
++                hasDef = hasDef && checkedDef;
++            else
++                hasDef = checkedDef;
++
++            combineOr = false;
++            combineAnd = false;
++
++            wxString tokNext = lineSplitter.GetToken();
++            if (tokNext.IsEmpty())
++                break;
++
++            if (tokNext.IsSameAs(_T("$$or$$")))
++                combineOr = true;
++            else if (tokNext.IsSameAs(_T("$$and$$")))
++                combineAnd = true;
++            else
++                break; // Some unexpected token.
+         }
+ 
+-// TODO (darmar#1#): Implementation does not consider case "#ifdef a || b".
+-        bool hasDef = (m_DefineTokens.count(token) > 0) || HasProjectCPPDefine(token);
+-
+-        if ((ifToken.IsSameAs(_T("#ifdef")) && hasDef) || (ifToken.IsSameAs(_T("#ifndef")) && !hasDef))
++        if (hasDef)
+         {
+             // Will be interpreted until corresponding #elif, #else or #endif
+         }
+@@ -434,7 +520,6 @@
+         else
+         {
+             // Skip to the corresponding #elif #else or #endif
+-            m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
+             wxString lastTok;
+             SkipPPIfdef(lastTok);
+             if (lastTok.IsSameAs(_T("#elif")))
+@@ -446,7 +531,6 @@
+         wxString lastTok;
+         while (true)
+         {
+-            m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
+             SkipPPIfdef(lastTok);
+             if (lastTok.IsEmpty() || lastTok.IsSameAs(_T("#endif")) )
+                 break;
+@@ -458,36 +542,48 @@
+         //    #if (PETSC_INT == 4)
+         //    #if 0
+         // How interpretation of #if/#elif can be improved?
+-        wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
+-        if (token.IsEmpty())
++        wxString token;
++        wxArrayString conToks;
++        lineSplitter.GetTokensToEOL(conToks);
++        bool answer = true;
++        bool isInt = false;
++        if (conToks.size() == 0)
+             return; // something is wrong
+-
+-        wxString condition = token;
+-        if (condition.StartsWith(_T("(")) && condition.EndsWith(_T(")")))
+-            condition = condition.Mid(1, condition.Length()-2).Trim(true).Trim(false);
+-        if (m_DefineTokens.count(token) > 0)
+-            condition = m_DefineTokens[token];
+-        bool answer = true;
+-        long lnum;
+-        if (condition.ToCLong(&lnum))
++        else if (conToks.size() == 1)
+         {
+-            if (lnum == 0)
+-                answer = false;
++            wxString condition = conToks[0];
++            if (condition.StartsWith(_T("(")) && condition.EndsWith(_T(")")))
++                condition = condition.Mid(1, condition.Length()-2).Trim(true).Trim(false);
++            if (m_DefineTokens.count(condition) > 0)
++                condition = m_DefineTokens[condition];
++            long lnum;
++            if (condition.ToCLong(&lnum))
++            {
++                if (lnum == 0)
++                    answer = false;
++                else
++                    answer = true;
++                isInt = true;
++            }
+             else
+-                answer = true;
++            {
++                conToks[0] = condition;
++            }
+         }
+-        else
++
++        if (!isInt)
+         {
+             // Handle:  if "PETSC_INT == 4"
+-            //    or:   if PETSC_INT
+-            wxArrayString conToks;
+-            MakeSaparateTokens(condition, conToks);
+             if (conToks.size() == 1)
+             {
+-                // if PETSC_INT. Definition of PETSC_INT was already checked and not found.
+-                answer = false;
++                // if (PETSC_INT == 2)
++                // Here conToks[0] is "PETSC_INT == 2"
++                wxString strTmp = conToks[0];
++                conToks.clear();
++                MakeSaparateTokens(strTmp, conToks);
+             }
+-            else if (conToks.size() == 3)
++
++            if (conToks.size() == 3)
+             {
+                 for (size_t i=0; i<3; i+=2)
+                 {
+@@ -499,7 +595,7 @@
+                 long ir;
+                 if (conToks[0].ToCLong(&il) && conToks[2].ToCLong(&ir))
+                 {
+-                    if (conToks[1] == _T("=="))
++                    if (conToks[1] == _T("$$ee$$")) // ==
+                     {
+                         if (il == ir)
+                             answer = true;
+@@ -506,7 +602,7 @@
+                         else
+                             answer = false;
+                     }
+-                    else if (conToks[1] == _T("!="))
++                    else if (conToks[1] == _T("$$ne$$")) // !=
+                     {
+                         if (il != ir)
+                             answer = true;
+@@ -527,7 +623,7 @@
+                         else
+                             answer = false;
+                     }
+-                    else if (conToks[1] == _T(">="))
++                    else if (conToks[1] == _T("$$ge$$")) // >=
+                     {
+                         if (il >= ir)
+                             answer = true;
+@@ -534,7 +630,7 @@
+                         else
+                             answer = false;
+                     }
+-                    else if (conToks[1] == _T("<="))
++                    else if (conToks[1] == _T("$$le$$")) // <=
+                     {
+                         if (il <= ir)
+                             answer = true;
+@@ -555,7 +651,7 @@
+             wxString lastTok;
+             while (true)
+             {
+-                m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++                //m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
+                 SkipPPIfdef(lastTok);
+                 if (lastTok.IsEmpty() || lastTok.IsSameAs(_T("#endif")) )
+                 {
+@@ -568,17 +664,17 @@
+                 }
+                 else if (lastTok.IsSameAs(_T("#else")))
+                     break;
++
++                m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
+             }
+         }
+     }
+-
+-    m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
+ }
+ 
+ void TokenizerPP::SkipPPIfdef(wxString& tokenAtEnd)
+ {
+     // Skip to the next corresponding #elif, #else or #endif
+-    int skipStart = m_TokensFiles[m_ActiveFileIdx]->GetLineNumber();
++    int skipStart = m_TokensFiles[m_ActiveFileIdx]->GetLineNumber() - 1;
+     tokenAtEnd.clear();
+     int inIfdef = 0;
+     while (true)

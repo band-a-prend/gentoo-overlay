@@ -1,0 +1,32 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/Makefile.am
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/Makefile.am	(revision 322)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/Makefile.am	(revision 323)
+@@ -45,11 +45,13 @@
+ 					nativeparserf.cpp \
+ 					parserf.cpp \
+ 					parserthreadf.cpp \
++					preprocfunction.cpp \
+ 					projectdependencies.cpp \
+ 					tab2space.cpp \
+ 					textcutter.cpp \
+ 					tokenf.cpp \
+ 					tokenizerf.cpp \
++					tokenizerpp.cpp \
+ 					usetokenf.cpp \
+ 					workspacebrowserbuilder.cpp \
+ 					workspacebrowserf.cpp \
+@@ -88,11 +90,13 @@
+ 					nativeparserf.h \
+ 					parserf.h \
+ 					parserthreadf.h \
++					preprocfunction.h \
+ 					projectdependencies.h \
+ 					tab2space.h \
+ 					textcutter.h \
+ 					tokenf.h \
+ 					tokenizerf.h \
++					tokenizerpp.h \
+ 					usetokenf.h \
+ 					workspacebrowserbuilder.h \
+ 					workspacebrowserf.h \

@@ -1,0 +1,12 @@
+Index: src/plugins/codecompletion/codecompletion.cpp
+===================================================================
+--- a/src/plugins/codecompletion/codecompletion.cpp	(revision 12208)
++++ b/src/plugins/codecompletion/codecompletion.cpp	(revision 12209)
+@@ -754,6 +754,7 @@
+             return ccpsActive;
+ 
+         case ParserCommon::ftOther:
++            return ccpsInactive;
+         default:
+             break;
+     }

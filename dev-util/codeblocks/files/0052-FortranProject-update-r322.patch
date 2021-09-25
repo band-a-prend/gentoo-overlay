@@ -1,0 +1,49 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 321)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 322)
+@@ -216,7 +216,7 @@
+ 															<object class="wxStaticText" name="ID_STATICTEXT1">
+ 																<label>Call tree depth limit:</label>
+ 															</object>
+-															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+ 															<border>4d</border>
+ 															<option>1</option>
+ 														</object>
+@@ -225,7 +225,7 @@
+ 																<value>5</value>
+ 																<min>1</min>
+ 															</object>
+-															<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++															<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+ 															<border>4d</border>
+ 														</object>
+ 													</object>
+@@ -430,7 +430,7 @@
+ 												<label>Always</label>
+ 												<style>wxRB_GROUP</style>
+ 											</object>
+-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++											<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+ 											<border>8</border>
+ 										</object>
+ 										<object class="sizeritem">
+@@ -437,7 +437,7 @@
+ 											<object class="wxRadioButton" name="rbutDocWOnly">
+ 												<label>Only when description is available</label>
+ 											</object>
+-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++											<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+ 											<border>5</border>
+ 										</object>
+ 										<object class="sizeritem">
+@@ -444,7 +444,7 @@
+ 											<object class="wxRadioButton" name="rbutDocWDont">
+ 												<label>Do not show</label>
+ 											</object>
+-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++											<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+ 											<border>5</border>
+ 										</object>
+ 									</object>

@@ -1,0 +1,212 @@
+Index: fpimagelist.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpimagelist.cpp	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpimagelist.cpp	(revision 325)
+@@ -290,6 +290,8 @@
+ 
+         case tkPreprocessor: return m_ImgNr["preproc"];
+ 
++        case tkMacroDefine: return m_ImgNr["preproc"];
++
+         case tkFile: return m_ImgNr["none"];
+ 
+         case tkVariable:
+Index: parserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 325)
+@@ -78,6 +78,7 @@
+         bool FindInfoLogForTypeBoundProc(TokensArrayFlat& tokenPair, bool logComAbove, bool logComBelow, bool logDeclar, bool logComVariab, wxString& msg,
+                                          wxString* buff=NULL, std::vector<int>* lineStarts=NULL);
+         bool FindInfoLogForGenericTBProc(TokensArrayFlat& tokens, bool logComAbove, bool logComBelow, bool logDeclar, bool logComVariab, wxString& msg);
++        void FindMachDefineTokens(const wxString& search, cbEditor* ed, TokensArrayFlat& result);
+         bool GetTokenStr(TokenFlat& token, wxString& msg);
+         void FindChildrenOfInterface(TokenFlat* token, TokensArrayFlat& result);
+         void GetPossitionOfDummyArgument(const wxString& args, const wxString& arg, int& start, int& end);
+Index: parserthreadf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 325)
+@@ -56,6 +56,7 @@
+         TokenF* DoAddToken(TokenKindF kind, const wxString& name, const wxString& args=wxEmptyString, const wxString& typeDefinition=wxEmptyString);
+         TokenF* DoAddToken(TokenKindF kind, const wxString& name, const wxString& args, const unsigned int defStartLine);
+         FileTokenF* DoAddFileToken(const wxString& filename, const wxString& projectFilename);
++        void DoAddDefineToken(const wxString& defTokName);
+         UseTokenF* DoAddUseToken(const wxString& modName);
+         ModuleTokenF* DoAddModuleToken(const wxString& modName);
+         SubmoduleTokenF* DoAddSubmoduleToken(const wxString& submName, const wxString& ancestorModule, const wxString& parentSubmodule, unsigned int defStartLine);
+@@ -83,6 +84,7 @@
+ 
+         TokensArrayF* m_pPPDefineTokens;
+         int m_inIfdef;
++        bool m_addPPDefineTokens;
+ 
+         void InitSecondEndPart();
+         void HandleModule();
+Index: tokenizerpp.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 325)
+@@ -62,6 +62,7 @@
+         void UngetToken() { return m_TokensFiles[m_ActiveFileIdx]->UngetToken(); }
+ 		bool SkipToEOL() { return m_TokensFiles[m_ActiveFileIdx]->SkipToEOL(); }
+ 		std::vector<wxString> GetParsedFileNames();
++		std::set<wxString>* GetDefinedTokens() { return &m_AllDefineTokens; }
+ 
+         typedef struct {
+             std::vector<int> lineStarts;
+@@ -88,6 +89,7 @@
+         ParserThreadF* m_pParent;
+         bool m_interpretPPDirectives;
+         std::map<wxString,wxString> m_DefineTokens;
++        std::set<wxString> m_AllDefineTokens;
+         std::vector<Tokenizerf*> m_TokensFiles;  // every file has own Tokenizerf
+         size_t m_ActiveFileIdx;
+         PreProcFunctionList m_KnownFunctions;
+Index: parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 325)
+@@ -888,6 +888,30 @@
+     return;
+ }
+ 
++void ParserF::FindMachDefineTokens(const wxString& search, cbEditor* ed, TokensArrayFlat& result)
++{
++    wxString filename = ed->GetFilename();
++    FortranSourceForm fsForm;
++    if (!IsFileFortran(filename, fsForm))
++        return;
++
++    //Find scope between file tokens
++    wxCriticalSectionLocker locker(s_CritSect);
++    TokensArrayF* children = FindFileTokens(filename);
++    if (!children)
++        return;
++
++    wxString searchLw = search.Lower();
++    size_t nChildren = children->GetCount()
++    for (size_t i=0; i<nChildren; i++)
++    {
++        if ((children->Item(i)->m_TokenKind == tkMacroDefine) && children->Item(i)->m_Name.StartsWith(searchLw))
++        {
++            result.Add(new TokenFlat(children->Item(i)));
++        }
++    }
++}
++
+ bool ParserF::FindLineScope(unsigned int line, int& lineStart, int tokenKindMask, TokensArrayF& children, TokenF* &pToken)
+ {
+     bool found = false;
+@@ -1692,7 +1716,7 @@
+         if (wasTkOtherRemoved)
+             tokKind = tokKind | tkOther;
+     }
+-    else
++    else // not onlyUseAssoc
+     {
+         int noChildrenOf = tkInterface | tkFunction | tkSubroutine | tkProgram;
+         FindMatchTokensDeclared(nameUnderCursor, result, tokKind, true, noChildrenOf, onlyPublicNames);
+@@ -1746,6 +1770,13 @@
+             }
+         }
+     }
++
++    if (allowVariables)
++    {
++        // Add #define tokens.
++        FindMachDefineTokens(nameUnderCursor, ed, result);
++    }
++
+     return true;
+ }
+ 
+Index: parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 325)
+@@ -39,6 +39,7 @@
+ 
+     m_pPPDefineTokens = new TokensArrayF();
+     m_inIfdef = 0;
++    m_addPPDefineTokens = false;
+ 
+     if (!isBuffer)
+     {
+@@ -87,6 +88,7 @@
+ 
+     m_pPPDefineTokens = new TokensArrayF();
+     m_inIfdef = 0;
++    m_addPPDefineTokens = true;
+ 
+     m_Filename = filename;
+     m_Tokens.InitFromBuffer(buffer, fsForm, m_interpretCPP);
+@@ -242,6 +244,22 @@
+         wxChar sep = wxFileName::GetPathSeparator();
+         m_pIncludeDB->SetInclude(m_Filename.AfterLast(sep), m_IncludeList);
+     }
++
++    if (m_addPPDefineTokens)
++    {
++        // Append "#define abc" tokens.
++        std::set<wxString>* pDefTok = m_Tokens.GetDefinedTokens();
++        for (auto defTokName : *pDefTok)
++        {
++            DoAddDefineToken(defTokName);
++        }
++        size_t nDef = m_ProjPPDefineTokens.size();
++        for (size_t i=0; i<nDef; ++i)
++        {
++            DoAddDefineToken(m_ProjPPDefineTokens[i]);
++        }
++    }
++
+     return true;
+ }
+ 
+@@ -330,6 +348,33 @@
+     return newToken;
+ }
+ 
++void ParserThreadF::DoAddDefineToken(const wxString& defTokName)
++{
++    TokenF* newToken = new TokenF;
++    newToken->m_Name = defTokName.Lower();
++    newToken->m_TokenKind = tkMacroDefine;
++    newToken->m_Filename = m_Filename;
++    newToken->m_DisplayName = defTokName;
++    newToken->m_DefinitionLength = 1;
++    newToken->m_LineStart = 1;
++    newToken->m_LineEnd = m_Tokens.GetLineNumber();
++
++    TokenF* parent = m_pLastParent;
++    while (parent)
++    {
++        if (parent->m_TokenKind == tkFile)
++            break;
++
++        parent = parent->m_pParent;
++    }
++
++    if (parent) // tkFile was found.
++    {
++        parent->AddChild(newToken);
++        newToken->m_pParent = parent;
++    }
++}
++
+ void ParserThreadF::HandleUse()
+ {
+     wxString modName;
+Index: tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 324)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 325)
+@@ -374,6 +374,7 @@
+ 
+     m_DefineTokens[token] = value; // add value even if it is empty
+     m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++    m_AllDefineTokens.insert(token);
+ 
+     if (isNewFunDefinition)
+     {

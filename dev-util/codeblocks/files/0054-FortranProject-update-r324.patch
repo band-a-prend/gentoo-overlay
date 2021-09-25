@@ -1,0 +1,63 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/projectdependencies.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/projectdependencies.cpp	(revision 323)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/projectdependencies.cpp	(revision 324)
+@@ -28,6 +28,7 @@
+ {
+     //ctor
+     m_WasInfiniteLoop = false;
++    m_FilesAreUniqueInWorkspace = true;
+ }
+ 
+ ProjectDependencies::~ProjectDependencies()
+@@ -86,6 +87,7 @@
+ {
+     Clear();
+ 
++    m_FilesAreUniqueInWorkspace = true;
+     m_prFilesArr = prFilesArr;
+     wxArrayString fnames;
+ 
+@@ -94,6 +96,9 @@
+ 	{
+         ProjectFile* pf = m_prFilesArr[i];
+         wxString ffp = pf->file.GetFullPath();
++        if (m_FileIndexMap.count(ffp) > 0)
++            m_FilesAreUniqueInWorkspace = false;
++
+         m_FileIndexMap.insert(std::make_pair(ffp,i));
+ 
+         wxString fname = pf->file.GetName() + _T(".") + pf->file.GetExt();
+@@ -213,10 +218,17 @@
+         {
+             size_t fidx = m_ModuleFileIdxMap[*pos];
+             if (fidx == idx)
+-                continue; // module defined and is used in the same file.
++                continue; // Module defined and is used in the same file.
+             cbProject* project2 = m_prFilesArr[fidx]->GetParentProject();
+-            if (project != project2)
+-                continue; // files are from different projects. File weight is limited to the same project.
++            if (m_FilesAreUniqueInWorkspace && project != project2)
++            {
++                // If files are unique:
++                //       Files are from different projects. File weight is limited to the same project.
++                // If files are not unique:
++                //       It could be, that this file is in the current project too.
++                //       Weights on the workspace level are calculated in that case.
++                continue;
++            }
+             m_Deep++;
+             wt = 1 + GetFileWeightByIndex(fidx);
+             m_Deep--;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/projectdependencies.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/projectdependencies.h	(revision 323)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/projectdependencies.h	(revision 324)
+@@ -67,6 +67,7 @@
+         int m_Deep;
+         bool m_WasInfiniteLoop;
+         bool m_BreakChain;
++        bool m_FilesAreUniqueInWorkspace;
+         wxArrayInt m_FileWeights;
+         BoolVector m_MadeChildrenSet;
+ 

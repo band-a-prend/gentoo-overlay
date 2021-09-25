@@ -1,0 +1,108 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 319)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 320)
+@@ -822,6 +822,7 @@
+                     wxString msg = _("Suggest a new file name:");
+ 
+                     wxTextEntryDialog dlg(this, msg, _("File name"), name);
++                    PlaceWindow(&dlg);
+                     if (dlg.ShowModal() == wxID_OK)
+                     {
+                         name = dlg.GetValue().Trim(true).Trim(false);
+@@ -2888,6 +2889,7 @@
+ {
+     while (true)
+     {
++        PlaceWindow(&addNewType);
+         if (addNewType.ShowModal() == wxID_OK)
+         {
+             wxString ft = addNewType.GetFortranType();
+@@ -2975,6 +2977,7 @@
+     editNewType.SetEditType(ft_old,bt_old,ct_old);
+     while (true)
+     {
++        PlaceWindow(&editNewType);
+         if (editNewType.ShowModal() == wxID_OK)
+         {
+             wxString ft = editNewType.GetFortranType();
+@@ -3968,6 +3971,7 @@
+ void Bindto::Onbt_OutputDirClick(wxCommandEvent& event)
+ {
+     wxDirDialog dlg(this, _T("Choose output directory"), tc_OutputDir->GetValue(), wxDD_DEFAULT_STYLE | wxDD_NEW_DIR_BUTTON);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+          wxString path = dlg.GetPath();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/formatindent.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/formatindent.cpp	(revision 319)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/formatindent.cpp	(revision 320)
+@@ -33,6 +33,7 @@
+ void FormatIndent::Format()
+ {
+     FormatIndentDlg fidlg(Manager::Get()->GetAppWindow());
++    PlaceWindow(&fidlg);
+     if (fidlg.ShowModal() == wxID_OK)
+     {
+         FormatIndentDlg::FormatIndentScope scope;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 319)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 320)
+@@ -2180,6 +2180,7 @@
+ void FortranProject::OnChangeCase(wxCommandEvent& event)
+ {
+     ChangeCase changCaseDlg(Manager::Get()->GetAppWindow());
++    PlaceWindow(&changCaseDlg);
+     changCaseDlg.ShowModal();
+ }
+ 
+@@ -2186,6 +2187,7 @@
+ void FortranProject::OnTab2Space(wxCommandEvent& event)
+ {
+     Tab2Space tab2SpaceDlg(Manager::Get()->GetAppWindow());
++    PlaceWindow(&tab2SpaceDlg);
+     tab2SpaceDlg.ShowModal();
+ }
+ 
+@@ -2196,6 +2198,7 @@
+         pr->SaveAllFiles();
+ 
+     Bindto bindto(Manager::Get()->GetAppWindow(), m_pNativeParser->GetParser());
++    PlaceWindow(&bindto);
+     bindto.ShowModal();
+ }
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/makefiledlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/makefiledlg.cpp	(revision 319)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/makefiledlg.cpp	(revision 320)
+@@ -2,6 +2,7 @@
+ #include "makefiledlg.h"
+ 
+ #include <sdk.h>
++#include "configmanager.h"
+ #ifndef CB_PRECOMP
+     #include <wx/filedlg.h>
+ #endif
+@@ -86,6 +87,7 @@
+ {
+     wxFileDialog saveFileDialog(this, _("Choose file name"), wxEmptyString, wxEmptyString, _T("All files (*)|*"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+     saveFileDialog.SetPath(tcMakefileName->GetValue());
++    PlaceWindow(&saveFileDialog);
+     if (saveFileDialog.ShowModal() != wxID_OK)
+         return;
+     tcMakefileName->SetValue(saveFileDialog.GetPath());
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/makefilegen.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/makefilegen.cpp	(revision 319)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/makefilegen.cpp	(revision 320)
+@@ -457,6 +457,7 @@
+     int i;
+     for (i=0; i<imax; i++)
+     {
++        PlaceWindow(&mfdlg);
+         if (mfdlg.ShowModal() != wxID_OK)
+             return false;
+         mffn = mfdlg.GetFilename();

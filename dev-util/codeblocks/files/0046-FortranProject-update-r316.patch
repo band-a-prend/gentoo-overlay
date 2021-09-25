@@ -1,0 +1,23 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 315)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 316)
+@@ -2420,6 +2420,18 @@
+                         TokenF* token = DoAddToken(tkInterface, curNam, wxEmptyString, lineNum);
+                         token->AddLineEnd(m_Tokens.GetLineNumber());
+                     }
++                    else if (curNamLw.IsSameAs(_T("read")) || curNamLw.IsSameAs(_T("write")))
++                    {
++                        curNam.Append(_T("%%"));
++                        curNam.Append(curLineArr.Item(ic));
++                        if (curLineArr.Item(ic+1).StartsWith(_("(")))
++                        {
++                            ic++;
++                            curNam.Append(curLineArr.Item(ic));
++                        }
++                        TokenF* token = DoAddToken(tkInterface, curNam, wxEmptyString, lineNum);
++                        token->AddLineEnd(m_Tokens.GetLineNumber());
++                    }
+                     else if (curLineArr.Item(ic+1).IsSameAs(_T("=>")))
+                     {
+                         wxString bindName = curLineArr.Item(ic);

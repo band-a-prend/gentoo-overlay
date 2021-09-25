@@ -1,0 +1,15 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 307)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 308)
+@@ -455,7 +455,9 @@
+     // Check if the include file is in checkDir folder.
+     wxFileName fpart(filename);
+     wxFileName fnameInclude(checkDir, wxEmptyString, wxPATH_UNIX);
+-    fnameInclude.AppendDir(fpart.GetPath());
++    wxString filePath = fpart.GetPath();
++    if (!filePath.IsEmpty())
++        fnameInclude.AppendDir(filePath);
+     fnameInclude.SetFullName(fpart.GetFullName());
+     if (wxFileExists(fnameInclude.GetFullPath()))
+     {

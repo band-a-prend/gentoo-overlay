@@ -1,0 +1,23 @@
+Codecompletion plugin patchset (mainly to fix SymbolBrowser wx3.0 compatibility)
+updates and upstream GCC11 fix (r12303). State of 2021-05-06.
+
+In comparison with origin upstream patches some modifications were made:
+
+Within -r12190.patch:
+
+* Change hunks to properly patch files:
+    src/src/environmentsettingsdlg.h
+
+
+Within -r12304.patch:
+* Drop hunk for files that are not exist in Codeblocks 20.03 tarball;
+    src/plugins/contrib/codesnippets/GenericMessageBox.cpp
+    src/plugins/contrib/codesnippets/Search/DirectoryParamsPanel.cpp
+    src/plugins/contrib/codesnippets/editsnippetframe.cpp
+
+* Change hunks to properly patch files:
+    src/plugins/contrib/EditorConfig/EditorConfig.cpp
+
+* Skip files to patch (too many diferences):
+    src/plugins/contrib/ThreadSearch/DirectoryParamsPanel.cpp
+    src/plugins/contrib/ThreadSearch/ThreadSearchView.cpp

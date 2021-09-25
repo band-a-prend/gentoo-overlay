@@ -1,0 +1,13 @@
+Index: parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 325)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 326)
+@@ -902,7 +902,7 @@
+         return;
+ 
+     wxString searchLw = search.Lower();
+-    size_t nChildren = children->GetCount()
++    size_t nChildren = children->GetCount();
+     for (size_t i=0; i<nChildren; i++)
+     {
+         if ((children->Item(i)->m_TokenKind == tkMacroDefine) && children->Item(i)->m_Name.StartsWith(searchLw))

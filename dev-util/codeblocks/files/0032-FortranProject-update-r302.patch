@@ -1,0 +1,23 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 301)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 302)
+@@ -2923,8 +2923,16 @@
+ {
+     wxFileName fname(filename);
+     wxString filename_ux = fname.GetFullPath(wxPATH_UNIX);
+-    if (m_pAIncludeFiles && m_pAIncludeFiles->count(filename_ux) == 1)
+-        return m_pAIncludeFiles->at(filename_ux);
++    try
++    {
++        if (m_pAIncludeFiles && m_pAIncludeFiles->count(filename_ux) == 1)
++            return m_pAIncludeFiles->at(filename_ux);
++    }
++    catch (const std::out_of_range& oor)
++    {
++        // 'out_of_range' can be thrown if map is modified in the main thread.
++        // Do nothing.
++    }
+ 
+     return wxEmptyString;
+ }

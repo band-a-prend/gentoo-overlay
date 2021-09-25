@@ -1,0 +1,1326 @@
+Index: src/plugins/classwizard/classwizarddlg.cpp
+===================================================================
+--- a/src/plugins/classwizard/classwizarddlg.cpp	(revision 12303)
++++ b/src/plugins/classwizard/classwizarddlg.cpp	(revision 12304)
+@@ -243,6 +243,7 @@
+ {
+     wxString path = XRCCTRL(*this, "txtCommonDir", wxTextCtrl)->GetValue();
+     wxDirDialog dlg (this, _T("Choose a directory"), path);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal()==wxID_OK)
+     {
+         path = dlg.GetPath();
+@@ -264,6 +265,7 @@
+ {
+     wxString path = XRCCTRL(*this, "txtIncludeDir", wxTextCtrl)->GetValue();
+     wxDirDialog dlg (this, _T("Choose a directory"), path);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal()==wxID_OK)
+     {
+         path = dlg.GetPath();
+@@ -275,6 +277,7 @@
+ {
+     wxString path = XRCCTRL(*this, "txtImplDir", wxTextCtrl)->GetValue();
+     wxDirDialog dlg (this, _T("Choose a directory"), path);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal()==wxID_OK)
+     {
+         path = dlg.GetPath();
+Index: src/plugins/codecompletion/cctest/cctest_frame.cpp
+===================================================================
+--- a/src/plugins/codecompletion/cctest/cctest_frame.cpp	(revision 12303)
++++ b/src/plugins/codecompletion/cctest/cctest_frame.cpp	(revision 12304)
+@@ -538,6 +538,7 @@
+     TokenTree*  tt = m_NativeParser.m_Parser.GetTokenTree();
+     if (!pb || !tt) return;
+     wxTextEntryDialog dlg(this, _("Enter name of token to debug:"), _("CCTest"));
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal()==wxID_OK)
+     {
+         wxString target = dlg.GetValue().Trim(true).Trim(false);
+@@ -550,7 +551,9 @@
+             Token* t = tt->at(i);
+             if (t && t->m_Name.Matches(target))
+             {
+-                CCDebugInfo di(this, pb, t); di.ShowModal();
++                CCDebugInfo di(this, pb, t);
++                PlaceWindow(&di);
++                di.ShowModal();
+                 found = true;
+                 break; // found, exit for-loop
+             }
+@@ -754,6 +757,7 @@
+                      _T(""), _T(""),
+                      _T("Save Files (*.txt)|*.txt|All files(*.*)|*.*"),
+                      wxFD_SAVE);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+         wxFile file(dlg.GetPath(), wxFile::write);
+Index: src/plugins/codecompletion/classbrowser.cpp
+===================================================================
+--- a/src/plugins/codecompletion/classbrowser.cpp	(revision 12303)
++++ b/src/plugins/codecompletion/classbrowser.cpp	(revision 12304)
+@@ -560,6 +560,7 @@
+             CC_LOCKER_TRACK_TT_MTX_LOCK(s_TokenTreeMutex)
+ 
+             CCDebugInfo info(wx_tree, m_Parser, ctd->m_Token);
++            PlaceWindow(&info);
+             info.ShowModal();
+ 
+             CC_LOCKER_TRACK_TT_MTX_UNLOCK(s_TokenTreeMutex)
+Index: src/plugins/codecompletion/codecompletion.cpp
+===================================================================
+--- a/src/plugins/codecompletion/codecompletion.cpp	(revision 12303)
++++ b/src/plugins/codecompletion/codecompletion.cpp	(revision 12304)
+@@ -1945,6 +1945,7 @@
+             {
+                 // FIXME: this  code can lead to a deadlock (because of double locking from single thread)
+                 CCDebugInfo info(nullptr, &m_NativeParser.GetParser(), token);
++                PlaceWindow(&info);
+                 info.ShowModal();
+             }
+             else if (isImpl)
+@@ -2640,6 +2641,7 @@
+ 
+     // select tokens
+     MultiSelectDlg dlg(Manager::Get()->GetAppWindow(), arr, true);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+         cbStyledTextCtrl* control = ed->GetControl();
+Index: src/plugins/codecompletion/coderefactoring.cpp
+===================================================================
+--- a/src/plugins/codecompletion/coderefactoring.cpp	(revision 12303)
++++ b/src/plugins/codecompletion/coderefactoring.cpp	(revision 12304)
+@@ -199,6 +199,7 @@
+     else
+     {
+         ScopeDialog scopeDlg(Manager::Get()->GetAppWindow(), _("Code Refactoring"));
++        PlaceWindow(&scopeDlg);
+         const int ret = scopeDlg.ShowModal();
+         if (ret == ScopeDialog::ID_OPEN_FILES)
+             GetOpenedFiles(files);
+Index: src/plugins/compilergcc/compilergcc.cpp
+===================================================================
+--- a/src/plugins/compilergcc/compilergcc.cpp	(revision 12303)
++++ b/src/plugins/compilergcc/compilergcc.cpp	(revision 12304)
+@@ -3199,6 +3199,7 @@
+                         "and the available system memory.\n\n"
+                         "Are you sure you want to rebuild the entire project?"),
+                     wxART_QUESTION);
++    PlaceWindow(&dlg);
+     if (m_pProject && dlg.ShowModal() == AnnoyingDialog::rtNO)
+         return;
+ 
+@@ -3229,6 +3230,7 @@
+                         "and the available system memory.\n\n"
+                         "Are you sure you want to rebuild ALL the projects?"),
+                     wxART_QUESTION);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == AnnoyingDialog::rtNO)
+         return;
+ 
+@@ -3247,6 +3249,7 @@
+                         "and the available system memory.\n\n"
+                         "Are you sure you want to proceed to cleaning?"),
+                     wxART_QUESTION);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == AnnoyingDialog::rtNO)
+         return;
+ 
+@@ -3266,6 +3269,7 @@
+                         "and the available system memory.\n\n"
+                         "Are you sure you want to proceed to cleaning?"),
+                     wxART_QUESTION);
++    PlaceWindow(&dlg);
+     if (m_pProject && dlg.ShowModal() == AnnoyingDialog::rtNO)
+         return;
+ 
+@@ -3355,6 +3359,7 @@
+         IncrementalSelectArrayIterator iterator(m_Targets);
+         IncrementalSelectDialog dlg(Manager::Get()->GetAppWindow(), &iterator, _("Select target..."),
+                                     _("Choose target:"));
++        PlaceWindow(&dlg);
+         if (dlg.ShowModal() == wxID_OK)
+         {
+             selection = dlg.GetSelection();
+Index: src/plugins/compilergcc/compileroptionsdlg.cpp
+===================================================================
+--- a/src/plugins/compilergcc/compileroptionsdlg.cpp	(revision 12303)
++++ b/src/plugins/compilergcc/compileroptionsdlg.cpp	(revision 12304)
+@@ -982,6 +982,7 @@
+                  "Do you want to enable these flags?");
+         AnnoyingDialog dlg(_("Enable compiler flags?"), msg, wxART_QUESTION,
+                            AnnoyingDialog::YES_NO, AnnoyingDialog::rtNO);
++        PlaceWindow(&dlg);
+         if (dlg.ShowModal() == AnnoyingDialog::rtNO)
+         {
+             // for disabled options, remove relative text option *and*
+@@ -3020,6 +3021,7 @@
+             dlg.SetSize(dlg.GetPosition().x, dlg.GetPosition().y - (220 - dlg.GetSize().GetHeight()) / 2,
+                         dlg.GetSize().GetWidth(), 220);
+         }
++        PlaceWindow(&dlg);
+         dlg.ShowModal();
+         wxString flags = dlg.GetValue();
+         flags.Replace(wxT("\n"), wxT(" "));
+Index: src/plugins/contrib/AutoVersioning/AutoVersioning.cpp
+===================================================================
+--- a/src/plugins/contrib/AutoVersioning/AutoVersioning.cpp	(revision 12303)
++++ b/src/plugins/contrib/AutoVersioning/AutoVersioning.cpp	(revision 12304)
+@@ -522,6 +522,7 @@
+     VersionEditorDialog.SetNamespace(cbC2U(GetConfig().Code.NameSpace.c_str()));
+     VersionEditorDialog.SetPrefix(cbC2U(GetConfig().Code.Prefix.c_str()));
+ 
++    PlaceWindow(&VersionEditorDialog);
+     VersionEditorDialog.ShowModal();
+     // allright let's call all the getters
+     avConfig OldConfig = GetConfig();
+@@ -833,6 +834,7 @@
+ {
+     avChangesDlg changesDlg((wxWindow*) Manager::Get()->GetAppWindow(),0L);
+     changesDlg.SetTemporaryChangesFile(m_Project->GetBasePath() + _T("changes.tmp"));
++    PlaceWindow(&changesDlg);
+     changesDlg.ShowModal();
+ 
+     wxString changes = changesDlg.Changes();
+Index: src/plugins/contrib/CppCheck/ConfigPanel.cpp
+===================================================================
+--- a/src/plugins/contrib/CppCheck/ConfigPanel.cpp	(revision 12303)
++++ b/src/plugins/contrib/CppCheck/ConfigPanel.cpp	(revision 12304)
+@@ -162,7 +162,7 @@
+                          _("Executable files (*)|*"),
+ #endif
+                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+-
++    PlaceWindow(&dialog);
+     if (dialog.ShowModal() == wxID_OK)
+         txtCppCheckApp->SetValue(dialog.GetPath());
+ }
+@@ -180,7 +180,7 @@
+                          _("Executable files (*)|*"),
+ #endif
+                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+-
++    PlaceWindow(&dialog);
+     if (dialog.ShowModal() == wxID_OK)
+         txtVeraApp->SetValue(dialog.GetPath());
+ }
+Index: src/plugins/contrib/Cscope/CscopeConfigPanel.cpp
+===================================================================
+--- a/src/plugins/contrib/Cscope/CscopeConfigPanel.cpp	(revision 12303)
++++ b/src/plugins/contrib/Cscope/CscopeConfigPanel.cpp	(revision 12304)
+@@ -1,5 +1,5 @@
+-#include "CscopeConfigPanel.h"
+-#include "configmanager.h"
++#include "CscopeConfigPanel.h"
++#include "configmanager.h"
+ #include <wx/filedlg.h>
+ 
+ //(*InternalHeaders(CscopeConfigPanel)
+@@ -52,14 +52,14 @@
+ 	bszMain->SetSizeHints(this);
+ 
+ 	Connect(ID_BTN_CPPCHECK_APP,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&CscopeConfigPanel::OnbtnCscopeAppClick);
+-	//*)
+-
+-
+-    ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("cscope"));
+-    if (cfg)
+-    {
+-        txtCscopeApp->SetValue( cfg->Read(_T("cscope_app"),
+-                                  GetDefaultCscopeExecutableName()) );
++	//*)
++
++
++    ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("cscope"));
++    if (cfg)
++    {
++        txtCscopeApp->SetValue( cfg->Read(_T("cscope_app"),
++                                  GetDefaultCscopeExecutableName()) );
+     }
+ }
+ 
+@@ -67,42 +67,42 @@
+ {
+ 	//(*Destroy(CscopeConfigPanel)
+ 	//*)
+-}
+-
+-void CscopeConfigPanel::OnApply()
+-{
+-ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("cscope"));
+-    if (cfg)
+-    {
+-        wxString app = txtCscopeApp->GetValue();
+-        if (!app.IsEmpty())
+-            cfg->Write(_T("cscope_app"), app);
+-    }
+ }
+ 
++void CscopeConfigPanel::OnApply()
++{
++ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("cscope"));
++    if (cfg)
++    {
++        wxString app = txtCscopeApp->GetValue();
++        if (!app.IsEmpty())
++            cfg->Write(_T("cscope_app"), app);
++    }
++}
+ 
++
+ void CscopeConfigPanel::OnbtnCscopeAppClick(wxCommandEvent& event)
+-{
+-    wxFileName initialFile(txtCscopeApp->GetValue());
+-    wxFileDialog dialog (this, _("Select CScope application"),
+-                         initialFile.GetPath(),
+-                         GetDefaultCscopeExecutableName(),
+-#ifdef __WXMSW__
+-                         _("Executable files (*.exe)|*.exe"),
+-#else
+-                         _("Executable files (*)|*"),
+-#endif
+-                        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+-
+-    if (dialog.ShowModal() == wxID_OK)
++{
++    wxFileName initialFile(txtCscopeApp->GetValue());
++    wxFileDialog dialog (this, _("Select CScope application"),
++                         initialFile.GetPath(),
++                         GetDefaultCscopeExecutableName(),
++#ifdef __WXMSW__
++                         _("Executable files (*.exe)|*.exe"),
++#else
++                         _("Executable files (*)|*"),
++#endif
++                        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
++    PlaceWindow(&dialog);
++    if (dialog.ShowModal() == wxID_OK)
+         txtCscopeApp->SetValue(dialog.GetPath());
+-}
+-
+-wxString CscopeConfigPanel::GetDefaultCscopeExecutableName()
+-{
+-#ifdef __WXMSW__
+-    return _T("cscope.exe");
+-#else
+-    return _T("cscope");
+-#endif
+ }
++
++wxString CscopeConfigPanel::GetDefaultCscopeExecutableName()
++{
++#ifdef __WXMSW__
++    return _T("cscope.exe");
++#else
++    return _T("cscope");
++#endif
++}
+Index: src/plugins/contrib/EditorConfig/EditorConfig.cpp
+===================================================================
+--- a/src/plugins/contrib/EditorConfig/EditorConfig.cpp	(revision 12303)
++++ b/src/plugins/contrib/EditorConfig/EditorConfig.cpp	(revision 12304)
+@@ -142,10 +142,20 @@
+ void EditorConfig::OnReloadEditorConfig(wxCommandEvent& /*event*/)
+ {
+     // Reload EditorConfig
+-    if ( ApplyEditorSettings(Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor()) )
+-        wxMessageDialog(NULL, _T("Editor configuration successfully re-loaded."), wxT("EditorConfig"), wxOK).ShowModal();
++    if (ApplyEditorSettings(Manager::Get()->GetEditorManager()->GetBuiltinActiveEditor()))
++    {
++        wxMessageDialog dlg(nullptr, _("Editor configuration successfully re-loaded."),
++                            _("Editor Config"), wxOK);
++        PlaceWindow(&dlg);
++        dlg.ShowModal();
++    }
+     else
+-        wxMessageDialog(NULL, _("Error re-loading editor configuration."),        wxT("EditorConfig"), wxOK).ShowModal();
++    {
++        wxMessageDialog dlg(nullptr, _("Error re-loading editor configuration."),
++                            _("Editor Config"), wxOK);
++        PlaceWindow(&dlg);
++        dlg.ShowModal();
++    }
+ }
+ 
+ bool EditorConfig::ApplyEditorSettings(EditorBase* eb)
+Index: src/plugins/contrib/FileManager/FileExplorer.cpp
+===================================================================
+--- a/src/plugins/contrib/FileManager/FileExplorer.cpp	(revision 12303)
++++ b/src/plugins/contrib/FileManager/FileExplorer.cpp	(revision 12304)
+@@ -1292,7 +1292,8 @@
+ void FileExplorer::OnNewFile(wxCommandEvent &/*event*/)
+ {
+     wxString workingdir=GetFullPath(m_selectti[0]); //SINGLE: m_Tree->GetSelection()
+-    wxTextEntryDialog te(this,_("Name Your New File: "));
++    wxTextEntryDialog te(this, _("Name Your New File: "));
++    PlaceWindow(&te);
+     if(te.ShowModal()!=wxID_OK)
+         return;
+     wxString name=te.GetValue();
+@@ -1321,6 +1322,7 @@
+     if(fav.path[fav.path.Len()-1]!=wxFileName::GetPathSeparator())
+         fav.path=fav.path+wxFileName::GetPathSeparator();
+     wxTextEntryDialog ted(NULL,_("Enter an alias for this directory:"),_("Add Favorite Directory"),fav.path);
++    PlaceWindow(&ted);
+     if(ted.ShowModal()!=wxID_OK)
+         return;
+     wxString name=ted.GetValue();
+@@ -1333,6 +1335,7 @@
+ {
+     wxString workingdir=GetFullPath(m_selectti[0]); //SINGLE: m_Tree->GetSelection()
+     wxTextEntryDialog te(this,_("New Directory Name: "));
++    PlaceWindow(&te);
+     if(te.ShowModal()!=wxID_OK)
+         return;
+     wxString name=te.GetValue();
+@@ -1437,6 +1440,7 @@
+     {
+         selectedfiles.Add(GetFullPath(m_selectti[i]));  //SINGLE: m_Tree->GetSelection()
+     }
++    PlaceWindow(&dd);
+     if(dd.ShowModal()==wxID_CANCEL)
+         return;
+     CopyFiles(dd.GetPath(),selectedfiles);
+@@ -1475,6 +1479,7 @@
+     for(int i=0;i<m_ticount;i++)
+         selectedfiles.Add(GetFullPath(m_selectti[i]));  //SINGLE: m_Tree->GetSelection()
+     dd.SetPath(GetFullPath(m_Tree->GetRootItem()));
++    PlaceWindow(&dd);
+     if(dd.ShowModal()==wxID_CANCEL)
+         return;
+     MoveFiles(dd.GetPath(),selectedfiles);
+@@ -1544,6 +1549,7 @@
+             return;
+         }
+         wxTextEntryDialog te(this,_("New name:"),_("Rename File"),wxFileName(path).GetFullName());
++        PlaceWindow(&te);
+         if(te.ShowModal()==wxID_CANCEL)
+             return;
+         wxFileName destpath(path);
+@@ -1554,6 +1560,7 @@
+     if(wxFileName::DirExists(path))
+     {
+         wxTextEntryDialog te(this,_("New name:"),_("Rename File"),wxFileName(path).GetFullName());
++        PlaceWindow(&te);
+         if(te.ShowModal()==wxID_CANCEL)
+             return;
+         wxFileName destpath(path);
+@@ -1583,6 +1590,7 @@
+ void FileExplorer::OnSettings(wxCommandEvent &/*event*/)
+ {
+     FileBrowserSettings fbs(m_favdirs,NULL);
++    PlaceWindow(&fbs);
+     if(fbs.ShowModal()==wxID_OK)
+     {
+         size_t count=m_favdirs.GetCount();
+Index: src/plugins/contrib/HexEditor/ExpressionTester.cpp
+===================================================================
+--- a/src/plugins/contrib/HexEditor/ExpressionTester.cpp	(revision 12303)
++++ b/src/plugins/contrib/HexEditor/ExpressionTester.cpp	(revision 12304)
+@@ -190,7 +190,8 @@
+ void ExpressionTester::OnButton3Click(wxCommandEvent& event)
+ {
+     SelectStoredExpressionDlg dlg( this, m_Expr->GetValue() );
+-    if ( dlg.ShowModal() == wxID_OK )
++    PlaceWindow(&dlg);
++    if (dlg.ShowModal() == wxID_OK)
+     {
+         m_Expr->SetValue( dlg.GetExpression() );
+         OnButton1Click(event);
+@@ -199,5 +200,7 @@
+ 
+ void ExpressionTester::OnButton4Click(wxCommandEvent& /*event*/)
+ {
+-    TestCasesDlg( this, Expression::GetTests() ).ShowModal();
++    TestCasesDlg dlg(this, Expression::GetTests());
++    PlaceWindow(&dlg);
++    dlg.ShowModal();
+ }
+Index: src/plugins/contrib/HexEditor/HexEditPanel.cpp
+===================================================================
+--- a/src/plugins/contrib/HexEditor/HexEditPanel.cpp	(revision 12303)
++++ b/src/plugins/contrib/HexEditor/HexEditPanel.cpp	(revision 12304)
+@@ -1170,7 +1170,7 @@
+                       fname.GetFullName(),
+                       _T("*.*"),//m_filecontent->GetWildcard(),
+                       wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+-
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() != wxID_OK) // cancelled out
+     {
+         UpdateModified();
+@@ -1520,6 +1520,7 @@
+     if ( !m_Content->GetSize() ) return;
+ 
+     SearchDialog dlg( this, m_Content, m_Current );
++    PlaceWindow(&dlg);
+     if ( dlg.ShowModal() == wxID_OK )
+     {
+         m_Current = dlg.GetOffset();
+@@ -1534,7 +1535,9 @@
+ 
+ void HexEditPanel::OnButton1Click(wxCommandEvent& /*event*/)
+ {
+-    ExpressionTester( 0, m_Content, m_Current).ShowModal();
++    ExpressionTester dlg(this, m_Content, m_Current);
++    PlaceWindow(&dlg);
++    dlg.ShowModal();
+ }
+ 
+ void HexEditPanel::ReparseExpression()
+@@ -1577,7 +1580,8 @@
+ void HexEditPanel::OnButton3Click1(wxCommandEvent& event)
+ {
+     SelectStoredExpressionDlg dlg( this, m_Expression->GetValue() );
+-    if ( dlg.ShowModal() == wxID_OK )
++    PlaceWindow(&dlg);
++    if (dlg.ShowModal() == wxID_OK)
+     {
+         m_Expression->SetValue( dlg.GetExpression() );
+         OnExpressionTextEnter(event);
+@@ -1828,7 +1832,9 @@
+ 
+     if ( !test ) return;
+ 
+-    TestCasesDlg( this, *test ).ShowModal();
++    TestCasesDlg dlg(this, *test);
++    PlaceWindow(&dlg);
++    dlg.ShowModal();
+ }
+ 
+ 
+Index: src/plugins/contrib/NassiShneiderman/NassiView.cpp
+===================================================================
+--- a/src/plugins/contrib/NassiShneiderman/NassiView.cpp	(revision 12303)
++++ b/src/plugins/contrib/NassiShneiderman/NassiView.cpp	(revision 12304)
+@@ -1212,7 +1212,9 @@
+ 
+ void NassiView::ExportCSource()
+ {
+-    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"), _T(""), _T(""), _("C sources (*.c)|*.c"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
++    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"), _T(""), _T(""),
++                     _("C sources (*.c)|*.c"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
++    PlaceWindow(&dlg);
+     if ( dlg.ShowModal() != wxID_OK ) return;
+     wxString filename = dlg.GetPath();
+     if ( filename.empty() ) return;
+@@ -1273,7 +1275,9 @@
+ 
+ void NassiView::ExportStrukTeX()
+ {
+-    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"), _T(""), _T(""), _("LaTeX files (*.tex)|*.tex"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
++    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"), _T(""), _T(""),
++                     _("LaTeX files (*.tex)|*.tex"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
++    PlaceWindow(&dlg);
+     if ( dlg.ShowModal() != wxID_OK ) return;
+     wxString filename = dlg.GetPath();
+     if ( filename.empty() ) return;
+@@ -1346,7 +1350,9 @@
+ #if wxUSE_POSTSCRIPT
+ void NassiView::ExportPS()
+ {
+-    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"), _T(""), _T(""), _("PostScript files (*.ps)|*.ps"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
++    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"), _T(""), _T(""),
++                     _("PostScript files (*.ps)|*.ps"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
++    PlaceWindow(&dlg);
+     if ( dlg.ShowModal() != wxID_OK ) return;
+     wxString filename = dlg.GetPath();
+     if ( filename.empty() ) return;
+@@ -1433,7 +1439,9 @@
+ 
+ void NassiView::ExportSVG()
+ {
+-    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"),_T(""),_T(""),_("SVG files (*.SVG)|*.SVG"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
++    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"),_T(""),_T(""),
++                     _("SVG files (*.SVG)|*.SVG"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
++    PlaceWindow(&dlg);
+     if ( dlg.ShowModal() != wxID_OK ) return;
+     wxString filename = dlg.GetPath();
+     if ( filename.empty() ) return;
+@@ -1515,7 +1523,9 @@
+ 
+ void NassiView::ExportBitmap()
+ {
+-    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"),_T(""),_T(""),_("PNG files (*.png)|*.png"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
++    wxFileDialog dlg( m_diagramwindow, _("Choose a file to exporting into"),_T(""),_T(""),
++                     _("PNG files (*.png)|*.png"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
++    PlaceWindow(&dlg);
+     if ( dlg.ShowModal() != wxID_OK ) return;
+     wxString filename = dlg.GetPath();
+     if ( filename.empty() ) return;
+Index: src/plugins/contrib/NassiShneiderman/cbEditorPanel.cpp
+===================================================================
+--- a/src/plugins/contrib/NassiShneiderman/cbEditorPanel.cpp	(revision 12303)
++++ b/src/plugins/contrib/NassiShneiderman/cbEditorPanel.cpp	(revision 12304)
+@@ -93,7 +93,7 @@
+                       fname.GetFullName(),
+                       m_filecontent->GetWildcard(),
+                       wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+-
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() != wxID_OK) // cancelled out
+     {
+         UpdateModified();
+Index: src/plugins/contrib/ProjectOptionsManipulator/ProjectOptionsManipulator.cpp
+===================================================================
+--- a/src/plugins/contrib/ProjectOptionsManipulator/ProjectOptionsManipulator.cpp	(revision 12303)
++++ b/src/plugins/contrib/ProjectOptionsManipulator/ProjectOptionsManipulator.cpp	(revision 12304)
+@@ -117,6 +117,7 @@
+   {
+     ProjectOptionsManipulatorResultDlg dlg( Manager::Get()->GetAppWindow(), ID_PROJECT_OPTIONS_RESULT_DLG );
+     dlg.ApplyResult(result);
++    PlaceWindow(&dlg);
+     dlg.ShowModal(); // Don't care about return value
+ 
+     ProjectOptionsManipulatorDlg::EProjectScanOption scan_opt = m_Dlg->GetScanOption();
+Index: src/plugins/contrib/ProjectOptionsManipulator/ProjectOptionsManipulatorDlg.cpp
+===================================================================
+--- a/src/plugins/contrib/ProjectOptionsManipulator/ProjectOptionsManipulatorDlg.cpp	(revision 12303)
++++ b/src/plugins/contrib/ProjectOptionsManipulator/ProjectOptionsManipulatorDlg.cpp	(revision 12304)
+@@ -406,6 +406,7 @@
+    }
+ 
+    wxSingleChoiceDialog choose_dlg(this, _T("Available compilers"), _T("Choose a new compiler"), compiler_array);
++   PlaceWindow(&choose_dlg);
+    if (choose_dlg.ShowModal() == wxID_OK)
+    {
+      if      (event.GetId() == ID_BTN_SEARCH_COMPILER_SRC)
+Index: src/plugins/contrib/SpellChecker/Thesaurus.cpp
+===================================================================
+--- a/src/plugins/contrib/SpellChecker/Thesaurus.cpp	(revision 12303)
++++ b/src/plugins/contrib/SpellChecker/Thesaurus.cpp	(revision 12304)
+@@ -112,6 +112,7 @@
+         {
+             Syn = wxEmptyString;
+             ThesaurusDialog dlg(m_pDialogsParent, Word, syn);
++            PlaceWindow(&dlg);
+             if ( dlg.ShowModal() == wxID_OK )
+             {
+                 Syn = dlg.GetSelection();
+Index: src/plugins/contrib/ToolsPlus/CmdConfigDialog.cpp
+===================================================================
+--- a/src/plugins/contrib/ToolsPlus/CmdConfigDialog.cpp	(revision 12303)
++++ b/src/plugins/contrib/ToolsPlus/CmdConfigDialog.cpp	(revision 12304)
+@@ -454,6 +454,7 @@
+     wxFileDialog fd(NULL, _("Import: Select File"),_T(""),_T(""),_T("*"),wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+     #endif
+     const int prevlistsize = m_ic.interps.GetCount();
++    PlaceWindow(&fd);
+     if(fd.ShowModal()!=wxID_OK)
+         return;
+     m_ic.ImportConfig(fd.GetPath());
+@@ -471,6 +472,7 @@
+     #else
+     wxFileDialog fd(NULL, _("Export: Choose a Filename"),_T(""),_T(""),_T("*"),wxFD_SAVE);
+     #endif
++    PlaceWindow(&fd);
+     if(fd.ShowModal()!=wxID_OK)
+         return;
+     m_ic.ExportConfig(fd.GetPath());
+Index: src/plugins/contrib/ToolsPlus/ToolsPlus.cpp
+===================================================================
+--- a/src/plugins/contrib/ToolsPlus/ToolsPlus.cpp	(revision 12303)
++++ b/src/plugins/contrib/ToolsPlus/ToolsPlus.cpp	(revision 12304)
+@@ -355,7 +355,9 @@
+         }
+         else
+             promptend++;
+-        wxTextEntryDialog ted(NULL,commandstr.Mid(promptind+10,promptend-1),consolename,_T(""),wxOK|wxCANCEL);
++        wxTextEntryDialog ted(NULL,commandstr.Mid(promptind+10,promptend-1),consolename,_T(""),
++                              wxOK|wxCANCEL);
++        PlaceWindow(&ted);
+         if (ted.ShowModal()==wxID_OK)
+             substitution=ted.GetValue();
+         else
+Index: src/plugins/contrib/Valgrind/Valgrind.cpp
+===================================================================
+--- a/src/plugins/contrib/Valgrind/Valgrind.cpp	(revision 12303)
++++ b/src/plugins/contrib/Valgrind/Valgrind.cpp	(revision 12304)
+@@ -534,6 +534,7 @@
+     wxFileDialog Dialog(Manager::Get()->GetAppFrame(), _("Choose XML log file"),
+                         wxEmptyString, wxEmptyString,
+                         wxT("*.xml"), wxFD_OPEN);
++    PlaceWindow(&Dialog);
+     if (Dialog.ShowModal() == wxID_OK)
+     {
+         TiXmlDocument Doc;
+Index: src/plugins/contrib/Valgrind/valgrind_config.cpp
+===================================================================
+--- a/src/plugins/contrib/Valgrind/valgrind_config.cpp	(revision 12303)
++++ b/src/plugins/contrib/Valgrind/valgrind_config.cpp	(revision 12304)
+@@ -125,6 +125,7 @@
+ void ValgrindConfigurationPanel::OnBrowseButtonClick(wxCommandEvent& /*event*/)
+ {
+     wxFileDialog dialog(this, wxT("Choose path"));
++    PlaceWindow(&dialog);
+     if (dialog.ShowModal() == wxID_OK)
+     {
+         m_ExecutablePath->SetValue(dialog.GetPath());
+Index: src/plugins/contrib/byogames/byogames.cpp
+===================================================================
+--- a/src/plugins/contrib/byogames/byogames.cpp	(revision 12303)
++++ b/src/plugins/contrib/byogames/byogames.cpp	(revision 12304)
+@@ -60,6 +60,7 @@
+ int BYOGames::SelectGame()
+ {
+     byoGameSelect Select(0);
++    PlaceWindow(&Select);
+     return Select.ShowModal();
+ }
+ 
+Index: src/plugins/contrib/codesnippets/codesnippetstreectrl.cpp
+===================================================================
+--- a/src/plugins/contrib/codesnippets/codesnippetstreectrl.cpp	(revision 12303)
++++ b/src/plugins/contrib/codesnippets/codesnippetstreectrl.cpp	(revision 12304)
+@@ -1541,6 +1541,7 @@
+     // move dialog into the parents frame space
+     wxPoint mousePosn = ::wxGetMousePosition();
+     (&dlg)->Move(mousePosn.x, mousePosn.y);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() != wxID_OK) return;
+ 
+     newFileName = dlg.GetPath();
+Index: src/plugins/contrib/codesnippets/codesnippetswindow.cpp
+===================================================================
+--- a/src/plugins/contrib/codesnippets/codesnippetswindow.cpp	(revision 12303)
++++ b/src/plugins/contrib/codesnippets/codesnippetswindow.cpp	(revision 12304)
+@@ -913,6 +913,7 @@
+     //-wxFileDialog dlg(this, _("Load snippets from file"), wxEmptyString, wxEmptyString, _("XML files (*.xml)|*.xml|All files (*.*)|*.*"), wxOPEN|wxFILE_MUST_EXIST);
+     wxFileDialog dlg(this, _("Load snippets from file"), wxEmptyString, wxEmptyString,
+         _("XML files (*.xml)|*.xml|All files (*.*)|*.*"), wxFD_OPEN);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+         LOGIT(wxT("LoadingFile:%s"),dlg.GetPath().c_str());
+@@ -935,6 +936,7 @@
+ // ----------------------------------------------------------------------------
+ {
+     wxFileDialog dlg(this, _("Save snippets to file"), wxEmptyString, _T("codesnippets.xml"), _("XML files (*.xml)|*.xml|All files (*.*)|*.*"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+         GetSnippetsTreeCtrl()->SaveItemsToFile(dlg.GetPath());
+Index: src/plugins/contrib/codesnippets/settingsdlg.cpp
+===================================================================
+--- a/src/plugins/contrib/codesnippets/settingsdlg.cpp	(revision 12303)
++++ b/src/plugins/contrib/codesnippets/settingsdlg.cpp	(revision 12304)
+@@ -152,7 +152,7 @@
+    // move dialog into the parents frame space
+     wxPoint mousePosn = ::wxGetMousePosition();
+     dlg.Move(mousePosn.x, mousePosn.y);
+-
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() != wxID_OK) return;
+     newFileName = dlg.GetPath();
+ 
+@@ -174,7 +174,7 @@
+    // move dialog into the parents frame space
+     wxPoint mousePosn = ::wxGetMousePosition();
+     dlg.Move(mousePosn.x, mousePosn.y);
+-
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() != wxID_OK) return wxEmptyString;
+     return dlg.GetPath();
+ }
+Index: src/plugins/contrib/devpak_plugin/devpakupdater.cpp
+===================================================================
+--- a/src/plugins/contrib/devpak_plugin/devpakupdater.cpp	(revision 12303)
++++ b/src/plugins/contrib/devpak_plugin/devpakupdater.cpp	(revision 12304)
+@@ -99,6 +99,7 @@
+     if (!ConfigurationValid())
+         return -1;
+     UpdateDlg dlg(Manager::Get()->GetAppWindow());
++    PlaceWindow(&dlg);
+     dlg.ShowModal();
+     return 0;
+ }
+Index: src/plugins/contrib/headerfixup/execution.cpp
+===================================================================
+--- a/src/plugins/contrib/headerfixup/execution.cpp	(revision 12303)
++++ b/src/plugins/contrib/headerfixup/execution.cpp	(revision 12304)
+@@ -315,6 +315,7 @@
+   {
+     this->Show(false);
+     Protocol Prot(NULL);
++    PlaceWindow(&Prot);
+     Prot.SetProtocol(m_Log);
+     Prot.ShowModal();
+   }
+Index: src/plugins/contrib/headerfixup/headerfixup.cpp
+===================================================================
+--- a/src/plugins/contrib/headerfixup/headerfixup.cpp	(revision 12303)
++++ b/src/plugins/contrib/headerfixup/headerfixup.cpp	(revision 12304)
+@@ -68,6 +68,7 @@
+   }
+ 
+   Execution Dlg(NULL);
++  PlaceWindow(&Dlg);
+   Dlg.ShowModal();
+   return 0;
+ }// Execute
+Index: src/plugins/contrib/keybinder/keybinder.cpp
+===================================================================
+--- a/src/plugins/contrib/keybinder/keybinder.cpp	(revision 12303)
++++ b/src/plugins/contrib/keybinder/keybinder.cpp	(revision 12304)
+@@ -2512,6 +2512,7 @@
+           "The new profile will be initially set to a copy of the last selected profile."),
+         _("Add new profile"));
+     dlg.SetValue(sel->GetName());
++    PlaceWindow(&dlg);
+ 
+     bool valid = FALSE;
+     while (!valid) {
+Index: src/plugins/contrib/lib_finder/lib_finder.cpp
+===================================================================
+--- a/src/plugins/contrib/lib_finder/lib_finder.cpp	(revision 12303)
++++ b/src/plugins/contrib/lib_finder/lib_finder.cpp	(revision 12304)
+@@ -128,6 +128,7 @@
+ int lib_finder::Execute()
+ {
+     LibrariesDlg m_Dlg(Manager::Get()->GetAppWindow(),m_KnownLibraries);
++    PlaceWindow(&m_Dlg);
+     m_Dlg.ShowModal();
+ 	return -1;
+ }
+@@ -299,7 +300,9 @@
+ 
+         if ( cbMessageBox( Message, _("LibFinder - error"), wxYES_NO|wxICON_EXCLAMATION ) == wxID_YES )
+         {
+-            ProjectMissingLibs(Manager::Get()->GetAppWindow() ,NotFound,m_KnownLibraries).ShowModal();
++            ProjectMissingLibs dlg(Manager::Get()->GetAppWindow(), NotFound, m_KnownLibraries);
++            PlaceWindow(&dlg);
++            dlg.ShowModal();
+         }
+     }
+ }
+Index: src/plugins/contrib/lib_finder/librariesdlg.cpp
+===================================================================
+--- a/src/plugins/contrib/lib_finder/librariesdlg.cpp	(revision 12303)
++++ b/src/plugins/contrib/lib_finder/librariesdlg.cpp	(revision 12304)
+@@ -366,11 +366,13 @@
+ 
+     // Getting list of directories to process
+     DirListDlg Dlg(this);
++    PlaceWindow(&Dlg);
+     if ( Dlg.ShowModal() == wxID_CANCEL ) return;
+ 
+     // Do the processing
+     FileNamesMap FNMap;
+     ProcessingDlg PDlg(Manager::Get()->GetAppWindow(),m_Manager,m_WorkingCopy);
++    PlaceWindow(&PDlg);
+     PDlg.ShowModal();
+ 
+     bool apply = PDlg.ReadDirs(Dlg.Dirs) && PDlg.ProcessLibs();
+@@ -966,5 +968,7 @@
+ 
+ void LibrariesDlg::OnButton3Click(wxCommandEvent& /*event*/)
+ {
+-    DefsDownloadDlg(this).ShowModal();
++    DefsDownloadDlg dlg(this);
++    PlaceWindow(&dlg);
++    dlg.ShowModal();
+ }
+Index: src/plugins/contrib/lib_finder/processingdlg.cpp
+===================================================================
+--- a/src/plugins/contrib/lib_finder/processingdlg.cpp	(revision 12303)
++++ b/src/plugins/contrib/lib_finder/processingdlg.cpp	(revision 12304)
+@@ -235,6 +235,7 @@
+     }
+ 
+     LibSelectDlg Dlg( this, Names, addOnly );
++    PlaceWindow(&Dlg);
+     Dlg.SetSelections( Selected );
+ 
+     if ( Dlg.ShowModal() == wxID_OK )
+Index: src/plugins/contrib/lib_finder/projectconfigurationpanel.cpp
+===================================================================
+--- a/src/plugins/contrib/lib_finder/projectconfigurationpanel.cpp	(revision 12303)
++++ b/src/plugins/contrib/lib_finder/projectconfigurationpanel.cpp	(revision 12304)
+@@ -567,7 +567,9 @@
+ void ProjectConfigurationPanel::OnButton2Click(wxCommandEvent& /*event*/)
+ {
+     wxArrayString HeadersBase;
+-    if ( HeadersDetectorDlg(this,m_Project,HeadersBase).ShowModal() != wxID_OK )
++    HeadersDetectorDlg dlg(this,m_Project,HeadersBase);
++    PlaceWindow(&dlg);
++    if (dlg.ShowModal() != wxID_OK)
+     {
+         cbMessageBox( _("Cancelled the search"), _("Cancelled"), wxOK | wxICON_WARNING, this );
+         return;
+Index: src/plugins/contrib/lib_finder/projectmissinglibs.cpp
+===================================================================
+--- a/src/plugins/contrib/lib_finder/projectmissinglibs.cpp	(revision 12303)
++++ b/src/plugins/contrib/lib_finder/projectmissinglibs.cpp	(revision 12304)
+@@ -305,10 +305,12 @@
+ 
+     // Getting list of directories to process
+     DirListDlg Dlg(this);
++    PlaceWindow(&Dlg);
+     if ( Dlg.ShowModal() == wxID_CANCEL ) return;
+ 
+     // Do the processing
+     ProcessingDlg PDlg( this, m_DetectionManager, m_CurrentResults );
++    PlaceWindow(&PDlg);
+     PDlg.ShowModal();
+ 
+     bool apply = PDlg.ReadDirs(Dlg.Dirs) && PDlg.ProcessLibs(Libs);
+Index: src/plugins/contrib/profiler/cbprofiler.cpp
+===================================================================
+--- a/src/plugins/contrib/profiler/cbprofiler.cpp	(revision 12303)
++++ b/src/plugins/contrib/profiler/cbprofiler.cpp	(revision 12304)
+@@ -115,6 +115,7 @@
+                                     _("Select Target"),
+                                     project->GetBuildTargetsCount(), &choices[0]);
+         dialog.SetSelection(selected);
++        PlaceWindow(&dialog);
+         if (dialog.ShowModal() != wxID_OK)
+             return -1;
+         int targetIndex = dialog.GetSelection();
+@@ -199,6 +200,7 @@
+                 {
+                     wxFileDialog filedialog(Manager::Get()->GetAppWindow(), _("Locate profile information"),
+                                             _T(""),_T("gmon.out"),_T("*.*"),wxFD_OPEN|wxFD_FILE_MUST_EXIST|compatibility::wxHideReadonly);
++                    PlaceWindow(&filedialog);
+                     if (filedialog.ShowModal() == wxID_OK)
+                     {
+                         dataname = filedialog.GetPath();
+Index: src/plugins/contrib/profiler/cbprofilerexec.cpp
+===================================================================
+--- a/src/plugins/contrib/profiler/cbprofilerexec.cpp	(revision 12303)
++++ b/src/plugins/contrib/profiler/cbprofilerexec.cpp	(revision 12304)
+@@ -426,7 +426,7 @@
+                             wxEmptyString,
+                             _T("*.*"),
+                             wxFD_SAVE);
+-
++    PlaceWindow(&filedialog);
+     if (filedialog.ShowModal() == wxID_OK)
+     {
+         wxFFile file(filedialog.GetPath().c_str(), _T("w"));
+Index: src/plugins/contrib/symtab/symtabconfig.cpp
+===================================================================
+--- a/src/plugins/contrib/symtab/symtabconfig.cpp	(revision 12303)
++++ b/src/plugins/contrib/symtab/symtabconfig.cpp	(revision 12304)
+@@ -181,6 +181,7 @@
+ #endif
+ 
+   wxDirDialog dd(parent, _("Select directory for search"));
++  PlaceWindow(&dd);
+   if (dd.ShowModal() == wxID_OK)
+   {
+     wxString path = dd.GetPath();
+@@ -212,6 +213,7 @@
+   wxString es       = wxEmptyString;
+ 
+   wxFileDialog fd(parent, caption, es, es, wildcard, wxFD_OPEN|compatibility::wxHideReadonly);
++  PlaceWindow(&fd);
+   if (fd.ShowModal() == wxID_OK)
+   {
+     wxString path = fd.GetPath();
+@@ -238,6 +240,7 @@
+   wxString es = wxEmptyString;
+ 
+   wxFileDialog fd(parent, caption, es, es, wildcard, wxFD_OPEN|compatibility::wxHideReadonly);
++  PlaceWindow(&fd);
+   if (fd.ShowModal() == wxID_OK)
+   {
+     wxString path = fd.GetPath();
+Index: src/plugins/contrib/symtab/symtabexec.cpp
+===================================================================
+--- a/src/plugins/contrib/symtab/symtabexec.cpp	(revision 12303)
++++ b/src/plugins/contrib/symtab/symtabexec.cpp	(revision 12304)
+@@ -159,7 +159,7 @@
+ 
+   wxString     es = wxEmptyString;
+   wxFileDialog fd(parent, _("Save NM output to file"), es, es, _T("*.*"), wxFD_SAVE);
+-
++  PlaceWindow(&fd);
+   if (fd.ShowModal() == wxID_OK)
+   {
+     wxFFile file(fd.GetPath().c_str(), _T("w"));
+Index: src/plugins/contrib/wxSmith/properties/wxsarraystringproperty.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/properties/wxsarraystringproperty.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/properties/wxsarraystringproperty.cpp	(revision 12304)
+@@ -37,6 +37,7 @@
+ bool wxsArrayStringProperty::ShowEditor(wxsPropertyContainer* Object)
+ {
+     wxsArrayStringEditorDlg Dlg(0,VALUE);
++    PlaceWindow(&Dlg);
+     return Dlg.ShowModal() == wxID_OK;
+ }
+ 
+Index: src/plugins/contrib/wxSmith/wxsproject.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxsproject.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxsproject.cpp	(revision 12304)
+@@ -304,6 +304,7 @@
+         }
+         cbConfigurationDialog Dlg(0,-1,_("Configuring wxSmith"));
+         Dlg.AttachConfigurationPanel(m_GUI->BuildConfigurationPanel(&Dlg));
++        PlaceWindow(&Dlg);
+         Dlg.ShowModal();
+     }
+ }
+Index: src/plugins/contrib/wxSmith/wxwidgets/defitems/wxstoolbareditor.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/defitems/wxstoolbareditor.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/defitems/wxstoolbareditor.cpp	(revision 12304)
+@@ -530,6 +530,7 @@
+     ToolBarItem* Selected = m_Selected;
+     SelectItem(Selected);
+     wxsBitmapIconEditorDlg Dlg(this,Selected->m_Bitmap,_T("wxART_TOOLBAR"));
++    PlaceWindow(&Dlg);
+     Dlg.ShowModal();
+     SelectItem(nullptr);
+     SelectItem(Selected);
+@@ -542,6 +543,7 @@
+     ToolBarItem* Selected = m_Selected;
+     SelectItem(Selected);
+     wxsBitmapIconEditorDlg Dlg(this,Selected->m_Bitmap2,_T("wxART_TOOLBAR"));
++    PlaceWindow(&Dlg);
+     Dlg.ShowModal();
+     SelectItem(nullptr);
+     SelectItem(Selected);
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxsarraystringcheckproperty.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsarraystringcheckproperty.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsarraystringcheckproperty.cpp	(revision 12304)
+@@ -39,6 +39,7 @@
+ bool wxsArrayStringCheckProperty::ShowEditor(wxsPropertyContainer* Object)
+ {
+     wxsArrayStringCheckEditorDlg Dlg(0,VALUE,CHECK);
++    PlaceWindow(&Dlg);
+     return Dlg.ShowModal() == wxID_OK;
+ }
+ 
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxsbitmapiconproperty.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsbitmapiconproperty.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsbitmapiconproperty.cpp	(revision 12304)
+@@ -162,6 +162,7 @@
+ bool wxsBitmapIconProperty::ShowEditor(wxsPropertyContainer* Object)
+ {
+     wxsBitmapIconEditorDlg Dlg(0,VALUE,DefaultClient);
++    PlaceWindow(&Dlg);
+     return Dlg.ShowModal() == wxID_OK;
+ }
+ 
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxscolourproperty.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxscolourproperty.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxscolourproperty.cpp	(revision 12304)
+@@ -493,6 +493,7 @@
+         }
+ 
+         wxColourDialog dialog(propgrid, &data);
++        PlaceWindow(&dialog);
+         if ( dialog.ShowModal() == wxID_OK )
+         {
+             wxColourData retData = dialog.GetColourData();
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxsfonteditordlg.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsfonteditordlg.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsfonteditordlg.cpp	(revision 12304)
+@@ -25,6 +25,7 @@
+ #include <wx/fontmap.h>
+ #include <wx/fontdlg.h>
+ #include <wx/settings.h>
++#include "globals.h"
+ 
+ #define FT_DFAULT   0x00
+ #define FT_CUSTOM   0x01
+@@ -581,6 +582,7 @@
+ {
+     wxString Face;
+     wxsFontFaceEditorDlg Dlg(this,Face);
++    PlaceWindow(&Dlg);
+     if ( Dlg.ShowModal() == wxID_OK && !Face.empty() )
+     {
+         FaceList->Append(Face);
+@@ -616,6 +618,7 @@
+     {
+         wxString Face = FaceList->GetString(Index);
+         wxsFontFaceEditorDlg Dlg(this,Face);
++        PlaceWindow(&Dlg);
+         if ( Dlg.ShowModal() == wxID_OK )
+         {
+             FaceList->SetString(Index,Face);
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxsfontproperty.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsfontproperty.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsfontproperty.cpp	(revision 12304)
+@@ -29,6 +29,7 @@
+ #include <wx/settings.h>
+ 
+ #include "../wxsflags.h"
++#include "globals.h"
+ 
+ using namespace wxsFlags;
+ 
+@@ -294,6 +295,7 @@
+ bool wxsFontProperty::ShowEditor(wxsPropertyContainer* Object)
+ {
+     wxsSimpleFontEditorDlg Dlg(0,VALUE);
++    PlaceWindow(&Dlg);
+     return Dlg.ShowModal() == wxID_OK;
+ }
+ 
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxsimageproperty.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsimageproperty.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxsimageproperty.cpp	(revision 12304)
+@@ -50,6 +50,7 @@
+     wxString                                ss;
+ 
+     // show the dialog, exit immediately if cancelled
++    PlaceWindow(&dlg);
+     n = dlg.ShowModal();
+     if(n != wxID_OK){
+         return false;
+Index: src/plugins/contrib/wxSmith/wxwidgets/properties/wxssimplefonteditordlg.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/properties/wxssimplefonteditordlg.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/properties/wxssimplefonteditordlg.cpp	(revision 12304)
+@@ -24,6 +24,7 @@
+ #include "wxsfonteditordlg.h"
+ 
+ #include <wx/fontdlg.h>
++#include "globals.h"
+ 
+ //(*InternalHeaders(wxsSimpleFontEditorDlg)
+ #include <wx/intl.h>
+@@ -217,6 +218,7 @@
+ void wxsSimpleFontEditorDlg::OnButton2Click(cb_unused wxCommandEvent& event)
+ {
+     wxsFontEditorDlg Dlg(this,m_WorkingCopy);
++    PlaceWindow(&Dlg);
+     Dlg.ShowModal();
+     UpdateFontDescription();
+ }
+Index: src/plugins/contrib/wxSmith/wxwidgets/wxsitemres.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/wxsitemres.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/wxsitemres.cpp	(revision 12304)
+@@ -537,6 +537,7 @@
+     if ( ShowDialog )
+     {
+         wxsDeleteItemRes Dlg;
++        PlaceWindow(&Dlg);
+         if ( Dlg.ShowModal() != wxID_OK )
+         {
+             return false;
+Index: src/plugins/contrib/wxSmith/wxwidgets/wxwidgetsgui.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/wxwidgetsgui.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/wxwidgetsgui.cpp	(revision 12304)
+@@ -197,6 +197,7 @@
+ bool wxWidgetsGUI::OnCreateApplicationBinding()
+ {
+     wxWidgetsGUIAppAdoptingDlg Dlg(0,this);
++    PlaceWindow(&Dlg);
+     Dlg.ShowModal();
+     return OnCheckIfApplicationManaged();
+ }
+Index: src/plugins/contrib/wxSmith/wxwidgets/wxwidgetsresfactory.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmith/wxwidgets/wxwidgetsresfactory.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmith/wxwidgets/wxwidgetsresfactory.cpp	(revision 12304)
+@@ -272,6 +272,7 @@
+ bool wxWidgetsResFactory::OnNewWizard(int Number,wxsProject* Project)
+ {
+     wxsNewWindowDlg Dlg(0,NamesPtr[Number],Project);
++    PlaceWindow(&Dlg);
+     return Dlg.ShowModal() == wxID_OK;
+ }
+ 
+Index: src/plugins/contrib/wxSmithContribItems/wxflatnotebook/wxsFlatNotebook.cpp
+===================================================================
+--- a/src/plugins/contrib/wxSmithContribItems/wxflatnotebook/wxsFlatNotebook.cpp	(revision 12303)
++++ b/src/plugins/contrib/wxSmithContribItems/wxflatnotebook/wxsFlatNotebook.cpp	(revision 12304)
+@@ -445,6 +445,7 @@
+     if ( Id == popupNewPageId )
+     {
+         wxTextEntryDialog Dlg(0,_("Enter name of new page"),_("Adding page"),_("New page"));
++        PlaceWindow(&Dlg);
+         if ( Dlg.ShowModal() == wxID_OK )
+         {
+             wxsItem* Panel = wxsItemFactory::Build(_T("wxPanel"),GetResourceData());
+Index: src/plugins/debuggergdb/debugger_defs.cpp
+===================================================================
+--- a/src/plugins/debuggergdb/debugger_defs.cpp	(revision 12303)
++++ b/src/plugins/debuggergdb/debugger_defs.cpp	(revision 12304)
+@@ -82,6 +82,7 @@
+ void DebuggerInfoCmd::ParseOutput(const wxString& output)
+ {
+     DebuggerInfoWindow win(Manager::Get()->GetAppWindow(), m_Title.wx_str(), output);
++    PlaceWindow(&win);
+     win.ShowModal();
+ }
+ 
+Index: src/plugins/debuggergdb/debuggergdb.cpp
+===================================================================
+--- a/src/plugins/debuggergdb/debuggergdb.cpp	(revision 12303)
++++ b/src/plugins/debuggergdb/debuggergdb.cpp	(revision 12304)
+@@ -2234,6 +2234,7 @@
+ 
+     cb::shared_ptr<GDBWatch> real_watch = cb::static_pointer_cast<GDBWatch>(watch);
+     EditWatchDlg dlg(real_watch, nullptr);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+         DoWatches();
+ }
+Index: src/sdk/configmanager.cpp
+===================================================================
+--- a/src/sdk/configmanager.cpp	(revision 12303)
++++ b/src/sdk/configmanager.cpp	(revision 12304)
+@@ -222,7 +222,7 @@
+     return wxEmptyString;
+ }
+ 
+-/// Print error message an allow the user to either discard the old config or close the application.
++/// Print error message and allow the user to either discard the old config or close the application.
+ /// Call this function when you've detected an error while reading the config.
+ static void handleConfigError(TiXmlDocument &doc, const wxString &fileName, const wxString &additionalMessage)
+ {
+@@ -396,7 +396,6 @@
+                                        F(_T("Could not save config file '%s'!"), cfg.wx_str()),
+                                        wxART_ERROR, AnnoyingDialog::TWO_BUTTONS,
+                                        AnnoyingDialog::rtTWO, _("&Retry"), _("&Close"));
+-                    PlaceWindow(&dlg);
+                     switch (dlg.ShowModal())
+                     {
+                         case AnnoyingDialog::rtONE:
+Index: src/sdk/debuggermanager.cpp
+===================================================================
+--- a/src/sdk/debuggermanager.cpp	(revision 12303)
++++ b/src/sdk/debuggermanager.cpp	(revision 12304)
+@@ -677,7 +677,7 @@
+ 
+         wxFileDialog dialog(this, _("Load script"), path, wxEmptyString,
+                             _T("Debugger script files (*.gdb)|*.gdb"), wxFD_OPEN | compatibility::wxHideReadonly);
+-
++        PlaceWindow(&dialog);
+         if (dialog.ShowModal() == wxID_OK)
+         {
+             manager->Write(_T("/file_dialogs/file_run_dbg_script/directory"), dialog.GetDirectory());
+Index: src/sdk/findreplacedlg.cpp
+===================================================================
+--- a/src/sdk/findreplacedlg.cpp	(revision 12303)
++++ b/src/sdk/findreplacedlg.cpp	(revision 12304)
+@@ -807,6 +807,7 @@
+ 
+     IncrementalSelectArrayIterator iterator(targetNames);
+     IncrementalSelectDialog dlg(this, &iterator, _("Select target..."), _("Choose target:"));
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+         wxChoice *chTarget = XRCCTRL(*this, "chTarget", wxChoice);
+Index: src/sdk/pluginsconfigurationdlg.cpp
+===================================================================
+--- a/src/sdk/pluginsconfigurationdlg.cpp	(revision 12303)
++++ b/src/sdk/pluginsconfigurationdlg.cpp	(revision 12304)
+@@ -246,6 +246,7 @@
+                         wxEmptyString, wxEmptyString,
+                         _T("Code::Blocks Plugins (*.cbplugin)|*.cbplugin"),
+                         wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE | compatibility::wxHideReadonly);
++    PlaceWindow(&fd);
+     if (fd.ShowModal() != wxID_OK)
+         return;
+ 
+@@ -309,6 +310,7 @@
+ 
+     ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("plugins_configuration"));
+     wxDirDialog dd(this, _("Select directory to export plugin"), cfg->Read(_T("/last_export_path")), wxDD_NEW_DIR_BUTTON);
++    PlaceWindow(&dd);
+     if (dd.ShowModal() != wxID_OK)
+         return;
+     cfg->Write(_T("/last_export_path"), dd.GetPath());
+Index: src/sdk/scriptingmanager.cpp
+===================================================================
+--- a/src/sdk/scriptingmanager.cpp	(revision 12303)
++++ b/src/sdk/scriptingmanager.cpp	(revision 12304)
+@@ -275,6 +275,7 @@
+                                         _("Script errors"),
+                                         msg,
+                                         true);
++            PlaceWindow(&dlg);
+             dlg.ShowModal();
+         }
+     }
+Index: src/sdk/uservarmanager.cpp
+===================================================================
+--- a/src/sdk/uservarmanager.cpp	(revision 12303)
++++ b/src/sdk/uservarmanager.cpp	(revision 12304)
+@@ -308,6 +308,7 @@
+ wxString UserVariableManager::GetVariable(wxWindow *parent, const wxString &old)
+ {
+     GetUserVariableDialog dlg(parent, old);
++    PlaceWindow(&dlg);
+     dlg.ShowModal();
+     return dlg.GetVariable();
+ }
+Index: src/src/app.cpp
+===================================================================
+--- a/src/src/app.cpp	(revision 12303)
++++ b/src/src/app.cpp	(revision 12304)
+@@ -1267,7 +1267,7 @@
+         wxSingleChoiceDialog dlg(nullptr, _("Please choose which personality (profile) to load:"),
+                                           _("Personalities (profiles)"),
+                                           items);
+-
++        PlaceWindow(&dlg);
+         if (dlg.ShowModal() == wxID_OK)
+             Manager::Get()->GetPersonalityManager()->SetPersonality(dlg.GetStringSelection());
+     }
+Index: src/src/main.cpp
+===================================================================
+--- a/src/src/main.cpp	(revision 12303)
++++ b/src/src/main.cpp	(revision 12304)
+@@ -5093,6 +5093,7 @@
+ void MainFrame::OnSettingsScripting(cb_unused wxCommandEvent& event)
+ {
+     ScriptingSettingsDlg dlg(this);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+         RunStartupScripts();
+ }
+Index: src/src/projectoptionsdlg.cpp
+===================================================================
+--- a/src/src/projectoptionsdlg.cpp	(revision 12303)
++++ b/src/src/projectoptionsdlg.cpp	(revision 12304)
+@@ -753,6 +753,7 @@
+ void ProjectOptionsDlg::OnVirtualTargets(cb_unused wxCommandEvent& event)
+ {
+     VirtualBuildTargetsDlg dlg(this, -1, m_Project);
++    PlaceWindow(&dlg);
+     dlg.ShowModal();
+ }
+ 
+Index: src/src/recentitemslist.cpp
+===================================================================
+--- a/src/src/recentitemslist.cpp	(revision 12303)
++++ b/src/src/recentitemslist.cpp	(revision 12304)
+@@ -89,7 +89,6 @@
+         query << question;
+ 
+     AnnoyingDialog dialog(_("Remove file from list"), query, wxART_QUESTION);
+-    PlaceWindow(&dialog);
+     if (dialog.ShowModal() == AnnoyingDialog::rtYES)
+     {
+         m_list->RemoveFileFromHistory(id);
+Index: src/src/scriptconsole.cpp
+===================================================================
+--- a/src/src/scriptconsole.cpp	(revision 12303)
++++ b/src/src/scriptconsole.cpp	(revision 12304)
+@@ -178,6 +178,7 @@
+                      wxEmptyString,
+                      _T("Script files (*.script)|*.script"),
+                      wxFD_OPEN | compatibility::wxHideReadonly);
++    PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+     {
+         mgr->Write(_T("/file_dialogs/file_run_script/directory"), dlg.GetDirectory());

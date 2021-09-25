@@ -1,0 +1,250 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.h	(revision 305)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.h	(revision 306)
+@@ -28,6 +28,13 @@
+ typedef std::map<wxString,wxString> StrMap;
+ typedef std::set<wxString> StrSet;
+ 
++typedef struct {
++	TokenF* procToCall;
++	wxString m_Name;
++	bool m_Pass;
++	wxString m_PassArg;
++} TypeTBP;
++typedef std::vector<TypeTBP> TypeTBPList;
+ 
+ class Bindto: public wxDialog
+ {
+@@ -256,7 +263,9 @@
+         wxString CreateBindFilename(const wxString& filename, bool header);
+         wxString CheckOverwriteFilename(wxFileName &fname);
+         void BindProcedure(wxString& txtBind, wxString& txtHeaders, wxString& txtCythonFirst, wxString& txtCythonSecond,
+-                           TokenF* token, const wxString& moduleName, bool isGlobal, wxString callName=wxEmptyString);
++                           TokenF* token, const wxString& moduleName, bool isGlobal, wxString callName=wxEmptyString,
++                           const TypeTBP* tbToken=NULL);
++        void FillTypeBoundProcList(TokenF* modToken, TokenF* typeToken, TypeTBPList& typeTBPList);
+         TypeBind GetBindType(TokenF* token, int& nDimVarAdd);
+         TypeBind GetBindType(const wxString& declar, int& nDimVarAdd);
+         wxString GetToken(const wxString& txt, int iPos);
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 305)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bindto.cpp	(revision 306)
+@@ -1076,6 +1076,7 @@
+             m_ModuleChildNames.clear();
+             m_HasPyClassConstructor = false;
+             m_TypeDefinedInMap.clear();
++            TypeTBPList typeTBPList;
+ 
+             if (m_PyCreateClass)
+             {
+@@ -1146,7 +1147,10 @@
+                     wxString tdef = mchil->Item(j)->m_TypeDefinition.Lower();
+                     tdef.Replace(_T(" "),_T(""));
+                     if (tdef.Find(_T("bind(c)")) == wxNOT_FOUND)
++                    {
+                         m_DefinedTypes.insert(mchil->Item(j)->m_Name);
++                        FillTypeBoundProcList(fchen->Item(i), mchil->Item(j), typeTBPList);
++                    }
+                     else
+                     {
+                         // type with bind(c)
+@@ -1162,6 +1166,17 @@
+                     }
+                 }
+             }
++
++            // Deal with type-bound procedures
++            for (const auto& curTBP: typeTBPList)
++            {
++                if (m_ModuleChildNames.count(curTBP.procToCall->m_Name) == 1)
++                    continue; // this procedure will be called already.
++                BindProcedure(txtBindMod, txtHeadersMod_2, txtCythonFirst, txtCythonMod,
++                              curTBP.procToCall, modName, false, wxEmptyString, &curTBP);
++                m_ModuleChildNames.insert(curTBP.procToCall->m_Name);
++            }
++
+             wxString txtCythonCtorDtor;
+             AddConstructors(txtBindMod, txtHeadersMod_2, txtCythonCtorDtor, txtCythonFirst, modName);
+             AddDestructors(txtBindMod, txtHeadersMod_2, txtCythonCtorDtor, txtCythonFirst, modName);
+@@ -1201,7 +1216,8 @@
+                 wxString useStr;
+                 for(auto const& mval : m_TypeDefinedInMap)
+                 {
+-                    useStr << GetIS(1) << _T("use :: ") << mval.second[0] << _T("\n");
++                    if (modName != mval.second[0])
++                        useStr << GetIS(1) << _T("use :: ") << mval.second[0] << _T("\n");
+                 }
+                 txtBindModFile.Replace(USEMODTDEF_KEY,useStr);
+             }
+@@ -1521,7 +1537,7 @@
+ 
+ 
+ void Bindto::BindProcedure(wxString& txtBind, wxString& txtHeaders, wxString& txtPyFirst, wxString& txtPySecond,
+-                           TokenF* token, const wxString& moduleName, bool isGlobal, wxString callName)
++                           TokenF* token, const wxString& moduleName, bool isGlobal, wxString callName, const TypeTBP* tbToken)
+ {
+     m_CurProcedure = token->m_Name;
+     wxString txtBindProc;
+@@ -2023,7 +2039,7 @@
+                         AddPyArgs(argArr, morePyIntArgs, tyaPy.addIntArg);
+                 }
+             }
+-            else
++            else // !tyaPy.fDrvTypeName.IsEmpty()
+             {
+                 if (i == 0 && m_PyFirstArgAsSelf && m_InFortranModule && m_PyCreateClass &&
+                     (m_DefinedTypes.count(tyaPy.fDrvTypeName) == 1))
+@@ -2140,20 +2156,53 @@
+     for (size_t i=0; i<additionalCalls.size(); i++)
+         txtBindSecond << GetIS() << additionalCalls.Item(i) << _T("\n");
+ 
+-    if (callName.IsEmpty())
+-        callName = token->m_DisplayName;
+-    if (token->m_TokenKind == tkSubroutine)
++    if (tbToken)
+     {
+-        txtBindSecond << GetIS() << _T("call ") << callName << _T("(");
++        // call type-bound procedure
++        if (tbToken->m_Pass)
++        {
++            // remove pass-argument from the argument list.
++            if (tbToken->m_PassArg.IsEmpty())
++            {
++                // no pass-argument is given. Assuming the first argument.
++                if (argArr.size() > 0)
++                    argArr.RemoveAt(0);
++            }
++            else
++                argArr.Remove(tbToken->m_PassArg);
++        }
++        callName = _T("self_fp%") + tbToken->m_Name;
++        if (token->m_TokenKind == tkSubroutine)
++        {
++            txtBindSecond << GetIS() << _T("call ") << callName << _T("(");
++        }
++        else if (token->m_TokenKind == tkFunction)
++        {
++            if (funTypeDec.StartsWith(_T("character")))
++                txtBindSecond << GetIS() << funResVar << _T("_f = ") << callName << _T("(");
++            else if (changedNamesMap.count(funResVar) == 0)
++                txtBindSecond << GetIS() << funResVar << _T(" = ") << callName << _T("(");
++            else
++                txtBindSecond << GetIS() << changedNamesMap[funResVar] << _T(" = ") << callName << _T("(");
++        }
+     }
+-    else if (token->m_TokenKind == tkFunction)
++    else
+     {
+-        if (funTypeDec.StartsWith(_T("character")))
+-            txtBindSecond << GetIS() << funResVar << _T("_f = ") << callName << _T("(");
+-        else if (changedNamesMap.count(funResVar) == 0)
+-            txtBindSecond << GetIS() << funResVar << _T(" = ") << callName << _T("(");
+-        else
+-            txtBindSecond << GetIS() << changedNamesMap[funResVar] << _T(" = ") << callName << _T("(");
++        if (callName.IsEmpty())
++            callName = token->m_DisplayName;
++        if (token->m_TokenKind == tkSubroutine)
++        {
++            txtBindSecond << GetIS() << _T("call ") << callName << _T("(");
++        }
++        else if (token->m_TokenKind == tkFunction)
++        {
++            if (funTypeDec.StartsWith(_T("character")))
++                txtBindSecond << GetIS() << funResVar << _T("_f = ") << callName << _T("(");
++            else if (changedNamesMap.count(funResVar) == 0)
++                txtBindSecond << GetIS() << funResVar << _T(" = ") << callName << _T("(");
++            else
++                txtBindSecond << GetIS() << changedNamesMap[funResVar] << _T(" = ") << callName << _T("(");
++        }
+     }
+ 
+     for (size_t i=0; i<argArr.GetCount(); i++)
+@@ -2249,7 +2298,86 @@
+     m_CurProcedure = wxEmptyString;
+ }
+ 
++void Bindto::FillTypeBoundProcList(TokenF* modToken, TokenF* typeToken, TypeTBPList& typeTBPList)
++{
++    // Fill typeTBPList
++    if (modToken->m_TokenKind != tkModule || typeToken->m_TokenKind != tkType)
++        return; // actually, this should not happen
+ 
++    TokensArrayF* tchil = &typeToken->m_Children;
++    for (size_t i=0; i<tchil->size(); ++i)
++    {
++        if (tchil->Item(i)->m_TokenKind == tkProcedure && tchil->Item(i)->m_TokenAccess == taPublic)
++        {
++            TypeTBP tbProc;
++            tbProc.procToCall = NULL;
++            tbProc.m_Name = tchil->Item(i)->m_Name;
++            tbProc.m_Pass = tchil->Item(i)->m_Pass;
++            tbProc.m_PassArg = tchil->Item(i)->m_Args.Lower();
++            TokensArrayF* mchil = &modToken->m_Children;
++            wxString callProc;
++            if (tchil->Item(i)->m_PartLast.IsEmpty())
++                callProc = tchil->Item(i)->m_Name;
++            else
++                callProc = tchil->Item(i)->m_PartLast.Lower(); // procedure to be called
++            for (size_t j=0; j<mchil->size(); ++j)
++            {
++                if ((mchil->Item(j)->m_TokenKind == tkSubroutine ||
++                    mchil->Item(j)->m_TokenKind == tkFunction) &&
++                    mchil->Item(j)->m_Name == callProc)
++                {
++                    tbProc.procToCall = mchil->Item(j);
++                    break;
++                }
++            }
++            if (tbProc.procToCall)
++                typeTBPList.push_back(tbProc);
++        }
++        else if (tchil->Item(i)->m_TokenKind == tkInterface && tchil->Item(i)->m_TokenAccess == taPublic)
++        {
++            // generic tb-procedure
++            wxStringTokenizer tokenizer(tchil->Item(i)->m_PartLast, wxDEFAULT_DELIMITERS, wxTOKEN_STRTOK);
++            while (tokenizer.HasMoreTokens())
++            {
++                wxString procName = tokenizer.GetNextToken().Lower();
++                for (size_t k=0; k<tchil->size(); ++k)
++                {
++                    if (tchil->Item(k)->m_TokenKind == tkProcedure && tchil->Item(k)->m_TokenAccess == taPrivate &&
++                        tchil->Item(k)->m_Name == procName)
++                    {
++                        // look only for private specific procedure. Public procedure is called separately.
++                        TypeTBP tbProc;
++                        tbProc.procToCall = NULL;
++                        tbProc.m_Name = tchil->Item(i)->m_Name;
++                        tbProc.m_Pass = tchil->Item(k)->m_Pass;
++                        tbProc.m_PassArg = tchil->Item(k)->m_Args.Lower();
++                        TokensArrayF* mchil = &modToken->m_Children;
++                        wxString callProc;
++                        if (tchil->Item(k)->m_PartLast.IsEmpty())
++                            callProc = tchil->Item(k)->m_Name;
++                        else
++                            callProc = tchil->Item(k)->m_PartLast.Lower(); // procedure to be called
++                        for (size_t j=0; j<mchil->size(); ++j)
++                        {
++                            if ((mchil->Item(j)->m_TokenKind == tkSubroutine ||
++                                mchil->Item(j)->m_TokenKind == tkFunction) &&
++                                mchil->Item(j)->m_Name == callProc)
++                            {
++                                tbProc.procToCall = mchil->Item(j);
++                                break;
++                            }
++                        }
++                        if (tbProc.procToCall)
++                            typeTBPList.push_back(tbProc);
++
++                        break;
++                    }
++                }
++            }
++        }
++    }
++}
++
+ Bindto::TypeBind Bindto::GetBindType(TokenF* token, int& nDimVarAdd)
+ {
+     nDimVarAdd = 0;

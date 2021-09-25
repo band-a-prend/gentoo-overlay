@@ -1,0 +1,21 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 309)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 310)
+@@ -457,10 +457,15 @@
+ 
+ void WorkspaceBrowserF::OnSearch(cb_unused wxCommandEvent& event)
+ {
+-    wxString search = m_Search->GetValue();
++    wxString search = m_Search->GetValue().Trim(true).Trim(false);
+     if (search.IsEmpty())
+         return;
+ 
++    if (search.length() > 100)
++    {
++        // Very long string. Such names are not allowed in Fortran.
++        search = search.Mid(0, 100);
++    }
+     TokenF* token = 0;
+     TokensArrayF result;
+     size_t count = FindMatchTokens(search, result);

@@ -1,0 +1,341 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 306)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.cpp	(revision 307)
+@@ -115,8 +115,7 @@
+     ConfigManager* cfg = Manager::Get()->GetConfigManager(_T("fortran_project"));
+     m_CallDepthMax = cfg->ReadInt(_T("/calltree_depthmax"), 5);
+ 
+-    TokensArrayClass tokAllTmp;
+-    TokensArrayF* tokAll = tokAllTmp.GetTokens();
++    TokensArrayF* tokAll = new TokensArrayF();
+ 
+     for (size_t i=0; i<pRoot->size(); i++)
+     {
+@@ -166,8 +165,24 @@
+ 
+     if (m_pProgressDlg)
+         m_pProgressDlg->Destroy();
++
++    ClearTokensArray(tokAll);
++    delete tokAll;
++    m_CallTreeTokenMap.clear();
+ }
+ 
++void CallTree::ClearTokensArray(TokensArrayF* tokens)
++{
++    size_t tokCount = tokens->GetCount();
++    for(size_t i=0; i<tokCount; ++i)
++    {
++        CallTreeToken* ctToken = static_cast<CallTreeToken*>(tokens->Item(i));
++        if (!ctToken->wereChildrenConnnected)
++            ClearTokensArray(&(tokens->Item(i)->m_Children));
++        delete ctToken;
++    }
++}
++
+ void CallTree::FindUsedModules(ParserF* pParser, CallTreeToken* token)
+ {
+     if (m_Cancelled)
+@@ -227,7 +242,7 @@
+             else
+             {
+                 TokenFlat* tf2 = resultMod->Item(0); // take just first result
+-                if (!HasChildToken(token, tf2) && !HasInHerarchy(token, tf2))
++                if (!HasChildToken(token, tf2) && !HasInHierarchy(token, tf2))
+                 {
+                     CallTreeToken* tok2 = new CallTreeToken(tf2, token);
+                     tok2->m_CallFilename = ctF.m_Filename;
+@@ -278,7 +293,7 @@
+             for (size_t k=0; k<resToks->size(); k++)
+             {
+                 TokenFlat* tf2 = resToks->Item(k);
+-                if (!HasChildToken(token, tf2) && !HasInHerarchy(token, tf2))
++                if (!HasChildToken(token, tf2) && !HasInHierarchy(token, tf2))
+                 {
+                     CallTreeToken* tok2 = new CallTreeToken(tf2, token);
+                     tok2->m_CallFilename = oneCall->m_Filename;
+@@ -367,14 +382,30 @@
+                 {
+                     tokType = tf2;
+                 }
+-                else if ((tf2->m_TokenKind != tkVariable) && !HasChildToken(token, tf2) && !HasInHerarchy(token, tf2))
++                else if ((tf2->m_TokenKind != tkVariable) && !HasChildToken(token, tf2) && !HasInHierarchy(token, tf2))
+                 {
+                     CallTreeToken* tok2 = new CallTreeToken(tf2, token);
+                     tok2->m_CallFilename = oneCall->m_Filename;
+                     tok2->m_CallLine     = oneCall->m_LineStart;
+-
+                     token->AddChild(tok2);
+ 
++                    // Check if tok2 is somewhere in the tree in the parallel branch.
++                    bool wasFound = FindInTree(tok2);
++                    if (wasFound)
++                    {
++                        // tok2 was found in the tree. Children were added to tok2.
++                        tokType = NULL;
++                        break;
++                    }
++                    else
++                    {
++                        TokenTreeMapKey key;
++                        key.m_LineStart = tok2->m_LineStart;
++                        key.m_Name = tok2->m_Name;
++                        key.m_Filename = tok2->m_Filename;
++                        m_CallTreeTokenMap[key] = tok2;
++                    }
++
+                     if (m_CallDepth < m_CallDepthMax)
+                     {
+                         m_CallDepth++;
+@@ -398,7 +429,7 @@
+                 }
+             }
+ 
+-            if (tokType && !HasChildToken(token, tokType) && !HasInHerarchy(token, tokType))
++            if (tokType && !HasChildToken(token, tokType) && !HasInHierarchy(token, tokType))
+             {
+                 CallTreeToken* tok2 = new CallTreeToken(tokType, token);
+                 tok2->m_CallFilename = oneCall->m_Filename;
+@@ -445,7 +476,8 @@
+ bool CallTree::HasChildToken(TokenF* tokParent, TokenF* tok)
+ {
+     TokensArrayF* tokArr = &tokParent->m_Children;
+-    for (size_t i=0; i<tokArr->size(); i++)
++    size_t nChildren = tokArr->size();
++    for (size_t i=0; i<nChildren; i++)
+     {
+         TokenF* tokItem = tokArr->Item(i);
+         if (tokItem->m_TokenKind == tok->m_TokenKind &&
+@@ -464,7 +496,8 @@
+ bool CallTree::HasCallChildToken(TokenF* tokParent, TokenFlat* tok)
+ {
+     TokensArrayF* tokArr = &tokParent->m_Children;
+-    for (size_t i=0; i<tokArr->size(); i++)
++    size_t nChildren = tokArr->size();
++    for (size_t i=0; i<nChildren; i++)
+     {
+         TokenF* tokItem = tokArr->Item(i);
+         if (tokItem->m_Name == tok->m_Name)
+@@ -475,9 +508,10 @@
+     return false;
+ }
+ 
+-bool CallTree::HasInHerarchy(TokenF* tokParent, TokenF* tok)
++bool CallTree::HasInHierarchy(TokenF* tokParent, TokenF* tok)
+ {
+-    // Used to avoid recursive calls
++    // Check if tok is as a parent in hierarchy.
++    // Used to avoid recursive calls.
+     TokenF* tokIn = tokParent;
+     while(tokIn)
+     {
+@@ -495,6 +529,30 @@
+     return false;
+ }
+ 
++bool CallTree::FindInTree(CallTreeToken* findTok)
++{
++    //return false;
++    bool wasFound = false;
++    // Find findTok between already existing callTree.
++    // If found, copy to findTok children.
++    TokenTreeMapKey findKey;
++    findKey.m_LineStart = findTok->m_LineStart;
++    findKey.m_Name = findTok->m_Name;
++    findKey.m_Filename = findTok->m_Filename;
++    if (m_CallTreeTokenMap.count(findKey) > 0)
++    {
++        CallTreeToken* tokInTree = m_CallTreeTokenMap[findKey];
++        size_t nChildren = tokInTree->m_Children.size();
++        for (size_t i=0; i<nChildren; ++i)
++        {
++            findTok->AddChild(tokInTree->m_Children.Item(i));
++        }
++        findTok->wereChildrenConnnected = true;
++        wasFound = true;
++    }
++    return wasFound;
++}
++
+ void CallTree::ManageInterfaceExplicit(ParserF* pParser, TokenFlat* origFT, CallTreeToken* token, std::set<wxString>& keywordSet)
+ {
+     // Try to find global procedures
+@@ -636,7 +694,7 @@
+                         parTok = pCTok->m_pParent;
+                 }
+ 
+-                if (parTok && !HasChildToken(token, parTok) && !HasInHerarchy(token, parTok))
++                if (parTok && !HasChildToken(token, parTok) && !HasInHierarchy(token, parTok))
+                 {
+                     CallTreeToken* tok2 = new CallTreeToken(parTok, token);
+                     tok2->m_CallFilename = pCTok->m_Filename;
+@@ -644,13 +702,28 @@
+ 
+                     token->AddChild(tok2);
+ 
+-                    if (m_CallDepth < m_CallDepthMax)
++                    // Check if tok2 is somewhere in the tree in the parallel branch.
++                    bool wasFound = FindInTree(tok2);
++                    if (wasFound)
+                     {
+-                        m_CallDepth++;
+-                        FindCallingTokens(pParser, tok2, cByDict);
+-                        m_CallDepth--;
++                        // tok2 was found in the tree. Children were added to tok2.
+                     }
++                    else
++                    {
++                        if (m_CallDepth < m_CallDepthMax)
++                        {
++                            TokenTreeMapKey key;
++                            key.m_LineStart = tok2->m_LineStart;
++                            key.m_Name = tok2->m_Name;
++                            key.m_Filename = tok2->m_Filename;
++                            m_CallTreeTokenMap[key] = tok2;
+ 
++                            m_CallDepth++;
++                            FindCallingTokens(pParser, tok2, cByDict);
++                            m_CallDepth--;
++                        }
++                    }
++
+                     if (m_Cancelled)
+                         return;
+                 }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h	(revision 306)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltree.h	(revision 307)
+@@ -10,6 +10,51 @@
+ 
+ #include "calltreeview.h"
+ #include "parserf.h"
++
++struct TokenTreeMapKey
++{
++    int m_LineStart;
++    wxString m_Name;
++    wxString m_Filename;
++
++    bool operator< (const TokenTreeMapKey& rhs)  const {
++        if (m_LineStart < rhs.m_LineStart)
++        {
++            return true;
++        }
++        else if (m_LineStart > rhs.m_LineStart)
++        {
++            return false;
++        }
++        else
++        {
++            // m_LineStart == rhs.m_LineStart
++            if (m_Name.Cmp(rhs.m_Name) < 0)
++            {
++                return true;
++            }
++            else if (m_Name.Cmp(rhs.m_Name) > 0)
++            {
++                return false;
++            }
++            else
++            {
++                // m_Name.Cmp(rhs.m_Name) == 0
++                if (m_Filename.Cmp(rhs.m_Filename) < 0)
++                {
++                    return true;
++                }
++                else
++                {
++                    return false; // lhs >= rhs
++                }
++            }
++        }
++        return false; // this should not happen.
++    }
++};
++
++
+ class CallTree
+ {
+     public:
+@@ -22,12 +67,14 @@
+     protected:
+ 
+     private:
++        void ClearTokensArray(TokensArrayF* tokens);
+         void FindUsedModules(ParserF* pParser, CallTreeToken* token);
+-        void FindCalledTokens(ParserF* pParser, CallTreeToken* token, std::set< wxString>& keywordSet);
++        void FindCalledTokens(ParserF* pParser, CallTreeToken* token, std::set<wxString>& keywordSet);
+         void FindTokenFromCall(ParserF* pParser, TokenFlat* parentTok, TokenFlat* oneCall, TokensArrayFlat* result);
+         bool HasChildToken(TokenF* tokParent, TokenF* tok);
+         bool HasCallChildToken(TokenF* tokParent, TokenFlat* tok);
+-        bool HasInHerarchy(TokenF* tokParent, TokenF* tok);
++        bool HasInHierarchy(TokenF* tokParent, TokenF* tok);
++        bool FindInTree(CallTreeToken* findTok);
+         void ManageInterfaceExplicit(ParserF* pParser, TokenFlat* origFT, CallTreeToken* token, std::set<wxString>& keywordSet);
+         void FindCallingTokens(ParserF* pParser, CallTreeToken* token, CalledByDict& cByDict);
+         void ManageTBProceduresForCallTree(ParserF* pParser, TokenFlat* origFT, CallTreeToken* token, std::set<wxString>& keywordSet);
+@@ -36,6 +83,8 @@
+ 
+         std::set<wxString> m_FortranIntrinsicModules;
+ 
++        std::map<TokenTreeMapKey, CallTreeToken*> m_CallTreeTokenMap;
++
+         wxStopWatch m_StopWatch;
+         long m_TimeOld;
+         wxProgressDialog* m_pProgressDlg;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.cpp	(revision 306)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.cpp	(revision 307)
+@@ -31,6 +31,7 @@
+     m_TokenAccess = tf->m_TokenAccess;
+ 
+     m_pParent     = parent;
++    wereChildrenConnnected = false;
+ }
+ 
+ CallTreeToken::CallTreeToken(TokenF* tf, CallTreeToken* parent)
+@@ -44,6 +45,7 @@
+     m_TokenAccess = tf->m_TokenAccess;
+ 
+     m_pParent     = parent;
++    wereChildrenConnnected = false;
+ }
+ 
+ CTVData::CTVData(TokenF* token)
+@@ -154,6 +156,7 @@
+         if (callLevel == 1)
+             m_pTree->Expand(addedId);
+     }
++    callLevel -= 1;
+ }
+ 
+ wxTreeItemId CallTreeView::InsertTreeItem(wxTreeItemId& parent, const wxString& displayName, int imageIdx, wxTreeItemData* tidata)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.h	(revision 306)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/calltreeview.h	(revision 307)
+@@ -24,6 +24,7 @@
+ 
+         wxString m_CallFilename;
+         unsigned int m_CallLine;
++        bool wereChildrenConnnected;
+ };
+ 
+ class CTVData : public wxTreeItemData
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.cpp	(revision 306)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.cpp	(revision 307)
+@@ -44,7 +44,8 @@
+ 
+ void TokenF::Clear()
+ {
+-    for(size_t i=0; i<m_Children.GetCount(); i++)
++    size_t nChildren = m_Children.GetCount();
++    for(size_t i=0; i<nChildren; ++i)
+     {
+         m_Children.Item(i)->Clear();
+         delete m_Children.Item(i);

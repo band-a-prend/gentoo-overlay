@@ -1,0 +1,127 @@
+Index: parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 327)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 328)
+@@ -661,7 +661,8 @@
+     modToken->AddLineEnd(m_Tokens.GetLineNumber());
+     m_pLastParent = old_parent;
+ 
+-    for (size_t i=0; i<interfTokens.GetCount(); i++)
++    size_t interfTokensCount = interfTokens.GetCount();
++    for (size_t i=0; i<interfTokensCount; i++)
+     {
+         interfTokens.Item(i)->m_TokenAccess = taDefKind;
+         if (interfTokens.Item(i)->m_TokenKind == tkInterfaceExplicit)
+@@ -674,11 +675,13 @@
+         }
+     }
+ 
+-    for (size_t i=0; i<publicNameList.GetCount(); i++)
++    size_t nameListCount = publicNameList.GetCount();
++    for (size_t i=0; i<nameListCount; i++)
+     {
+         modToken->AddToPublicList(publicNameList.Item(i));
+     }
+-    for (size_t i=0; i<privateNameList.GetCount(); i++)
++    nameListCount = privateNameList.GetCount();
++    for (size_t i=0; i<nameListCount; i++)
+     {
+         modToken->AddToPrivateList(privateNameList.Item(i));
+     }
+@@ -686,7 +689,8 @@
+     TokensArrayF* toks = &modToken->m_Children;
+     if (toks)
+     {
+-        for (size_t i=0; i<toks->GetCount(); i++)
++        size_t toksCount = toks->GetCount();
++        for (size_t i=0; i<toksCount; i++)
+         {
+             SetTokenAccess(modToken, toks->Item(i), taDefKind);
+ 
+@@ -718,7 +722,8 @@
+             TokensArrayF* modChs = &modToken->m_Children;
+             TokenKindF tk;
+             bool found = false;
+-            for (size_t k=0; k<modChs->GetCount(); k++)
++            size_t modChsCount = modChs->GetCount();
++            for (size_t k=0; k<modChsCount; k++)
+             {
+                 if ((modChs->Item(k)->m_TokenKind == tkSubroutine || modChs->Item(k)->m_TokenKind == tkFunction) &&
+                         modChs->Item(k)->m_Name.IsSameAs(intfname))
+@@ -765,7 +770,8 @@
+     {
+         TokensArrayF* chs = &typeTokensAll.Item(i)->m_Children;
+         TokensArrayF genericProc;
+-        for (size_t j=0; j<chs->GetCount(); j++)
++        size_t chsCount = chs->GetCount();
++        for (size_t j=0; j<chsCount; j++)
+         {
+             if (chs->Item(j)->m_TokenKind == tkProcedure)
+             {
+@@ -776,9 +782,10 @@
+                     procName = chs->Item(j)->m_PartLast;
+ 
+                 TokensArrayF* modChs = &modToken->m_Children;
++                size_t modChsCount = modChs->GetCount();
+                 TokenKindF tk;
+                 bool found = false;
+-                for (size_t k=0; k<modChs->GetCount(); k++)
++                for (size_t k=0; k<modChsCount; k++)
+                 {
+                     if ((modChs->Item(k)->m_TokenKind == tkSubroutine || modChs->Item(k)->m_TokenKind == tkFunction) &&
+                             modChs->Item(k)->m_Name.IsSameAs(procName))
+@@ -1429,7 +1436,8 @@
+     wxArrayString varArgs;
+     wxArrayString varComs;
+     wxArrayString varDims;
+-    for (size_t i=idx+1; i<lineTok.GetCount(); )
++    size_t lineTokCount = lineTok.GetCount();
++    for (size_t i=idx+1; i<lineTokCount; )
+     {
+         wxString var1= lineTok.Item(i);
+         if (var1.IsSameAs(_T(",")))
+@@ -1439,7 +1447,7 @@
+         }
+         wxString arg1;
+         wxString dim1;
+-        while (i+1 < lineTok.GetCount())
++        while (i+1 < lineTokCount)
+         {
+             wxString s = lineTok.Item(i+1);
+             if ((s.StartsWith(_T("(")) && s.EndsWith(_T(")"))) || (s.StartsWith(_T("[")) && s.EndsWith(_T("]"))))
+@@ -1451,11 +1459,11 @@
+                 break;
+         }
+         dim1 << arg1;
+-        if (i+1 < lineTok.GetCount() && (lineTok.Item(i+1).IsSameAs(_T("=>")) || lineTok.Item(i+1).IsSameAs(_T("="))
++        if (i+1 < lineTokCount && (lineTok.Item(i+1).IsSameAs(_T("=>")) || lineTok.Item(i+1).IsSameAs(_T("="))
+                                          || lineTok.Item(i+1).IsSameAs(_T("*"))) )
+         {
+             i += 1;
+-            for (; i<lineTok.GetCount(); i++)
++            for (; i<lineTokCount; i++)
+             {
+                 if (lineTok.Item(i).IsSameAs(_T(",")))
+                     break;
+@@ -1462,9 +1470,9 @@
+                 else
+                     arg1 << lineTok.Item(i);
+             }
+-            if(i >= lineTok.GetCount())
++            if(i >= lineTokCount)
+             {
+-                i = lineTok.GetCount() - 1;
++                i = lineTokCount - 1;
+             }
+         }
+         wxString comStr = linesArr.Item(i).AfterFirst('!');
+@@ -1481,7 +1489,8 @@
+             varDims.Add(dim1);
+         i++;
+     }
+-    for (size_t i=0; i<varNames.GetCount(); i++)
++    size_t varNamesCount = varNames.GetCount();
++    for (size_t i=0; i<varNamesCount; i++)
+     {
+         TokenF* tok = DoAddToken(tkVariable, varNames[i], varArgs[i], defT);
+         tok->m_DocString = varComs.Item(i);

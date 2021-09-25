@@ -1,0 +1,14 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 310)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 311)
+@@ -136,7 +136,8 @@
+             HandleUse();
+         }
+         else if (tok_low.Matches(_T("module")) && !nex_low.Matches(_T("procedure"))
+-                 && !nex_low.Matches(_T("function"))  && !nex_low.Matches(_T("subroutine")))
++                 && !nex_low.Matches(_T("function"))  && !nex_low.Matches(_T("subroutine"))
++                 && !nex_low.Matches(_T("pure")) && !nex_low.Matches(_T("elemental")))
+         {
+             HandleModule();
+         }

@@ -1,0 +1,12 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 316)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 317)
+@@ -360,6 +360,7 @@
+ {
+     if (m_NativeParser)
+     {
++        m_NativeParser->MakeAIncludeFileList();
+         switch (m_BrowserOptions.displayFilter)
+         {
+         case bdfWorkspace:

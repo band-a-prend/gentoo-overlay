@@ -1,0 +1,83 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.cpp	(revision 299)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.cpp	(revision 300)
+@@ -775,7 +775,7 @@
+         unsigned int tmpLen = tmp.Length() - 1;
+         for (unsigned int i = 0; i < tmpLen; ++i)
+         {
+-            if (i < tmpLen && tmp.GetChar(i) == ' ' && tmp.GetChar(i + 1) == ' ')
++            if (tmp.GetChar(i) == ' ' && tmp.GetChar(i + 1) == ' ')
+                 continue; // skip excessive spaces
+             ret_Str << tmp.GetChar(i);
+         }
+@@ -804,10 +804,9 @@
+ }
+ 
+ 
+-wxArrayString Tokenizerf::GetTokensToEOL(wxArrayString* arrStrLines)
++void Tokenizerf::GetTokensToEOL(wxArrayString& arrStr, wxArrayString* arrStrLines)
+ {
+     // get all tokens on line until EOL
+-    wxArrayString arrStr;
+     wxString o_tok;
+     wxString tok;
+     bool newLineNext = false;
+@@ -862,7 +861,6 @@
+                 newLineNext = false;
+         }
+     }
+-    return arrStr;
+ }
+ 
+ 
+@@ -875,7 +873,8 @@
+     unsigned int undoColumn = m_Column;
+     bool undoWasNextLine = m_WasNextLine;
+ 
+-    wxArrayString arrStr = GetTokensToEOL();
++    wxArrayString arrStr;
++    GetTokensToEOL(arrStr);
+ 
+     m_WasPeeked = false;
+     m_TokenIndex = undoTokenIndex;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h	(revision 299)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h	(revision 300)
+@@ -48,7 +48,7 @@
+ 		unsigned int GetLineCount(){ return m_LineStartIdx.size(); }
+ 		bool IsOK(){ return m_IsOK; }
+ 		bool SkipToOneOfChars(const char* chars, bool toLineEnd = false);
+-		wxArrayString GetTokensToEOL(wxArrayString* arrStrLines = 0);
++		void GetTokensToEOL(wxArrayString& arrStr, wxArrayString* arrStrLines = 0);
+ 		wxArrayString PeekTokensToEOL();
+ 		wxString GetCurrentLine();
+ 		wxString GetLineFortran();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 299)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 300)
+@@ -208,9 +208,12 @@
+                 return token; // something is wrong
+             wxString params = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameFortranLine();
+             value = InterpretDefinedFunction(token, params);
++            if (value.IsEmpty())
++                return token; // something wrong with funciton interpretation
+         }
+     }
+ 
++
+     value = CheckSaveInPocket(value);
+ 
+     return value;
+@@ -775,7 +778,8 @@
+     wxArrayString* arrStrLinesEOL = NULL;
+     if (arrStrLines)
+         arrStrLinesEOL = new wxArrayString;
+-    wxArrayString tokenToEOL = m_TokensFiles[m_ActiveFileIdx]->GetTokensToEOL(arrStrLinesEOL);
++    wxArrayString tokenToEOL;
++    m_TokensFiles[m_ActiveFileIdx]->GetTokensToEOL(tokenToEOL, arrStrLinesEOL);
+     InterpretArrayString(tokenToEOL, tokenArr, arrStrLinesEOL, arrStrLines);
+     if (arrStrLinesEOL)
+         delete arrStrLinesEOL;

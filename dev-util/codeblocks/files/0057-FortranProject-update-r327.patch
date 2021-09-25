@@ -1,0 +1,32 @@
+Index: fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 326)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 327)
+@@ -2221,7 +2221,7 @@
+     int style = control->GetStyleAt(control->GetCurrentPos());
+     if (style == wxSCI_F_STRING1 || style == wxSCI_F_STRING2 || style == wxSCI_F_PREPROCESSOR)
+     {
+-        wxString curLine = control->GetCurLine();
++        wxString curLine = control->GetCurLine().Trim(false);
+         wxString curLineLow = curLine.Lower();
+         if (!curLineLow.Trim(false).StartsWith(_T("include")) &&
+             !curLineLow.Trim(false).StartsWith(_T("#include")))
+Index: nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 326)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 327)
+@@ -475,9 +475,11 @@
+     // Check if the include file is in checkDir folder.
+     wxFileName fpart(filename);
+     wxFileName fnameInclude(checkDir, wxEmptyString, wxPATH_UNIX);
+-    wxString filePath = fpart.GetPath();
+-    if (!filePath.IsEmpty())
+-        fnameInclude.AppendDir(filePath);
++    wxArrayString dirs = fpart.GetDirs();
++    for (size_t i=0; i<dirs.size(); ++i)
++    {
++        fnameInclude.AppendDir(dirs[i]);
++    }
+     fnameInclude.SetFullName(fpart.GetFullName());
+     if (wxFileExists(fnameInclude.GetFullPath()))
+     {

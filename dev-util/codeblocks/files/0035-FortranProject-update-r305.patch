@@ -1,0 +1,58 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 304)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 305)
+@@ -20,6 +20,7 @@
+     #include <editormanager.h>
+     #include <projectmanager.h>
+     #include <pluginmanager.h>
++    #include <macrosmanager.h>
+     #include <logmanager.h>
+     #include <cbauibook.h>
+     #include <cbeditor.h>
+@@ -325,17 +326,20 @@
+ 
+     for (auto it=m_ASearchDirs.begin(); it != m_ASearchDirs.end(); ++it)
+     {
++        // m_ASearchDirs may contain directory and file names (not only directories!)
+         wxArrayString files;
+         wxArrayString* pDirs = &it->second;
+         for (size_t i=0; i<pDirs->size(); ++i)
+         {
+-            if (wxDirExists(pDirs->Item(i)))
++            wxString dir = pDirs->Item(i);
++            Manager::Get()->GetMacrosManager()->ReplaceMacros(dir);
++            if (wxDirExists(dir))
+             {
+-                wxDir::GetAllFiles(pDirs->Item(i), &files, wxEmptyString, wxDIR_FILES);
++                wxDir::GetAllFiles(dir, &files, wxEmptyString, wxDIR_FILES);
+             }
+-            else if (wxFileExists(pDirs->Item(i)))
++            else if (wxFileExists(dir))
+             {
+-                files.Add(pDirs->Item(i));
++                files.Add(dir);
+             }
+             else
+             {
+@@ -346,7 +350,7 @@
+                 wxFileName prFilename(it->first);
+ 
+                 wxFileName fname;
+-                fname.AssignDir(pDirs->Item(i)); // try as a dir
++                fname.AssignDir(dir); // try as a dir
+                 fname.MakeAbsolute(prFilename.GetPath());
+ 
+                 if (wxDirExists(fname.GetPath()))
+@@ -396,8 +400,10 @@
+         wxArrayString* pDirs = &it->second;
+         for (size_t i=0; i<pDirs->size(); ++i)
+         {
++            wxString dir = pDirs->Item(i);
++            Manager::Get()->GetMacrosManager()->ReplaceMacros(dir);
+             wxFileName dirName;
+-            dirName.AssignDir(pDirs->Item(i));
++            dirName.AssignDir(dir);
+             dirName.MakeAbsolute(prFilename.GetPath());
+ 
+             wxArrayString files;

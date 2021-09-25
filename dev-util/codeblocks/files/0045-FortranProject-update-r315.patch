@@ -1,0 +1,14 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 314)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 315)
+@@ -1355,7 +1355,8 @@
+             HighlightLanguage lang = theme->GetLanguageForFilename(_T(".")+wxFileName(ed->GetFilename()).GetExt());
+ 
+             int kwcase = cfg->ReadInt(_T("/keywords_case"), 0);
+-            for (int i = 0; i <= 4; ++i)
++            int nKWS = std::min(wxSCI_KEYWORDSET_MAX, 4-1); // 4 is m_LexerKeywordsToInclude array size.
++            for (int i = 0; i <= nKWS; ++i)
+             {
+                 if (!m_LexerKeywordsToInclude[i])
+                     continue;

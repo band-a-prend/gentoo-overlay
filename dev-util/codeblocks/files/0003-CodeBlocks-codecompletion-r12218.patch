@@ -1,0 +1,23 @@
+Index: src/plugins/codecompletion/parser/cclogger.h
+===================================================================
+--- a/src/plugins/codecompletion/parser/cclogger.h	(revision 12217)
++++ b/src/plugins/codecompletion/parser/cclogger.h	(revision 12218)
+@@ -158,14 +158,14 @@
+ 
+     #define CC_LOCKER_TRACK_TT_MTX_LOCK(M)      \
+         do {                                    \
+-            auto result = M.Lock();             \
+-            cbAssert(result==wxMUTEX_NO_ERROR); \
++            auto locker_result = M.Lock();             \
++            cbAssert(locker_result==wxMUTEX_NO_ERROR); \
+         } while (false);
+ 
+     #define CC_LOCKER_TRACK_TT_MTX_UNLOCK(M)    \
+         do {                                    \
+-            auto result = M.Unlock();           \
+-            cbAssert(result==wxMUTEX_NO_ERROR); \
++            auto locker_result = M.Unlock();           \
++            cbAssert(locker_result==wxMUTEX_NO_ERROR); \
+         } while (false);
+ 
+     #define CC_LOCKER_TRACK_CBBT_MTX_LOCK    CC_LOCKER_TRACK_TT_MTX_LOCK

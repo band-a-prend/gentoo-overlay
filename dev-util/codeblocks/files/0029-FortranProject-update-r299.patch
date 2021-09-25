@@ -1,0 +1,2735 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn.cbp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn.cbp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn.cbp	(revision 299)
+@@ -125,6 +125,8 @@
+ 		<Unit filename="parserf.h" />
+ 		<Unit filename="parserthreadf.cpp" />
+ 		<Unit filename="parserthreadf.h" />
++		<Unit filename="preprocfunction.cpp" />
++		<Unit filename="preprocfunction.h" />
+ 		<Unit filename="projectdependencies.cpp" />
+ 		<Unit filename="projectdependencies.h" />
+ 		<Unit filename="resources/calltreeview.xrc" />
+@@ -142,6 +144,8 @@
+ 		<Unit filename="tokenf.h" />
+ 		<Unit filename="tokenizerf.cpp" />
+ 		<Unit filename="tokenizerf.h" />
++		<Unit filename="tokenizerpp.cpp" />
++		<Unit filename="tokenizerpp.h" />
+ 		<Unit filename="usetokenf.cpp" />
+ 		<Unit filename="usetokenf.h" />
+ 		<Unit filename="workspacebrowserbuilder.cpp" />
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30-unix.cbp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30-unix.cbp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30-unix.cbp	(revision 299)
+@@ -113,6 +113,8 @@
+ 		<Unit filename="parserf.h" />
+ 		<Unit filename="parserthreadf.cpp" />
+ 		<Unit filename="parserthreadf.h" />
++		<Unit filename="preprocfunction.cpp" />
++		<Unit filename="preprocfunction.h" />
+ 		<Unit filename="projectdependencies.cpp" />
+ 		<Unit filename="projectdependencies.h" />
+ 		<Unit filename="resources/calltreeview.xrc" />
+@@ -130,6 +132,8 @@
+ 		<Unit filename="tokenf.h" />
+ 		<Unit filename="tokenizerf.cpp" />
+ 		<Unit filename="tokenizerf.h" />
++		<Unit filename="tokenizerpp.cpp" />
++		<Unit filename="tokenizerpp.h" />
+ 		<Unit filename="usetokenf.cpp" />
+ 		<Unit filename="usetokenf.h" />
+ 		<Unit filename="workspacebrowserbuilder.cpp" />
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30.cbp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30.cbp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30.cbp	(revision 299)
+@@ -124,6 +124,8 @@
+ 		<Unit filename="parserf.h" />
+ 		<Unit filename="parserthreadf.cpp" />
+ 		<Unit filename="parserthreadf.h" />
++		<Unit filename="preprocfunction.cpp" />
++		<Unit filename="preprocfunction.h" />
+ 		<Unit filename="projectdependencies.cpp" />
+ 		<Unit filename="projectdependencies.h" />
+ 		<Unit filename="resources/calltreeview.xrc" />
+@@ -141,6 +143,8 @@
+ 		<Unit filename="tokenf.h" />
+ 		<Unit filename="tokenizerf.cpp" />
+ 		<Unit filename="tokenizerf.h" />
++		<Unit filename="tokenizerpp.cpp" />
++		<Unit filename="tokenizerpp.h" />
+ 		<Unit filename="usetokenf.cpp" />
+ 		<Unit filename="usetokenf.h" />
+ 		<Unit filename="workspacebrowserbuilder.cpp" />
+@@ -154,9 +158,6 @@
+ 		<Unit filename="wxsmith/FormatIndentDlg.wxs" />
+ 		<Unit filename="wxsmith/MakefileDlg.wxs" />
+ 		<Extensions>
+-			<code_completion />
+-			<debugger />
+-			<envvars />
+ 			<wxsmith version="1">
+ 				<gui name="wxWidgets" src="" main="" init_handlers="necessary" language="CPP" />
+ 				<resources>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30_64.cbp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30_64.cbp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx30_64.cbp	(revision 299)
+@@ -127,6 +127,8 @@
+ 		<Unit filename="parserf.h" />
+ 		<Unit filename="parserthreadf.cpp" />
+ 		<Unit filename="parserthreadf.h" />
++		<Unit filename="preprocfunction.cpp" />
++		<Unit filename="preprocfunction.h" />
+ 		<Unit filename="projectdependencies.cpp" />
+ 		<Unit filename="projectdependencies.h" />
+ 		<Unit filename="resources/calltreeview.xrc" />
+@@ -144,6 +146,8 @@
+ 		<Unit filename="tokenf.h" />
+ 		<Unit filename="tokenizerf.cpp" />
+ 		<Unit filename="tokenizerf.h" />
++		<Unit filename="tokenizerpp.cpp" />
++		<Unit filename="tokenizerpp.h" />
+ 		<Unit filename="usetokenf.cpp" />
+ 		<Unit filename="usetokenf.h" />
+ 		<Unit filename="workspacebrowserbuilder.cpp" />
+@@ -157,9 +161,6 @@
+ 		<Unit filename="wxsmith/FormatIndentDlg.wxs" />
+ 		<Unit filename="wxsmith/MakefileDlg.wxs" />
+ 		<Extensions>
+-			<code_completion />
+-			<debugger />
+-			<envvars />
+ 			<wxsmith version="1">
+ 				<gui name="wxWidgets" src="" main="" init_handlers="necessary" language="CPP" />
+ 				<resources>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx31.cbp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx31.cbp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx31.cbp	(revision 299)
+@@ -124,6 +124,8 @@
+ 		<Unit filename="parserf.h" />
+ 		<Unit filename="parserthreadf.cpp" />
+ 		<Unit filename="parserthreadf.h" />
++		<Unit filename="preprocfunction.cpp" />
++		<Unit filename="preprocfunction.h" />
+ 		<Unit filename="projectdependencies.cpp" />
+ 		<Unit filename="projectdependencies.h" />
+ 		<Unit filename="resources/calltreeview.xrc" />
+@@ -141,6 +143,8 @@
+ 		<Unit filename="tokenf.h" />
+ 		<Unit filename="tokenizerf.cpp" />
+ 		<Unit filename="tokenizerf.h" />
++		<Unit filename="tokenizerpp.cpp" />
++		<Unit filename="tokenizerpp.h" />
+ 		<Unit filename="usetokenf.cpp" />
+ 		<Unit filename="usetokenf.h" />
+ 		<Unit filename="workspacebrowserbuilder.cpp" />
+@@ -154,9 +158,6 @@
+ 		<Unit filename="wxsmith/FormatIndentDlg.wxs" />
+ 		<Unit filename="wxsmith/MakefileDlg.wxs" />
+ 		<Extensions>
+-			<code_completion />
+-			<debugger />
+-			<envvars />
+ 			<wxsmith version="1">
+ 				<gui name="wxWidgets" src="" main="" init_handlers="necessary" language="CPP" />
+ 				<resources>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx31_64.cbp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx31_64.cbp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/FortranProject_cbsvn_wx31_64.cbp	(revision 299)
+@@ -127,6 +127,8 @@
+ 		<Unit filename="parserf.h" />
+ 		<Unit filename="parserthreadf.cpp" />
+ 		<Unit filename="parserthreadf.h" />
++		<Unit filename="preprocfunction.cpp" />
++		<Unit filename="preprocfunction.h" />
+ 		<Unit filename="projectdependencies.cpp" />
+ 		<Unit filename="projectdependencies.h" />
+ 		<Unit filename="resources/calltreeview.xrc" />
+@@ -144,6 +146,8 @@
+ 		<Unit filename="tokenf.h" />
+ 		<Unit filename="tokenizerf.cpp" />
+ 		<Unit filename="tokenizerf.h" />
++		<Unit filename="tokenizerpp.cpp" />
++		<Unit filename="tokenizerpp.h" />
+ 		<Unit filename="usetokenf.cpp" />
+ 		<Unit filename="usetokenf.h" />
+ 		<Unit filename="workspacebrowserbuilder.cpp" />
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.h	(nonexistent)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.h	(revision 299)
+@@ -0,0 +1,43 @@
++
++#ifndef PREPROCFUNCTION_H
++#define PREPROCFUNCTION_H
++
++#include <sdk.h>
++#ifndef CB_PRECOMP
++    #include <wx/string.h>
++#endif
++#include <vector>
++#include <set>
++
++
++class PreProcFunctionList;
++
++class PreProcFunction
++{
++    public:
++        PreProcFunction(const wxString& funName, const wxString& argStr, const wxString& funBodyIn,
++                                 PreProcFunctionList *knownFunctions);
++        ~PreProcFunction();
++        wxString Interpret(const wxString& argStr, PreProcFunctionList *knownFunctions, std::set<wxString>* makeArgSet=NULL);
++
++        wxString m_FunName;
++        std::vector<wxString> m_Args;
++        std::vector<wxString> m_Terms;
++    private:
++};
++
++class PreProcFunctionList
++{
++    public:
++        PreProcFunctionList();
++        ~PreProcFunctionList();
++        bool HasFunction(const wxString& funName);
++        PreProcFunction* GetFunction(const wxString& funName);
++        void AddFunction(PreProcFunction* pFun);
++    private:
++        std::vector<PreProcFunction*> m_Functions;
++        std::vector<wxString> m_FunctionNames;
++};
++
++#endif // PREPROCFUNCTION_H
++
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.h	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.h	(revision 299)
+@@ -107,6 +107,12 @@
+ 		bool m_Pass;
+ 		bool m_IsAbstract; // is abstract procedure or procedure pointer, or type
+ 
++		//For included with #include
++		bool m_WasIncluded; // was included with #include directive?
++		wxString m_IncludeFilename;
++		unsigned int m_IncludeLineStart;
++		unsigned int m_IncludeLineEnd;
++
+ 		TokenF* m_pParent;
+ 		TokensArrayF m_Children;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/bufferparserthread.cpp	(revision 299)
+@@ -42,8 +42,9 @@
+         return;
+     TokensArrayF* pTokens = new TokensArrayF();
+     IncludeDB* pIncludeDB = new IncludeDB();
++    std::map<wxString,wxString>* aIncludeFiles = m_pNativeParser->GetAdditionalIncludeFiles();
+ 
+-    ParserThreadF thread(projFilename, UnixFilename(filename), pTokens, fsForm, pIncludeDB, buffer);
++    ParserThreadF thread(projFilename, UnixFilename(filename), pTokens, fsForm, pIncludeDB, aIncludeFiles, buffer);
+     thread.Parse();
+     delete pIncludeDB;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 299)
+@@ -275,6 +275,7 @@
+     if (IsAttached() && m_InitDone && !Manager::IsAppShuttingDown())
+     {
+         m_InitDone = false;
++        m_pNativeParser->MakeAIncludeFileList();
+         // Parse the projects
+         m_pNativeParser->ForceReparseWorkspace();
+         m_InitDone = true;
+@@ -308,6 +309,7 @@
+     if (!ProjectManager::IsBusy() && IsAttached() && m_InitDone)
+     {
+         m_pNativeParser->DelProjectSearchDirs(event.GetProject());
++        m_pNativeParser->DelProjectIncludeDirs(event.GetProject());
+     }
+ 
+     event.Skip();
+@@ -375,8 +377,9 @@
+                 cbProject* cbp = pf->GetParentProject();
+                 projFN = cbp->GetFilename();
+             }
+-            m_pNativeParser->ReparseFile(projFN, editor->GetFilename());
+-            m_pNativeParser->UpdateWorkspaceBrowser();
++            bool wasReparsed = m_pNativeParser->ReparseFile(projFN, editor->GetFilename());
++            if (wasReparsed)
++                m_pNativeParser->UpdateWorkspaceBrowser();
+         }
+     }
+     event.Skip();
+@@ -1928,6 +1931,7 @@
+     {
+         // Project is loaded
+         wxArrayString adirs;
++        wxArrayString adirsInclude;
+         TiXmlElement* node = elem->FirstChildElement("fortran_project");
+         if (node)
+         {
+@@ -1935,8 +1939,14 @@
+             {
+                 adirs.Add(cbC2U(e->Attribute("dir")));
+             }
++
++            for(TiXmlElement* e = node->FirstChildElement("additional_include_dir"); e != NULL; e = e->NextSiblingElement("additional_include_dir"))
++            {
++                adirsInclude.Add(cbC2U(e->Attribute("dir")));
++            }
+         }
+         m_pNativeParser->SetProjectSearchDirs(prj, adirs);
++        m_pNativeParser->SetProjectIncludeDirs(prj, adirsInclude);
+     }
+     else
+     {
+@@ -1953,6 +1963,13 @@
+             TiXmlElement* e = node->InsertEndChild(TiXmlElement("additional_dir"))->ToElement();
+             e->SetAttribute("dir", cbU2C(adirs.Item(i)));
+         }
++
++        wxArrayString adirsInclude = m_pNativeParser->GetProjectIncludeDirs(prj);
++        for (size_t i=0; i<adirsInclude.size(); ++i)
++        {
++            TiXmlElement* e = node->InsertEndChild(TiXmlElement("additional_include_dir"))->ToElement();
++            e->SetAttribute("dir", cbU2C(adirsInclude.Item(i)));
++        }
+     }
+ }
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.cpp	(revision 299)
+@@ -20,13 +20,19 @@
+     #include <manager.h>
+ #endif
+ 
++#include <wx/tokenzr.h>
++
+ #include <editpathdlg.h>
+ 
+ BEGIN_EVENT_TABLE(FPOptionsProjectDlg, wxPanel)
+     EVT_UPDATE_UI(-1, FPOptionsProjectDlg::OnUpdateUI)
+-    EVT_BUTTON(XRCID("btnAdd"), FPOptionsProjectDlg::OnAdd)
++    EVT_BUTTON(XRCID("btnAddDir"), FPOptionsProjectDlg::OnAddDir)
++    EVT_BUTTON(XRCID("btnAddFile"), FPOptionsProjectDlg::OnAddFile)
+     EVT_BUTTON(XRCID("btnEdit"), FPOptionsProjectDlg::OnEdit)
+     EVT_BUTTON(XRCID("btnDelete"), FPOptionsProjectDlg::OnDelete)
++    EVT_BUTTON(XRCID("btnAddInclude"), FPOptionsProjectDlg::OnAddInclude)
++    EVT_BUTTON(XRCID("btnEditInclude"), FPOptionsProjectDlg::OnEditInclude)
++    EVT_BUTTON(XRCID("btnDeleteInclude"), FPOptionsProjectDlg::OnDeleteInclude)
+ END_EVENT_TABLE()
+ 
+ FPOptionsProjectDlg::FPOptionsProjectDlg(wxWindow* parent, cbProject* project, NativeParserF* np) :
+@@ -35,11 +41,16 @@
+ {
+     wxXmlResource::Get()->LoadPanel(this, parent, _T("pnlProjectFPOptions"));
+     m_OldPaths = m_pNativeParser->GetProjectSearchDirs(m_pProject);
+-
+     wxListBox* control = XRCCTRL(*this, "lstPaths", wxListBox);
+     control->Clear();
+     for (size_t i = 0; i < m_OldPaths.GetCount(); ++i)
+         control->Append(m_OldPaths[i]);
++
++    m_OldPathsInclude = m_pNativeParser->GetProjectIncludeDirs(m_pProject);
++    control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
++    control->Clear();
++    for (size_t i = 0; i < m_OldPathsInclude.GetCount(); ++i)
++        control->Append(m_OldPathsInclude[i]);
+ }
+ 
+ FPOptionsProjectDlg::~FPOptionsProjectDlg()
+@@ -46,7 +57,7 @@
+ {
+ }
+ 
+-void FPOptionsProjectDlg::OnAdd(cb_unused wxCommandEvent& event)
++void FPOptionsProjectDlg::OnAddDir(cb_unused wxCommandEvent& event)
+ {
+     wxListBox* control = XRCCTRL(*this, "lstPaths", wxListBox);
+ 
+@@ -63,6 +74,28 @@
+     }
+ }
+ 
++void FPOptionsProjectDlg::OnAddFile(cb_unused wxCommandEvent& event)
++{
++    wxListBox* control = XRCCTRL(*this, "lstPaths", wxListBox);
++
++    EditPathDlg dlg(this,
++                    m_pProject ? m_pProject->GetBasePath() : _T(""),
++                    m_pProject ? m_pProject->GetBasePath() : _T(""),
++                    _("Add file"), _T(""), false, true);
++
++    PlaceWindow(&dlg);
++    if (dlg.ShowModal() == wxID_OK)
++    {
++        wxString pathAll = dlg.GetPath();
++        wxStringTokenizer tokenizer(pathAll, _T(";"), wxTOKEN_STRTOK);
++        while (tokenizer.HasMoreTokens())
++        {
++            wxString path = tokenizer.GetNextToken();
++            control->Append(path);
++        }
++    }
++}
++
+ void FPOptionsProjectDlg::OnEdit(cb_unused wxCommandEvent& event)
+ {
+     wxListBox* control = XRCCTRL(*this, "lstPaths", wxListBox);
+@@ -70,10 +103,14 @@
+     if (sel < 0)
+         return;
+ 
++    bool isDir = false;
++    wxString selStr = control->GetString(sel);
++    if (wxDirExists(selStr))
++        isDir = true;
+     EditPathDlg dlg(this,
+-                    control->GetString(sel),
++                    selStr,
+                     m_pProject ? m_pProject->GetBasePath() : _T(""),
+-                    _("Edit directory"));
++                    isDir ? _("Edit directory") : _("Edit file"), _T(""), isDir);
+ 
+     PlaceWindow(&dlg);
+     if (dlg.ShowModal() == wxID_OK)
+@@ -93,28 +130,91 @@
+     control->Delete(sel);
+ }
+ 
++void FPOptionsProjectDlg::OnAddInclude(cb_unused wxCommandEvent& event)
++{
++    wxListBox* control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
++
++    EditPathDlg dlg(this,
++                    m_pProject ? m_pProject->GetBasePath() : _T(""),
++                    m_pProject ? m_pProject->GetBasePath() : _T(""),
++                    _("Add directory"));
++
++    PlaceWindow(&dlg);
++    if (dlg.ShowModal() == wxID_OK)
++    {
++        wxString path = dlg.GetPath();
++        control->Append(path);
++    }
++}
++
++void FPOptionsProjectDlg::OnEditInclude(cb_unused wxCommandEvent& event)
++{
++    wxListBox* control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
++    int sel = control->GetSelection();
++    if (sel < 0)
++        return;
++
++    EditPathDlg dlg(this,
++                    control->GetString(sel),
++                    m_pProject ? m_pProject->GetBasePath() : _T(""),
++                    _("Edit directory"));
++
++    PlaceWindow(&dlg);
++    if (dlg.ShowModal() == wxID_OK)
++    {
++        wxString path = dlg.GetPath();
++        control->SetString(sel, path);
++    }
++}
++
++void FPOptionsProjectDlg::OnDeleteInclude(cb_unused wxCommandEvent& event)
++{
++    wxListBox* control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
++    int sel = control->GetSelection();
++    if (sel < 0)
++        return;
++
++    control->Delete(sel);
++}
++
+ void FPOptionsProjectDlg::OnUpdateUI(cb_unused wxUpdateUIEvent& event)
+ {
+     wxListBox* control = XRCCTRL(*this, "lstPaths", wxListBox);
+     bool en = control->GetSelection() >= 0;
+-
+     XRCCTRL(*this, "btnEdit", wxButton)->Enable(en);
+     XRCCTRL(*this, "btnDelete", wxButton)->Enable(en);
++
++    control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
++    en = control->GetSelection() >= 0;
++    XRCCTRL(*this, "btnEditInclude", wxButton)->Enable(en);
++    XRCCTRL(*this, "btnDeleteInclude", wxButton)->Enable(en);
+ }
+ 
+ void FPOptionsProjectDlg::OnApply()
+ {
+-    wxArrayString newpaths;
++    if (!m_pNativeParser || !m_pProject)
++        return;
++
++    wxArrayString newpathsSearch;
+     wxListBox* control = XRCCTRL(*this, "lstPaths", wxListBox);
+     for (int i = 0; i < (int)control->GetCount(); ++i)
+-        newpaths.Add(control->GetString(i));
++        newpathsSearch.Add(control->GetString(i));
+ 
+-    if (!m_pNativeParser || !m_pProject)
+-        return;
+-
+-    if (m_OldPaths != newpaths)
++    if (m_OldPaths != newpathsSearch)
+     {
+-        m_pNativeParser->SetProjectSearchDirs(m_pProject, newpaths);
++        m_pNativeParser->SetProjectSearchDirs(m_pProject, newpathsSearch);
+         m_pNativeParser->ForceReparseProjectSearchDirs();
+     }
++
++    wxArrayString newpathsInclude;
++    control = XRCCTRL(*this, "lstPathsInclude", wxListBox);
++    for (int i = 0; i < (int)control->GetCount(); ++i)
++        newpathsInclude.Add(control->GetString(i));
++
++    if (m_OldPathsInclude != newpathsInclude)
++    {
++        m_pNativeParser->SetProjectIncludeDirs(m_pProject, newpathsInclude);
++        m_pNativeParser->MakeAIncludeFileList();
++        m_pNativeParser->ForceReparseWorkspace();
++    }
+ }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fpoptionsprjdlg.h	(revision 299)
+@@ -31,9 +31,13 @@
+     virtual void OnCancel(){}
+ 
+ protected:
+-    void OnAdd(wxCommandEvent& event);
++    void OnAddDir(wxCommandEvent& event);
++    void OnAddFile(wxCommandEvent& event);
+     void OnEdit(wxCommandEvent& event);
+     void OnDelete(wxCommandEvent& event);
++    void OnAddInclude(cb_unused wxCommandEvent& event);
++    void OnEditInclude(cb_unused wxCommandEvent& event);
++    void OnDeleteInclude(cb_unused wxCommandEvent& event);
+     void OnUpdateUI(wxUpdateUIEvent& event);
+ 
+ private:
+@@ -40,6 +44,7 @@
+     cbProject*    m_pProject;
+     NativeParserF* m_pNativeParser;
+     wxArrayString m_OldPaths;
++    wxArrayString m_OldPathsInclude;
+ 
+     DECLARE_EVENT_TABLE()
+ };
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.cpp	(revision 299)
+@@ -32,6 +32,7 @@
+ #include <vector>
+ 
+ #include <wx/tokenzr.h>
++#include <wx/filefn.h>
+ 
+ #include <cbstyledtextctrl.h>
+ 
+@@ -66,6 +67,7 @@
+       m_ThreadPool(this, wxNewId(), 2, 2 * 1024 * 1024),
+       m_ASearchDirsReparseTimer(this, idASearchDirsReparseTimer)
+ {
++    m_Parser.SetAdditionalIncludeFiles(&m_AIncludeFiles);
+ }
+ 
+ NativeParserF::~NativeParserF()
+@@ -232,11 +234,14 @@
+     }
+ }
+ 
+-void NativeParserF::ReparseFile(const wxString& projectFilename, const wxString& filename)
++bool NativeParserF::ReparseFile(const wxString& projectFilename, const wxString& filename)
+ {
++    bool wasReparsed = false;
+     FortranSourceForm fsForm;
+     if (IsFileFortran(filename, fsForm))
+-        m_Parser.Reparse(projectFilename, filename, fsForm);
++        wasReparsed = m_Parser.Reparse(projectFilename, filename, fsForm);
++
++    return wasReparsed;
+ }
+ 
+ void NativeParserF::ReparseProject(cbProject* project)
+@@ -324,11 +329,40 @@
+         wxArrayString* pDirs = &it->second;
+         for (size_t i=0; i<pDirs->size(); ++i)
+         {
+-            wxDir::GetAllFiles(pDirs->Item(i), &files, wxEmptyString, wxDIR_FILES);
++            if (wxDirExists(pDirs->Item(i)))
++            {
++                wxDir::GetAllFiles(pDirs->Item(i), &files, wxEmptyString, wxDIR_FILES);
++            }
++            else if (wxFileExists(pDirs->Item(i)))
++            {
++                files.Add(pDirs->Item(i));
++            }
++            else
++            {
++                // Note: I don't really understand, however 'wxFileExists' does return 'false' when file contains relative path.
++                //       It seems that current dir is not a project dir.
++                // Try with absolute paths.
++
++                wxFileName prFilename(it->first);
++
++                wxFileName fname;
++                fname.AssignDir(pDirs->Item(i)); // try as a dir
++                fname.MakeAbsolute(prFilename.GetPath());
++
++                if (wxDirExists(fname.GetPath()))
++                {
++                    wxDir::GetAllFiles(fname.GetPath(), &files, wxEmptyString, wxDIR_FILES);
++                }
++                else
++                {
++                    // Assume, it is a file.
++                    files.Add(fname.GetPath());
++                }
++            }
+         }
+ 
+         size_t nfiles = files.size();
+-        for (size_t i=0; i<nfiles; i++)
++        for (size_t i=0; i<nfiles; ++i)
+         {
+             if (IsFileFortran(files.Item(i), fsForm))
+             {
+@@ -351,6 +385,35 @@
+     }
+ }
+ 
++void NativeParserF::MakeAIncludeFileList()
++{
++    // Make additional include files list.
++    m_AIncludeFiles.clear();
++
++    for (auto it=m_AIncludeDirs.begin(); it != m_AIncludeDirs.end(); ++it)
++    {
++        wxFileName prFilename(it->first);
++        wxArrayString* pDirs = &it->second;
++        for (size_t i=0; i<pDirs->size(); ++i)
++        {
++            wxFileName dirName;
++            dirName.AssignDir(pDirs->Item(i));
++            dirName.MakeAbsolute(prFilename.GetPath());
++
++            wxArrayString files;
++            wxDir::GetAllFiles(dirName.GetPath(), &files, wxEmptyString, wxDIR_FILES | wxDIR_DIRS);
++
++            size_t nfiles = files.size();
++            for (size_t j=0; j<nfiles; ++j)
++            {
++                wxFileName fname(files.Item(j));
++                fname.MakeRelativeTo(dirName.GetPath(), wxPATH_UNIX);
++                m_AIncludeFiles[fname.GetFullPath(wxPATH_UNIX)] = files.Item(j);
++            }
++        }
++    }
++}
++
+ wxArrayString* NativeParserF::GetWSFiles()
+ {
+     return &m_WSFiles;
+@@ -376,6 +439,11 @@
+     return &m_ADirFileForms;
+ }
+ 
++std::map<wxString,wxString>* NativeParserF::GetAdditionalIncludeFiles()
++{
++    return &m_AIncludeFiles;
++}
++
+ void NativeParserF::OnUpdateWorkspaceBrowser(wxCommandEvent& /*event*/)
+ {
+     m_Parser.ConnectToNewTokens();
+@@ -1258,6 +1326,35 @@
+     m_ASearchDirs[project->GetFilename()] = searchDirs;
+ }
+ 
++void NativeParserF::SetProjectIncludeDirs(cbProject* project, wxArrayString& includeDirs)
++{
++    if (!project)
++        return;
++
++    m_AIncludeDirs[project->GetFilename()] = includeDirs;
++}
++
++wxArrayString NativeParserF::GetProjectIncludeDirs(cbProject* project)
++{
++    wxArrayString dirs;
++    if (!project)
++        return dirs;
++    wxString pfn = project->GetFilename();
++    if (m_AIncludeDirs.count(pfn) == 0)
++        return dirs;
++
++    return m_AIncludeDirs[pfn];
++}
++
++void NativeParserF::DelProjectIncludeDirs(cbProject* project)
++{
++    if (!project)
++        return;
++
++    m_AIncludeDirs.erase(project->GetFilename());
++}
++
++
+ bool NativeParserF::HasFortranFiles(cbProject* project)
+ {
+     if (!project)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/nativeparserf.h	(revision 299)
+@@ -41,7 +41,7 @@
+         void RemoveFromParser(cbProject* project);
+         void AddFileToParser(const wxString& projectFilename, const wxString& filename);
+         void RemoveFileFromParser(const wxString& filename);
+-        void ReparseFile(const wxString& projectFilename, const wxString& filename);
++        bool ReparseFile(const wxString& projectFilename, const wxString& filename);
+         void ReparseProject(cbProject* project);
+         void ParseProject(cbProject* project);
+         void ForceReparseWorkspace();
+@@ -74,10 +74,15 @@
+         wxArrayString* GetWSFileProjFilenames();
+         wxArrayString* GetADirFiles();
+         ArrayOfFortranSourceForm* GetADirFileForms();
++        std::map<wxString,wxString>* GetAdditionalIncludeFiles();
+         void GetCurrentBuffer(wxString& buffer, wxString& filename, wxString& projFilename);
+         void ReparseCurrentEditor();
+         wxArrayString GetProjectSearchDirs(cbProject* project);
+         void SetProjectSearchDirs(cbProject* project, wxArrayString& searchDirs);
++        void SetProjectIncludeDirs(cbProject* project, wxArrayString& includeDirs);
++        void MakeAIncludeFileList();
++        wxArrayString GetProjectIncludeDirs(cbProject* project);
++        void DelProjectIncludeDirs(cbProject* project);
+         bool HasFortranFiles(cbProject* project);
+         void DelProjectSearchDirs(cbProject* project);
+         void ForceReparseProjectSearchDirs();
+@@ -135,6 +140,9 @@
+         std::map<wxString,wxArrayString> m_ASearchDirs;
+         std::map<wxString,wxArrayString> m_ADirFNameToProjMap;
+ 
++        std::map<wxString,wxArrayString> m_AIncludeDirs; ///< dirs with additional include files for each project
++        std::map<wxString,wxString> m_AIncludeFiles;     ///< additional include files
++
+         DECLARE_EVENT_TABLE();
+ };
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 299)
+@@ -54,6 +54,7 @@
+     m_pIncludeDBADirNew = NULL;
+     m_pBufferTokens = new TokensArrayF();
+     m_pCurrentBufferTokensNew = NULL;
++    m_pAIncludeFiles = NULL;
+ 
+     if (withIntrinsicModules)
+     {
+@@ -93,7 +94,7 @@
+ {
+     wxCriticalSectionLocker locker(s_CritSect);
+     wxString fn = UnixFilename(filename);
+-    ParserThreadF* thread = new ParserThreadF(projectFilename, fn, m_pTokens, fsForm, false, m_pIncludeDB);
++    ParserThreadF* thread = new ParserThreadF(projectFilename, fn, m_pTokens, fsForm, false, m_pIncludeDB, m_pAIncludeFiles);
+     bool res = thread->Parse();
+     delete thread;
+ 
+@@ -176,6 +177,11 @@
+     }
+ }
+ 
++void ParserF::SetAdditionalIncludeFiles(std::map<wxString,wxString>* pAIncludeFiles)
++{
++    m_pAIncludeFiles = pAIncludeFiles;
++}
++
+ bool ParserF::FindTypeBoundProcedures(const TokenFlat& interToken, const wxArrayString& searchArr, TokensArrayFlat& resTokenArr)
+ {
+     wxCriticalSectionLocker locker(s_CritSect);
+@@ -514,6 +520,9 @@
+             wxCriticalSectionLocker locker(s_CritSect);
+             typeToken = GetTypeInFile(resultTypesTmp->Item(0)->m_Filename, resultTypesTmp->Item(0)->m_LineStart,
+                                       resultTypesTmp->Item(0)->m_Name);
++            if (!typeToken)
++                return false;
++
+             if (i == nTypes)
+             {
+                 isHostAssociated = resultTypesTmp->Item(0)->m_HostAssociated;
+@@ -561,7 +570,7 @@
+                         else
+                             tokName = tokenCh->m_Name;
+ 
+-                        // what is kind of procedure ?
++                        // what is the kind of procedure?
+                         TokensArrayFlatClass tokensProc;
+                         TokensArrayFlat* resultProc = tokensProc.GetTokens();
+                         int kindMask = tkFunction | tkSubroutine;
+@@ -592,6 +601,8 @@
+                     {
+                         result.Add(tokTmp);
+                     }
++                    else
++                        delete tokTmp;
+                 }
+             }
+         }
+@@ -603,6 +614,11 @@
+             newToken->m_DisplayName = typeToken->m_ExtendsType;
+             newToken->m_TokenKind = tkType;
+             newToken->m_pParent = typeToken;
++            if (typeToken->m_WasIncluded)
++            {
++                newToken->m_Filename = typeToken->m_IncludeFilename;
++                newToken->m_LineStart = typeToken->m_IncludeLineStart;
++            }
+             result.Add(new TokenFlat(newToken));
+         }
+         if (!typeToken->m_ExtendsType.IsEmpty())
+@@ -1510,7 +1526,10 @@
+         return;
+ 
+     if (isAfterPercent)
++    {
++        ChangeAddressWithInclude(result);
+         return;
++    }
+ 
+     int tokKind = tkModule | tkSubmodule | tkFunction | tkProgram | tkSubroutine | tkPreprocessor | tkInterface |
+                   tkBlockData | tkType | tkVariable | tkProcedure;
+@@ -1545,6 +1564,8 @@
+     {
+         FindMatchTokensAtInclude(ed, nameUnder, onlyPublicNames, false, result);
+     }
++
++    ChangeAddressWithInclude(result);
+ }
+ 
+ 
+@@ -2639,6 +2660,8 @@
+         return;
+ 
+     TokensArrayF* pFileChildren = FindFileTokens(token->m_Filename);
++    if (!pFileChildren)
++        return;
+ 
+     for (size_t j=0; j < pFileChildren->GetCount(); j++)
+     {
+@@ -3242,6 +3265,7 @@
+             break;
+         }
+     }
++
+     if (!have)
+     {
+         result.Add(new TokenFlat(token));
+@@ -3263,7 +3287,9 @@
+         }
+     }
+     if (!have)
++    {
+         result.Add(new TokenFlat(token));
++    }
+ }
+ 
+ 
+@@ -4142,14 +4168,19 @@
+ {
+     if (!children)
+         children = FindFileTokens(token.m_Filename);
++
+     if (!children)
+         return NULL;
+ 
+     TokenF* pFoundToken = NULL;
+ 
+-    for (size_t i=0; i<children->GetCount(); i++)
++    size_t childrenCount = children->GetCount();
++    for (size_t i=0; i<childrenCount; i++)
+     {
+-		if (children->Item(i)->m_LineStart == token.m_LineStart && children->Item(i)->m_Name == token.m_Name)
++		if ( (!token.m_WasIncluded && children->Item(i)->m_LineStart == token.m_LineStart &&
++              children->Item(i)->m_Name == token.m_Name) ||
++             (token.m_WasIncluded && children->Item(i)->m_IncludeLineStart == token.m_IncludeLineStart &&
++              children->Item(i)->m_Name == token.m_Name) )
+         {
+             pFoundToken = children->Item(i);
+             break;
+@@ -4162,7 +4193,8 @@
+             if (pFoundToken)
+                 break;
+         }
+-        else if (children->Item(i)->m_LineStart > token.m_LineStart)
++        else if ( (!token.m_WasIncluded && children->Item(i)->m_LineStart > token.m_LineStart) ||
++                  (token.m_WasIncluded && children->Item(i)->m_IncludeLineStart > token.m_IncludeLineStart) )
+             break;
+     }
+     return pFoundToken;
+@@ -4466,6 +4498,19 @@
+     }
+ }
+ 
++void ParserF::ChangeAddressWithInclude(TokensArrayFlat& tokArr)
++{
++    size_t arrSize = tokArr.size();
++    for (size_t i=0; i<arrSize; ++i)
++    {
++        if (tokArr.Item(i)->m_WasIncluded)
++        {
++            tokArr.Item(i)->m_Filename = tokArr.Item(i)->m_IncludeFilename;
++            tokArr.Item(i)->m_LineStart = tokArr.Item(i)->m_IncludeLineStart;
++        }
++    }
++}
++
+ void ParserF::BuildCalledByDict(CalledByDict& cByDict)
+ {
+     cByDict.Build(m_pTokens);
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.h	(revision 299)
+@@ -40,6 +40,7 @@
+         bool RemoveFile(const wxString& filename);
+         void RemoveBuffer(const wxString& filename);
+         TokensArrayF* GetTokens(){return m_pTokens;};
++        void SetAdditionalIncludeFiles(std::map<wxString,wxString>* pAIncludeFiles);
+         bool FindTypeBoundProcedures(const TokenFlat& interToken, const wxArrayString& searchArr, TokensArrayFlat& resTokenArr);
+         bool FindMatchTokenInSameModule(const TokenFlat& procedureToken, const wxString& search, TokensArrayFlat& result, int tokenKindMask, int noChildrenOf);
+         size_t FindMatchTokensDeclared(const wxString& search, TokensArrayFlat& result, int tokenKindMask, bool partialMatch=false, int noChildrenOf=0,
+@@ -105,6 +106,7 @@
+         void GetChildren(TokenFlat* token, int tokenKindMask, TokensArrayFlat& result, int levelMax=1);
+         void GetChildren(TokenF* pToken, int tokenKindMask, TokensArrayFlat& result, int level, int levelMax);
+         void FindImplementedProcInMySubmodules(TokenFlat* tok, const wxString& search, TokensArrayFlat& result);
++        void ChangeAddressWithInclude(TokensArrayFlat& tokArr);
+         void BuildCalledByDict(CalledByDict& cByDict);
+ 
+     protected:
+@@ -184,6 +186,8 @@
+         IncludeDB*    m_pIncludeDBADirNew;
+         TokensArrayF* m_pBufferTokens;
+         TokensArrayF* m_pCurrentBufferTokensNew;
++
++        std::map<wxString,wxString>* m_pAIncludeFiles;     ///< additional include files
+ };
+ 
+ #endif // PARSERF_H
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.cpp	(revision 299)
+@@ -20,11 +20,13 @@
+                              TokensArrayF* tokens,
+                              FortranSourceForm fsForm,
+                              bool isBuffer,
+-                             IncludeDB* includeDB)
++                             IncludeDB* includeDB,
++                             std::map<wxString,wxString>* aIncludeFiles)
+     :
+     m_pTokens(tokens),
+     m_pLastParent(0L),
+     m_pIncludeDB(includeDB),
++    m_pAIncludeFiles(aIncludeFiles),
+     m_Briefend(_T("@brief_end@"))
+ {
+     m_InterfaceOperator = 0;
+@@ -49,6 +51,7 @@
+     {
+         m_Tokens.InitFromBuffer(bufferOrFilename, fsForm);
+     }
++    m_Tokens.SetParent(this);
+     InitSecondEndPart();
+ }
+ 
+@@ -57,11 +60,13 @@
+                              TokensArrayF* tokens,
+                              FortranSourceForm fsForm,
+                              IncludeDB* includeDB,
++                             std::map<wxString,wxString>* aIncludeFiles,
+                              const wxString& buffer)
+     :
+     m_pTokens(tokens),
+     m_pLastParent(0L),
+     m_pIncludeDB(includeDB),
++    m_pAIncludeFiles(aIncludeFiles),
+     m_Briefend(_T("@brief_end@"))
+ {
+     m_InterfaceOperator = 0;
+@@ -75,6 +80,7 @@
+     m_Filename = filename;
+     m_Tokens.InitFromBuffer(buffer, fsForm);
+     m_Tokens.SetFilename(filename);
++    m_Tokens.SetParent(this);
+     wxChar sep = wxFileName::GetPathSeparator();
+     m_pLastParent = DoAddFileToken(filename.AfterLast(sep), projectFilename);
+ 
+@@ -229,12 +235,19 @@
+ 
+     newToken->m_TokenKind = kind;
+     newToken->m_pParent = m_pLastParent;
+-    newToken->m_Filename = m_Tokens.GetFilename();
+-    newToken->m_LineStart = m_Tokens.GetLineNumber();
++    newToken->m_Filename = m_Tokens.GetParentFilename();
++    newToken->m_LineStart = m_Tokens.GetParentLineNumber();
+     newToken->m_DisplayName = name;
+     newToken->m_Args = args;
+     newToken->m_TypeDefinition = typeDefinition;
+     newToken->m_DefinitionLength = 1;
++    if (m_Tokens.IsInInclude())
++    {
++        newToken->m_WasIncluded = true;
++        newToken->m_IncludeFilename = m_Tokens.GetFilename();
++        newToken->m_IncludeLineStart = m_Tokens.GetLineNumber();
++        newToken->m_IncludeLineEnd = newToken->m_IncludeLineStart;
++    }
+ 
+     if (m_pLastParent)
+     {
+@@ -255,15 +268,21 @@
+ 
+     newToken->m_TokenKind = kind;
+     newToken->m_pParent = m_pLastParent;
+-    newToken->m_Filename = m_Tokens.GetFilename();
++    newToken->m_Filename = m_Tokens.GetParentFilename();
+     newToken->m_DisplayName = name;
+     newToken->m_Args = args;
+     newToken->m_TypeDefinition = wxEmptyString;
+ 
+-    newToken->m_LineStart = defStartLine;
++    newToken->m_LineStart = m_Tokens.GetParentLineNumber();
+     newToken->m_DefinitionLength = m_Tokens.GetLineNumber() - defStartLine + 1;
++    if (m_Tokens.IsInInclude())
++    {
++        newToken->m_WasIncluded = true;
++        newToken->m_IncludeFilename = m_Tokens.GetFilename();
++        newToken->m_IncludeLineStart = defStartLine;
++        newToken->m_IncludeLineEnd = newToken->m_IncludeLineStart;
++    }
+ 
+-
+     if (m_pLastParent)
+     {
+         m_pLastParent->AddChild(newToken);
+@@ -413,12 +432,18 @@
+ 
+     newToken->m_TokenKind = tkUse;
+     newToken->m_pParent = m_pLastParent;
+-    newToken->m_Filename = m_Tokens.GetFilename();
++    newToken->m_Filename = m_Tokens.GetParentFilename();
+     newToken->m_DisplayName = modName;
+     newToken->m_TypeDefinition = wxEmptyString;
+-
+-    newToken->m_LineStart = m_Tokens.GetLineNumber();
++    newToken->m_LineStart = m_Tokens.GetParentLineNumber();
+     newToken->m_DefinitionLength = 1;
++    if (m_Tokens.IsInInclude())
++    {
++        newToken->m_WasIncluded = true;
++        newToken->m_IncludeFilename = m_Tokens.GetFilename();
++        newToken->m_IncludeLineStart = m_Tokens.GetLineNumber();
++        newToken->m_IncludeLineEnd = newToken->m_IncludeLineStart;
++    }
+ 
+     if (m_pLastParent)
+     {
+@@ -432,7 +457,6 @@
+     return newToken;
+ }
+ 
+-
+ void ParserThreadF::HandleModule()
+ {
+     TokenKindF kind = tkModule;
+@@ -566,6 +590,13 @@
+             }
+         }
+     }
++
++    modToken->AddLineEnd(m_Tokens.GetParentLineNumber());
++    if (modToken->m_WasIncluded)
++    {
++        modToken->m_IncludeLineEnd = m_Tokens.GetLineNumber();
++    }
++
+     modToken->AddLineEnd(m_Tokens.GetLineNumber());
+     m_pLastParent = old_parent;
+ 
+@@ -861,12 +892,18 @@
+ 
+     newToken->m_TokenKind = tkModule;
+     newToken->m_pParent = m_pLastParent;
+-    newToken->m_Filename = m_Tokens.GetFilename();
++    newToken->m_Filename = m_Tokens.GetParentFilename();
+     newToken->m_DisplayName = modName;
+     newToken->m_TypeDefinition = wxEmptyString;
+-
+-    newToken->m_LineStart = m_Tokens.GetLineNumber();
++    newToken->m_LineStart = m_Tokens.GetParentLineNumber();
+     newToken->m_DefinitionLength = 1;
++    if (m_Tokens.IsInInclude())
++    {
++        newToken->m_WasIncluded = true;
++        newToken->m_IncludeFilename = m_Tokens.GetFilename();
++        newToken->m_IncludeLineStart = m_Tokens.GetLineNumber();
++        newToken->m_IncludeLineEnd = newToken->m_IncludeLineStart;
++    }
+ 
+     if (m_pLastParent)
+     {
+@@ -1213,12 +1250,12 @@
+             || tok_low.IsSameAs(_T("complex")) || tok_low.IsSameAs(_T("logical"))
+             || tok_low.IsSameAs(_T("enumerator")) )
+     {
+-        if (next_low.StartsWith(_T("(")))
++        if (next_low.StartsWith(_T("(")))  // 'integer(4)'
+         {
+             token.Append(next);
+             m_Tokens.GetToken();
+         }
+-        else if (next_low.StartsWith(_T("*")))
++        else if (next_low.StartsWith(_T("*"))) // 'integer*4'
+         {
+             token.Append(m_Tokens.GetToken());
+             token.Append(m_Tokens.GetTokenSameFortranLine());
+@@ -2024,12 +2061,15 @@
+             continue;
+         }
+         tok_low = token.Lower();
++        unsigned int tok_ln = m_Tokens.GetLineNumber();
+ 
+         wxString next = m_Tokens.PeekToken();
+         wxString nex_low = next.Lower();
++        unsigned int nex_ln = m_Tokens.GetPeekedLineNumber();
++        if (tok_ln != nex_ln)
++            nex_low = wxEmptyString;
+ 
+-        if ( ((m_Tokens.GetLineNumber() == m_Tokens.GetPeekedLineNumber()) && IsEnd(tok_low, nex_low)) ||
+-             ((m_Tokens.GetLineNumber() != m_Tokens.GetPeekedLineNumber()) && IsEnd(tok_low, _T(""))) )
++        if (IsEnd(tok_low, nex_low))
+         {
+             m_Tokens.SkipToOneOfChars(";", true);
+             break;
+@@ -2043,7 +2083,7 @@
+             break;
+         }
+         else if (tok_low.Matches(_T("type")) && !nex_low(0,1).Matches(_T("(")) && !nex_low.Matches(_T("is"))
+-                 && ln_tokold != m_Tokens.GetLineNumber())
++                 && ln_tokold != tok_ln)
+         {
+             HandleType();
+         }
+@@ -2059,7 +2099,7 @@
+         {
+             HandleUse();
+         }
+-        else if (tok_low.Matches(_T("interface")) && ln_tokold != m_Tokens.GetLineNumber())
++        else if (tok_low.Matches(_T("interface")) && ln_tokold != tok_ln)
+         {
+             HandleInterface();
+         }
+@@ -2103,7 +2143,7 @@
+                 nex_low = next.Lower();
+                 HandleBlockData();
+             }
+-            else if (m_Tokens.GetLineNumber() != m_Tokens.GetPeekedLineNumber() || next.Matches(_T(";")))
++            else if (tok_ln != nex_ln || nex_low.Matches(_T(";")))
+             {
+                 HandleBlockConstruct();
+             }
+@@ -2142,12 +2182,12 @@
+         {
+             HandleBindTo();
+         }
+-        else
++        else if (tok_ln == nex_ln)
+         {
+             bool needDefault = true;
+             bool hasFunctionInLine = false;
+             TokensArrayF tokTmpArr;
+-            if (ln_tokold != m_Tokens.GetLineNumber()) // declaration can start only from a new line
++            if (ln_tokold != tok_ln) // declaration can start only from a new line
+             {
+                 CheckParseOneDeclaration(token, tok_low, next, nex_low, needDefault, tokTmpArr, hasFunctionInLine);
+             }
+@@ -2764,14 +2804,11 @@
+             }
+         }
+     }
+-    else
++    else if (next.StartsWith(_T("(")))
+     {
+-        if (next.StartsWith(_T("(")))
+-        {
+-            wxString curLine = m_Tokens.GetLineFortran();
+-            TakeFunctionsCallsFromString(curLine);
+-            m_Tokens.SkipToOneOfChars(";", true);
+-        }
++        wxString curLine = m_Tokens.GetLineFortran();
++        TakeFunctionsCallsFromString(curLine);
++        m_Tokens.SkipToOneOfChars(";", true);
+     }
+ }
+ 
+@@ -2880,3 +2917,14 @@
+     idxStart += 1;
+     funName = str.Mid(idxStart, idxEnd-idxStart+1);
+ }
++
++
++wxString ParserThreadF::GetAdditionalIncludeFile(wxString filename)
++{
++    wxFileName fname(filename);
++    wxString filename_ux = fname.GetFullPath(wxPATH_UNIX);
++    if (m_pAIncludeFiles && m_pAIncludeFiles->count(filename_ux) == 1)
++        return m_pAIncludeFiles->at(filename_ux);
++
++    return wxEmptyString;
++}
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserthreadf.h	(revision 299)
+@@ -14,7 +14,7 @@
+ #include <set>
+ 
+ #include "tokenf.h"
+-#include "tokenizerf.h"
++#include "tokenizerpp.h"
+ #include "usetokenf.h"
+ #include "moduletokenf.h"
+ #include "submoduletokenf.h"
+@@ -30,17 +30,20 @@
+                              TokensArrayF* tokens,
+                              FortranSourceForm fsForm,
+                              bool isBuffer=false,
+-                             IncludeDB* includeDB=NULL);
++                             IncludeDB* includeDB=NULL,
++                             std::map<wxString,wxString>* aIncludeFiles=NULL);
+         ParserThreadF(const wxString& projectFilename,
+                              const wxString& filename,
+                              TokensArrayF* tokens,
+                              FortranSourceForm fsForm,
+                              IncludeDB* includeDB,
++                             std::map<wxString,wxString>* aIncludeFiles,
+                              const wxString& buffer);
+         virtual ~ParserThreadF();
+         bool Parse();
+         void ParseDeclarations(bool breakAtEnd=false, bool breakAtContains=false);
+         static void SplitAssociateConstruct(const wxString& argLine, std::map<wxString,wxString>& assocMap);
++        wxString GetAdditionalIncludeFile(wxString filename);
+     protected:
+     private:
+         TokenF* DoAddToken(TokenKindF kind, const wxString& name, const wxString& args=wxEmptyString, const wxString& typeDefinition=wxEmptyString);
+@@ -50,12 +53,13 @@
+         ModuleTokenF* DoAddModuleToken(const wxString& modName);
+         SubmoduleTokenF* DoAddSubmoduleToken(const wxString& submName, const wxString& ancestorModule, const wxString& parentSubmodule, unsigned int defStartLine);
+ 
+-        Tokenizerf m_Tokens;
++        TokenizerPP m_Tokens;
+         TokensArrayF* m_pTokens;
+         TokenF* m_pLastParent;
+         wxString m_Filename;
+         wxArrayString m_IncludeList;
+         IncludeDB* m_pIncludeDB;
++        std::map<wxString,wxString>* m_pAIncludeFiles;  // additional include files
+ 
+         int m_NumberOfBlockConstruct;
+ 
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.cpp	(nonexistent)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/preprocfunction.cpp	(revision 299)
+@@ -0,0 +1,194 @@
++
++#include "preprocfunction.h"
++#include "tokenizerf.h"
++
++#include <wx/tokenzr.h>
++
++
++PreProcFunction::PreProcFunction(const wxString& funName, const wxString& argStr, const wxString& funBodyIn,
++                                 PreProcFunctionList *knownFunctions)
++{
++    m_FunName = funName;
++    // in argStr we expecting "(a, b, c)"
++    if ( !argStr.StartsWith(_T("(")) || !argStr.EndsWith(_T(")")) )
++    {
++        // something is wrong
++        m_FunName = wxEmptyString;
++        return;
++    }
++    std::set<wxString> funArgSet;
++    wxStringTokenizer tokenizer(argStr.Mid(1,argStr.Length()-2), _T(","), wxTOKEN_STRTOK);
++    while (tokenizer.HasMoreTokens())
++    {
++        wxString par1 = tokenizer.GetNextToken().Trim(true).Trim(false);
++        m_Args.push_back(_T("&%arg_") + par1);
++        funArgSet.insert(par1);
++    }
++
++    // join function from multiple lines into one line.
++    wxString funBody;
++    wxStringTokenizer funTokenizer(funBodyIn, _T("\n"), wxTOKEN_STRTOK);
++    while (funTokenizer.HasMoreTokens())
++    {
++        wxString line1 = funTokenizer.GetNextToken().Trim(true);
++        if (line1.EndsWith(_T("\\")))
++            line1 = line1.Mid(0, line1.Length()-1);
++        funBody << line1;
++    }
++
++    if (funBody.IsEmpty())
++        return;
++
++    Tokenizerf funToks;
++    funToks.InitFromBuffer(funBody + _T(" "), fsfFree);
++    while(true)
++    {
++        wxString tok = funToks.GetToken();
++        if (tok.IsEmpty())
++            break;
++        wxString nexTok = funToks.PeekToken();
++        if (tok == _T("##"))
++            tok = _T("&%oper_join");
++        else if (funArgSet.count(tok) > 0)
++            tok = _T("&%arg_") + tok;
++        else if ( knownFunctions && knownFunctions->HasFunction(tok) && (nexTok.starts_with('(') && nexTok.ends_with(')')) )
++        {
++            // it is call to the defined function.
++            tok = knownFunctions->GetFunction(tok)->Interpret(nexTok, knownFunctions, &funArgSet);
++            funToks.GetToken(); // consume nexTok
++        }
++        m_Terms.push_back(tok);
++    }
++}
++
++PreProcFunction::~PreProcFunction()
++{
++    //dtor
++}
++
++wxString PreProcFunction::Interpret(const wxString& argStr, PreProcFunctionList *knownFunctions, std::set<wxString>* makeArgSet)
++{
++    if ( !argStr.StartsWith(_T("(")) || !argStr.EndsWith(_T(")")) )
++        return wxEmptyString;
++
++    std::vector<wxString> varArr;
++    wxStringTokenizer tokenizer(argStr.Mid(1,argStr.Length()-2), _T(","), wxTOKEN_RET_EMPTY_ALL);
++    while (tokenizer.HasMoreTokens())
++    {
++        wxString var1 = tokenizer.GetNextToken().Trim(true).Trim(false);
++        varArr.push_back(var1);
++    }
++
++    if (varArr.size() != m_Args.size())
++        return wxEmptyString; // number of dummy arguments not equal to the call arguments.
++
++    wxString retStr;
++    for (const auto& term: m_Terms)
++    {
++        if (term == _T("&%oper_join"))
++            ;
++        else
++            retStr << term;
++    }
++
++    for (size_t i=0; i<m_Args.size(); ++i)
++    {
++        wxString repStr;
++        if (makeArgSet && makeArgSet->count(varArr[i]) > 0)
++            repStr = _T("&%arg_") + varArr[i]; // mark this argument
++        else
++            repStr = varArr[i];
++        retStr.Replace(m_Args[i], repStr);
++    }
++    return retStr;
++}
++
++PreProcFunctionList::PreProcFunctionList()
++{
++    // ctor
++}
++
++PreProcFunctionList::~PreProcFunctionList()
++{
++    //dtor
++    for (auto fun: m_Functions)
++    {
++        delete(fun);
++    }
++}
++
++
++bool PreProcFunctionList::HasFunction(const wxString& funName)
++{
++    for (const auto& name: m_FunctionNames)
++    {
++        if (name == funName)
++            return true;
++    }
++    return false;
++}
++
++PreProcFunction* PreProcFunctionList::GetFunction(const wxString& funName)
++{
++    for (size_t i=0; i<m_FunctionNames.size(); ++i)
++    {
++        if (m_FunctionNames[i] == funName)
++            return m_Functions[i];
++    }
++    return NULL;
++}
++
++void PreProcFunctionList::AddFunction(PreProcFunction* pFun)
++{
++    m_Functions.push_back(pFun);
++    m_FunctionNames.push_back(pFun->m_FunName);
++}
++
++
++//bool PreProcFunction::GetNextTokenIdx(const wxString& line, size_t idxStartRead, size_t& idxStart, size_t& idxEnd)
++//{
++//    // returns true when token was found.
++//    // idxStart is idx where token starts.
++//    // idxEnd is idx after token ends.
++//
++//    std::map<wxString,wxString> m_KnownFunctions;
++//
++//    // Find where token starts
++//    idxStart = 0;
++//    idxEnd   = 0;
++//    size_t lineLen = line.size();
++//    if (lineLen == 0)
++//        return false;
++//
++//    bool startFound = false;
++//    for (size_t i=idxStartRead; i<lineLen; ++i)
++//    {
++//        wxChar char1 = line.GetChar(i);
++//        if (char1 != ' ' && char1 != '\t' && char1 != '\n')
++//        {
++//            startFound = true;
++//            idxStart = i;
++//            break;
++//        }
++//    }
++//
++//    if (!startFound)
++//        return false;
++//
++//    idxEnd = lineLen;
++//    for (size_t i=idxStart; i<lineLen; ++i)
++//    {
++//        wxChar char1 = line.GetChar(i);
++//        if (isalnum(char1) || char1 == '_' || char1 == '$' || char1 == '#')
++//        {}
++//        else
++//        {
++//            if(i == idxStart)
++//                idxEnd = i + 1;
++//            else
++//                idxEnd = i;
++//            break;
++//        }
++//    }
++//    return true;
++//}
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/project_settings_fortran.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/project_settings_fortran.xrc	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/project_settings_fortran.xrc	(revision 299)
+@@ -5,9 +5,9 @@
+ 			<orient>wxVERTICAL</orient>
+ 			<object class="sizeritem">
+ 				<object class="wxStaticText" name="ID_STATICTEXT1">
+-					<label>Additional search paths for the code completion:</label>
++					<label>Additional files or directories to be parsed:</label>
+ 				</object>
+-				<flag>wxALL|wxEXPAND</flag>
++				<flag>wxALL</flag>
+ 				<border>8</border>
+ 			</object>
+ 			<object class="sizeritem">
+@@ -19,14 +19,21 @@
+ 			<object class="sizeritem">
+ 				<object class="wxBoxSizer">
+ 					<object class="sizeritem">
+-						<object class="wxButton" name="btnAdd">
+-							<label>&amp;Add</label>
++						<object class="wxButton" name="btnAddDir">
++							<label>Add directory</label>
+ 						</object>
+ 						<flag>wxALIGN_LEFT</flag>
+ 					</object>
+ 					<object class="sizeritem">
++						<object class="wxButton" name="btnAddFile">
++							<label>Add file</label>
++						</object>
++						<flag>wxLEFT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++						<border>8</border>
++					</object>
++					<object class="sizeritem">
+ 						<object class="wxButton" name="btnEdit">
+-							<label>&amp;Edit</label>
++							<label>Edit</label>
+ 						</object>
+ 						<flag>wxLEFT</flag>
+ 						<border>8</border>
+@@ -33,7 +40,7 @@
+ 					</object>
+ 					<object class="sizeritem">
+ 						<object class="wxButton" name="btnDelete">
+-							<label>&amp;Delete</label>
++							<label>Delete</label>
+ 						</object>
+ 						<flag>wxLEFT</flag>
+ 						<border>8</border>
+@@ -42,6 +49,50 @@
+ 				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL</flag>
+ 				<border>8</border>
+ 			</object>
++			<object class="sizeritem">
++				<object class="wxStaticText" name="ID_STATICTEXT2">
++					<label>Additional directories to be searched for include files during the parsing:</label>
++				</object>
++				<flag>wxALL|wxALIGN_LEFT</flag>
++				<border>8</border>
++			</object>
++			<object class="sizeritem">
++				<object class="wxListBox" name="lstPathsInclude">
++					<default>-1</default>
++				</object>
++				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
++				<border>8</border>
++				<option>1</option>
++			</object>
++			<object class="sizeritem">
++				<object class="wxBoxSizer">
++					<object class="sizeritem">
++						<object class="wxButton" name="btnAddInclude">
++							<label>Add directory</label>
++						</object>
++						<flag>wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++						<option>1</option>
++					</object>
++					<object class="sizeritem">
++						<object class="wxButton" name="btnEditInclude">
++							<label>Edit</label>
++						</object>
++						<flag>wxLEFT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++						<border>5</border>
++						<option>1</option>
++					</object>
++					<object class="sizeritem">
++						<object class="wxButton" name="btnDeleteInclude">
++							<label>Delete</label>
++						</object>
++						<flag>wxLEFT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++						<border>8</border>
++						<option>1</option>
++					</object>
++				</object>
++				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
++				<border>8</border>
++			</object>
+ 		</object>
+ 	</object>
+ </resource>
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenf.cpp	(revision 299)
+@@ -19,6 +19,7 @@
+ 	m_TokenAccess(taPublic),
+ 	m_Pass(true),
+ 	m_IsAbstract(false),
++	m_WasIncluded(false),
+ 	m_pParent(0L)
+ {
+ }
+@@ -30,6 +31,7 @@
+ 	m_TokenAccess(taPublic),
+ 	m_Pass(true),
+ 	m_IsAbstract(false),
++	m_WasIncluded(false),
+ 	m_pParent(0L)
+ {
+ 	//ctor
+@@ -159,6 +161,14 @@
+     m_DocString = tok->m_DocString;
+ 
+     m_HostAssociated = false;
++
++    m_WasIncluded = tok->m_WasIncluded;
++    if (m_WasIncluded)
++    {
++        m_IncludeFilename = tok->m_IncludeFilename;
++        m_IncludeLineStart = tok->m_IncludeLineStart;
++        m_IncludeLineEnd = tok->m_IncludeLineEnd;
++    }
+ }
+ 
+ TokenFlat::TokenFlat(const TokenFlat* tok)
+@@ -194,6 +204,13 @@
+     m_DocString = tok->m_DocString;
+     m_Rename = tok->m_Rename;
+     m_HostAssociated = tok->m_HostAssociated;
++
++    m_WasIncluded = tok->m_WasIncluded;
++    if (m_WasIncluded)
++    {
++        m_IncludeFilename = tok->m_IncludeFilename;
++        m_IncludeLineStart = tok->m_IncludeLineStart;
++    }
+ }
+ 
+ TokenFlat::~TokenFlat()
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.cpp	(revision 299)
+@@ -694,13 +694,14 @@
+             tmp = m_Buffer.Mid(start, m_TokenIndex - start);
+ 
+             // skip fortran comments
+-            for (unsigned int i = 0; i < tmp.Length() - 1; ++i)
++            unsigned int tmpLen = tmp.Length() - 1;
++            for (unsigned int i = 0; i < tmpLen; ++i)
+             {
+                 if (tmp.GetChar(i) == '!')
+                 {
+                     // replace comment line with spaces
+                     tmp.SetChar(i,' ');
+-                    for(++i; i < tmp.Length() - 1; ++i)
++                    for(++i; i < tmpLen; ++i)
+                     {
+                         if (tmp.GetChar(i) == '\n')
+                         {
+@@ -724,7 +725,8 @@
+ 
+             // skip fixed-form fortran comments
+             int col = -1;
+-            for (unsigned int i = 0; i < tmp.Length() - 1; ++i)
++            unsigned int tmpLen = tmp.Length() - 1;
++            for (unsigned int i = 0; i < tmpLen; ++i)
+             {
+                 if (col !=  -1)
+                 {
+@@ -745,7 +747,7 @@
+                 {
+                     // replace comment line with spaces
+                     tmp.SetChar(i,' ');
+-                    for(++i; i < tmp.Length() - 1; ++i)
++                    for(++i; i < tmpLen; ++i)
+                     {
+                         if (tmp.GetChar(i) == '\n')
+                         {
+@@ -770,9 +772,10 @@
+         tmp.Replace(_T("\r"), _T(" ")); // replace CR with spaces
+         tmp.Replace(_T("&"), _T(" ")); // replace fortran line continuation with spaces
+         // fix-up arguments (remove excessive spaces/tabs/newlines)
+-        for (unsigned int i = 0; i < tmp.Length()-1; ++i)
++        unsigned int tmpLen = tmp.Length() - 1;
++        for (unsigned int i = 0; i < tmpLen; ++i)
+         {
+-            if (i < tmp.Length()-1 && tmp.GetChar(i) == ' ' && tmp.GetChar(i + 1) == ' ')
++            if (i < tmpLen && tmp.GetChar(i) == ' ' && tmp.GetChar(i + 1) == ' ')
+                 continue; // skip excessive spaces
+             ret_Str << tmp.GetChar(i);
+         }
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerf.h	(revision 299)
+@@ -59,6 +59,7 @@
+ 		void SetFilename(const wxString& filename);
+         void UngetToken();
+ 		bool SkipToEOL();
++		FortranSourceForm GetSourceForm() { return m_SourceForm; }
+ 	protected:
+ 		void BaseInit();
+ 		wxString DoGetToken();
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(nonexistent)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.cpp	(revision 299)
+@@ -0,0 +1,882 @@
++#include "tokenizerpp.h"
++#include "parserthreadf.h"
++
++#include <wx/tokenzr.h>
++#include <wx/filename.h>
++#include <wx/filefn.h>
++
++
++TokenizerPP::TokenizerPP(const wxString& filename, FortranSourceForm sourceForm)
++{
++    //ctor
++    Tokenizerf* pFileTokens = new Tokenizerf(filename, sourceForm);
++    m_TokensFiles.push_back(pFileTokens);
++    m_ActiveFileIdx = 0;
++    m_pParent = 0;
++    m_PocketSize = 0;
++    m_PocketWasPeeked = false;
++    m_PeekedFromPocket = false;
++    m_PocketLineNumber = 0;
++}
++
++TokenizerPP::~TokenizerPP()
++{
++    //dtor
++    for (size_t i=0; i<m_TokensFiles.size(); ++i)
++    {
++        delete m_TokensFiles[i];
++    }
++}
++
++void TokenizerPP::SetParent(ParserThreadF* parent)
++{
++    m_pParent = parent;
++}
++
++bool TokenizerPP::Init(const wxString& filename, FortranSourceForm sourceForm)
++{
++    m_ActiveFileIdx = 0;
++    m_PocketSize = 0;
++    return m_TokensFiles[0]->Init(filename, sourceForm);
++}
++
++bool TokenizerPP::InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm)
++{
++    m_ActiveFileIdx = 0;
++    m_PocketSize = 0;
++    return m_TokensFiles[0]->InitFromBuffer(buffer, sourceForm);
++}
++
++wxString TokenizerPP::GetToken()
++{
++    wxString token;
++    if (m_PocketSize > 0)
++    {
++        // take token from the pocket
++        if (m_PocketWasPeeked)
++        {
++            m_TokensFiles[m_ActiveFileIdx]->GetToken();
++            m_PocketWasPeeked = false;
++        }
++
++        m_PocketSize -= 1;
++        token = m_Pocket[m_PocketSize];
++        m_Pocket.pop_back();
++
++        return token;
++    }
++
++    while (true)
++    {
++        token = m_TokensFiles[m_ActiveFileIdx]->GetToken();
++
++        if (token.GetChar(0) == '#')
++        {
++            if (token.IsSameAs(_T("#define")))
++                HandlePPDefine();
++            else if (token.IsSameAs(_T("#undefine")) || token.IsSameAs(_T("#undef")))
++                HandlePPUndefine();
++            else if (token.IsSameAs(_T("#if")) || token.IsSameAs(_T("#ifdef")) || token.IsSameAs(_T("#ifndef")))
++                HandlePPIfdef(token);
++            else if (token.IsSameAs(_T("#endif")) || token.IsSameAs(_T("#else")) || token.IsSameAs(_T("#elif")))
++                HandlePPIfdef(token);
++            else if (token.IsSameAs(_T("#include")))
++                HandleInclude();
++            else if (token.IsSameAs(_T("#error")))
++                m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++            else
++                break;  // don't know what it is
++        }
++        else if (token.IsEmpty())
++        {
++            // assume the end of file was reached
++            if (m_ActiveFileIdx > 0)
++            {
++                delete m_TokensFiles[m_ActiveFileIdx];
++                m_TokensFiles.pop_back();
++                m_ActiveFileIdx = m_TokensFiles.size() - 1;
++            }
++            else
++                return wxEmptyString; // no more tokens
++        }
++        else
++            break;
++    }
++
++    token = ChangeWithDefinedValue(token);
++    if (m_PocketSize > 0)
++    {
++        m_PocketWasPeeked = false;
++        m_PocketLineNumber = m_TokensFiles[m_ActiveFileIdx]->GetLineNumber();
++    }
++
++    return token;
++}
++
++wxString TokenizerPP::InterpretDefinedFunction(const wxString& funName, const wxString& paramsIn)
++{
++    wxString value;
++    if (!m_KnownFunctions.HasFunction(funName))
++        return value; // sorry, function is unknown.
++
++    if (!paramsIn.StartsWith(_T("(")) || !paramsIn.EndsWith(_T(")")))
++        return value; // something is wrong
++
++    wxString params = paramsIn.Mid(1, paramsIn.size()-2);
++
++    wxString paramsChanged = _T("(");
++    wxStringTokenizer tokenizer(params, _T(","));
++    while (tokenizer.HasMoreTokens())
++    {
++        wxString par1 = tokenizer.GetNextToken();
++        if (m_DefineTokens.count(par1) > 0)
++            paramsChanged << m_DefineTokens[par1];
++        else
++            paramsChanged << par1;
++
++        if (tokenizer.HasMoreTokens())
++            paramsChanged << _T(",");
++    }
++    paramsChanged << _T(")");
++
++    PreProcFunction* pFunc = m_KnownFunctions.GetFunction(funName);
++    value = pFunc->Interpret(paramsChanged, &m_KnownFunctions);
++
++    return value;
++}
++
++wxString TokenizerPP::ChangeWithDefinedValue(const wxString& token)
++{
++    if (token.StartsWith(_T("(")) && token.EndsWith(_T(")")))
++    {
++        // we have e.g. "(myType)"
++        wxString newToken;
++        wxString tokInside = token.Mid(1,token.size()-2).Trim(true).Trim(false);
++        int idx1 = tokInside.Find('(');
++        if (idx1 != wxNOT_FOUND)
++        {
++            // we have e.g. "CAT3(a,b,c)"
++            wxString tok1 = tokInside.Mid(0, idx1);
++            wxString tok2 = tokInside.Mid(idx1);
++
++            if (m_DefineTokens.count(tok1) > 0)
++            {
++                wxString value = m_DefineTokens[tok1];
++                if (value.StartsWith(_T("(")))
++                {
++                    // it is defined function
++                    if (!m_KnownFunctions.HasFunction(tok1))
++                        return token; // sorry, function is unknown.
++                    else
++                        return  (_T("(") + InterpretDefinedFunction(tok1, tok2) + _T(")"));
++                }
++                else
++                    return (_T("(") + value + tok2 + _T(")"));
++            }
++        }
++        else
++        {
++            if (m_DefineTokens.count(tokInside) > 0)
++            {
++                return (_T("(") + m_DefineTokens[tokInside] + _T(")"));
++            }
++        }
++    }
++    else if (m_DefineTokens.count(token) > 0)
++    {
++        return ChangeDefinedWithValue(token);
++    }
++    return token;
++}
++
++wxString TokenizerPP::ChangeDefinedWithValue(const wxString& token)
++{
++    if (m_DefineTokens[token].IsEmpty())
++        return token; // this define has no value
++
++    wxString value = m_DefineTokens[token];
++
++    if (value.StartsWith(_T("(")))
++    {
++        // it is defined function
++        if (!m_KnownFunctions.HasFunction(token))
++            return token; // sorry, function is unknown.
++        else
++        {
++            wxString peeked = m_TokensFiles[m_ActiveFileIdx]->PeekTokenSameFortranLine();
++            if (!peeked.StartsWith(_T("(")))
++                return token; // something is wrong
++            wxString params = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameFortranLine();
++            value = InterpretDefinedFunction(token, params);
++        }
++    }
++
++    value = CheckSaveInPocket(value);
++
++    return value;
++}
++
++wxString TokenizerPP::CheckSaveInPocket(const wxString& token)
++{
++    //
++    // 'token' can be e.g. type(myType). In this case, the function should return
++    // only 'type' and '(myType)' should go to the pocket.
++    // Similarly 'integer*4' should be split into 'integer', '*' and '4' tokens.
++    //
++    size_t pos1 = token.find('(');
++    wxString value;
++    wxString val_part1;
++    wxString val_part2;
++    wxString val_part3;
++    if (pos1 != wxString::npos)
++    {
++        val_part1 = token.Mid(0, pos1).Trim();
++        size_t pos2 = token.rfind(')');
++        if (pos2 != wxString::npos)
++        {
++            val_part2 = token.Mid(pos1, pos2-pos1+1);
++            val_part3 = token.Mid(pos2+1).Trim();
++        }
++        else
++            val_part2 = token.Mid(pos1);
++    }
++    else
++    {
++        pos1 = token.find('*');
++        if (pos1 == wxString::npos)
++            return token;
++
++        val_part1 = token.Mid(0, pos1).Trim();
++        val_part2 = _T("*");
++        val_part3 = token.Mid(pos1+1);
++    }
++
++    if (val_part1.IsEmpty())
++    {
++        val_part1 = val_part2;
++        val_part2 = val_part3;
++        val_part3 = wxEmptyString;
++    }
++    value = val_part1;
++    if (!val_part3.IsEmpty())
++        m_Pocket.push_back(val_part3);
++    m_Pocket.push_back(val_part2);
++    m_PocketSize = m_Pocket.size();
++
++    return value;
++}
++
++void TokenizerPP::HandlePPDefine()
++{
++    // Handle #define ABC
++    // or #define ABC abc
++    //
++    wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++    if (token.IsEmpty())
++        return; // something wrong
++    wxString line = m_TokensFiles[m_ActiveFileIdx]->GetCurrentLine();
++    size_t idx1 = line.find(token);
++    if (idx1 == wxString::npos)
++        return; // token not found. Something is wrong
++
++    wxString value;
++    wxString val_line = line.Mid(idx1+token.size()).Trim(true).Trim(false);
++    bool isNewFunDefinition = val_line.StartsWith(_T("("));
++    // Replace defined values in val_line
++    if (isNewFunDefinition)
++    {
++        // I do not interpret (change) the line with function definition. Should I?
++        value = val_line;
++    }
++    else if (!val_line.IsEmpty())
++    {
++        bool hasFunCall = false;
++        size_t funNamePosShearch = 0;
++        wxString funName;
++        const wxString delimeters = _T(" ,()[]");
++        wxStringTokenizer tokenizer(val_line, delimeters, wxTOKEN_STRTOK);
++        if (tokenizer.HasMoreTokens())
++        {
++            size_t last_pos = 0;
++            while (tokenizer.HasMoreTokens())
++            {
++                wxString word = tokenizer.GetNextToken();
++                size_t pos = tokenizer.GetPosition();
++                if (delimeters.find(val_line.GetChar(pos-1)) != wxString::npos)
++                    pos -= 1;
++                size_t pos_wstart = pos - word.size();
++                if (m_DefineTokens.count(word) > 0)
++                {
++                    wxString def_val = m_DefineTokens[word];
++                    if (def_val.StartsWith(_T("(")))
++                    {
++                        // It is call to a defined function.
++                        if (m_KnownFunctions.HasFunction(word))
++                        {
++                            // Do nothing at first.
++                            hasFunCall = true;
++                            funNamePosShearch = value.length(); // after this position will come delimiters and then function name.
++                            funName = word;
++                        }
++                        else
++                            word << def_val; // unknown function.
++                    }
++                    else
++                        word = def_val;
++                }
++                value << val_line.Mid(last_pos, pos_wstart-last_pos); // delimiter
++                value << word;
++                last_pos = pos;
++                if (!tokenizer.HasMoreTokens())
++                {
++                    // add trailing delimeters
++                    value << val_line.Mid(pos);
++                }
++            }
++        }
++        else
++            value = val_line;
++
++        if (hasFunCall)
++        {
++            // Function call.
++            int funNamePos = funNamePosShearch + value.Mid(funNamePosShearch).Find(funName);
++            size_t callStart = value.find('(', funNamePos);
++            size_t callEnd = value.find(')', callStart+1);
++            if (callStart != wxString::npos && callEnd != wxString::npos && callStart < callEnd)
++            {
++                wxString callArgs = value.Mid(callStart, callEnd-callStart+1);
++                wxString word = InterpretDefinedFunction(funName, callArgs);
++                value = value.Mid(0, funNamePos) + word + value.Mid(callEnd+1);
++            }
++        }
++    }
++
++    m_DefineTokens[token] = value; // add value even if it is empty
++    m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++
++    if (isNewFunDefinition)
++    {
++        // it is a function definition.
++        size_t idxArgEnd = value.find(')');
++        if (idxArgEnd != wxString::npos)
++        {
++            wxString argStr = value.Mid(0, idxArgEnd+1);
++            wxString funBody = value.Mid(idxArgEnd+1).Trim(true).Trim(false);
++            PreProcFunction* pFun = new PreProcFunction(token, argStr, funBody, &m_KnownFunctions);
++            m_KnownFunctions.AddFunction(pFun);
++        }
++    }
++}
++
++void TokenizerPP::HandlePPUndefine()
++{
++    // Handle #undefine ABC or #undef ABC
++    wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++    if (token.IsEmpty())
++        return; // something wrong
++    m_DefineTokens.erase(token);
++    m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++}
++
++void TokenizerPP::HandlePPIfdef(const wxString& inToken, bool skipElif)
++{
++    wxString ifToken = inToken;
++    // Handle #ifdef, #ifndef, #if, #if defined constructs.
++    wxString ptok = PeekToken();
++
++    if ( (ifToken.IsSameAs(_T("#if")) || (ifToken.IsSameAs(_T("#elif")) && !skipElif) )
++        && ptok.IsSameAs(_T("defined")) )
++    {
++        GetToken(); // consume peeked token.
++        ifToken = _T("#ifdef");
++    }
++
++    if ( ifToken.IsSameAs(_T("#ifdef")) || ifToken.IsSameAs(_T("#ifndef")) )
++    {
++        wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++        if (token.IsEmpty())
++            return; // something is wrong
++
++        if (token.StartsWith('(') && token.EndsWith(')'))
++        {
++            token = token.Mid(1,token.Length()-2).Trim(true).Trim(false);
++        }
++
++// TODO (darmar#1#): Implementation does not consider case "#ifdef a || b".
++        bool hasDef = (m_DefineTokens.count(token) > 0);
++
++        if ((ifToken.IsSameAs(_T("#ifdef")) && hasDef) || (ifToken.IsSameAs(_T("#ifndef")) && !hasDef))
++        {
++            // Will be interpreted until corresponding #elif, #else or #endif
++        }
++        else
++        {
++            // Skip to the corresponding #elif #else or #endif
++            m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++            wxString lastTok;
++            SkipPPIfdef(lastTok);
++            if (lastTok.IsSameAs(_T("#elif")))
++                HandlePPIfdef(lastTok, false);
++        }
++    }
++    else if (skipElif && (ifToken.IsSameAs(_T("#elif")) || ifToken.IsSameAs(_T("#else"))) )
++    {
++        wxString lastTok;
++        while (true)
++        {
++            m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++            SkipPPIfdef(lastTok);
++            if (lastTok.IsEmpty() || lastTok.IsSameAs(_T("#endif")) )
++                break;
++        }
++    }
++    else if (ifToken.IsSameAs(_T("#if")) || ifToken.IsSameAs(_T("#elif")))
++    {
++        // Handle:
++        //    #if (PETSC_INT == 4)
++        //    #if 0
++        // How interpretation of #if/#elif can be improved?
++        wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++        if (token.IsEmpty())
++            return; // something is wrong
++
++        wxString condition = token;
++        if (condition.StartsWith(_T("(")) && condition.EndsWith(_T(")")))
++            condition = condition.Mid(1, condition.Length()-2).Trim(true).Trim(false);
++        if (m_DefineTokens.count(token) > 0)
++            condition = m_DefineTokens[token];
++        bool answer = true;
++        long lnum;
++        if (condition.ToCLong(&lnum))
++        {
++            if (lnum == 0)
++                answer = false;
++            else
++                answer = true;
++        }
++        else
++        {
++            // Handle:  "PETSC_INT == 4"
++            wxArrayString conToks;
++            MakeSaparateTokens(condition, conToks);
++            if (conToks.size() == 3)
++            {
++                for (size_t i=0; i<3; i+=2)
++                {
++                    if (m_DefineTokens.count(conToks[i]) > 0)
++                        conToks[i] = m_DefineTokens[conToks[i]];
++                }
++
++                long il;
++                long ir;
++                if (conToks[0].ToCLong(&il) && conToks[2].ToCLong(&ir))
++                {
++                    if (conToks[1] == _T("=="))
++                    {
++                        if (il == ir)
++                            answer = true;
++                        else
++                            answer = false;
++                    }
++                    else if (conToks[1] == _T("!="))
++                    {
++                        if (il != ir)
++                            answer = true;
++                        else
++                            answer = false;
++                    }
++                    else if (conToks[1] == _T(">"))
++                    {
++                        if (il > ir)
++                            answer = true;
++                        else
++                            answer = false;
++                    }
++                    else if (conToks[1] == _T("<"))
++                    {
++                        if (il < ir)
++                            answer = true;
++                        else
++                            answer = false;
++                    }
++                    else if (conToks[1] == _T(">="))
++                    {
++                        if (il >= ir)
++                            answer = true;
++                        else
++                            answer = false;
++                    }
++                    else if (conToks[1] == _T("<="))
++                    {
++                        if (il <= ir)
++                            answer = true;
++                        else
++                            answer = false;
++                    }
++                }
++            }
++        }
++
++        if (answer)
++        {
++            // Will be interpreted until corresponding #elif, #else or #endif
++        }
++        else
++        {
++            // Skip to the corresponding #endif or #elif or #else
++            wxString lastTok;
++            while (true)
++            {
++                m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++                SkipPPIfdef(lastTok);
++                if (lastTok.IsEmpty() || lastTok.IsSameAs(_T("#endif")) )
++                {
++                    break;
++                }
++                else if (lastTok.IsSameAs(_T("#elif")))
++                {
++                    HandlePPIfdef(lastTok, false);
++                    break;
++                }
++                else if (lastTok.IsSameAs(_T("#else")))
++                    break;
++            }
++        }
++    }
++
++    m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++}
++
++void TokenizerPP::SkipPPIfdef(wxString& tokenAtEnd)
++{
++    // Skip to the next corresponding #elif, #else or #endif
++    tokenAtEnd.clear();
++    int inIfdef = 0;
++    while (true)
++    {
++        wxString token = m_TokensFiles[m_ActiveFileIdx]->GetToken();
++        if (token.IsEmpty())
++            break;
++
++        if (token.StartsWith(_T("#")))
++        {
++            if (token.IsSameAs(_T("#ifdef")) || token.IsSameAs(_T("#ifndef")) || token.IsSameAs(_T("#if")))
++            {
++                inIfdef += 1;
++                m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++            }
++            else if (inIfdef > 0 && token.IsSameAs(_T("#endif")))
++            {
++                inIfdef -= 1;
++                m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++            }
++            else if (token.IsSameAs(_T("#define")))
++                continue;
++            else if (token.IsSameAs(_T("#undefine")) || token.IsSameAs(_T("#undef")))
++                continue;
++            else if (inIfdef == 0 &&
++                     (token.IsSameAs(_T("#elif")) || token.IsSameAs(_T("#else")) || token.IsSameAs(_T("#endif"))))
++            {
++                tokenAtEnd = token;
++                break;
++            }
++        }
++        else
++            m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++    }
++}
++
++void TokenizerPP::HandleInclude()
++{
++    wxString token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++    if (token.IsEmpty())
++        return; // something wrong
++
++    wxString includeFilename;
++    if ( (token.StartsWith(_T("\"")) || token.StartsWith(_T("<"))) &&
++         (token.EndsWith(_T("\""))  || token.EndsWith(_T(">"))) )
++    {
++        // Handle "name".
++        includeFilename = token.Mid(1,token.size()-2).Trim(true).Trim(false);
++    }
++    else if (token.IsSameAs(_T("<")))
++    {
++        // Handle #include <filename.fpp>
++        includeFilename = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++        if (m_TokensFiles[m_ActiveFileIdx]->PeekToken().IsSameAs(_T(".")))
++        {
++            wxString point = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++            includeFilename.Append(point + m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine());
++        }
++    }
++    m_TokensFiles[m_ActiveFileIdx]->SkipToEOL();
++
++    // Check if the include file is in the same folder as an active file.
++    wxFileName fileName(m_TokensFiles[m_ActiveFileIdx]->GetFilename(), wxPATH_UNIX);
++    fileName.SetFullName(includeFilename);
++    if (!wxFileExists(fileName.GetFullPath()))
++    {
++        // Include file not in the current file folder.
++        // Check if this file is between additional directories for includes.
++        if (!m_pParent)
++            return;
++        wxString aIncludeFile = m_pParent->GetAdditionalIncludeFile(includeFilename);
++        if (aIncludeFile.IsEmpty())
++            return;
++
++        fileName.Assign(aIncludeFile, wxPATH_UNIX);
++        if (!wxFileExists(fileName.GetFullPath()))
++            return;
++    }
++
++    // Activate parsing of the include file.
++    // SourceForm of file take the same as of the current file.
++    Tokenizerf* pFileTokens = new Tokenizerf(fileName.GetFullPath(wxPATH_UNIX), m_TokensFiles[m_ActiveFileIdx]->GetSourceForm());
++    m_TokensFiles.push_back(pFileTokens);
++    m_ActiveFileIdx = m_TokensFiles.size() - 1;
++}
++
++wxString TokenizerPP::GetTokenSameLine()
++{
++    wxString token;
++    if (m_PocketSize > 0)
++    {
++        // take token from the pocket
++        m_PocketSize -= 1;
++        token = m_Pocket[m_PocketSize];
++        m_Pocket.pop_back();
++        return token;
++    }
++
++    token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameLine();
++
++    if (m_DefineTokens.count(token) > 0)
++    {
++        // token was defined with #define
++        return ChangeDefinedWithValue(token);
++    }
++
++    return token;
++}
++
++wxString TokenizerPP::GetTokenSameFortranLine()
++{
++    wxString token;
++    if (m_PocketSize > 0)
++    {
++        // take token from the pocket
++        m_PocketSize -= 1;
++        token = m_Pocket[m_PocketSize];
++        m_Pocket.pop_back();
++        return token;
++    }
++
++    token = m_TokensFiles[m_ActiveFileIdx]->GetTokenSameFortranLine();
++
++    if (m_DefineTokens.count(token) > 0)
++    {
++        // token was defined with #define
++        return ChangeDefinedWithValue(token);
++    }
++
++    return token;
++}
++
++wxString TokenizerPP::PeekToken()
++{
++    if (m_PocketSize > 0)
++    {
++        // take token from the pocket
++        m_PeekedFromPocket = true;
++        return m_Pocket[m_PocketSize-1];
++    }
++
++    wxString token = m_TokensFiles[m_ActiveFileIdx]->PeekToken();
++    m_PeekedFromPocket = false;
++
++    token = ChangeWithDefinedValue(token);
++    if (m_PocketSize > 0)
++    {
++        m_Pocket.push_back(token);
++        m_PocketSize = m_Pocket.size();
++        m_PocketWasPeeked = true;
++        m_PocketLineNumber = m_TokensFiles[m_ActiveFileIdx]->GetPeekedLineNumber();
++    }
++    return token;
++}
++
++wxString TokenizerPP::PeekTokenSameFortranLine()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->PeekTokenSameFortranLine();
++}
++
++const wxString& TokenizerPP::GetParentFilename()
++{
++    return m_TokensFiles[0]->GetFilename();
++}
++
++unsigned int TokenizerPP::GetParentLineNumber()
++{
++    return m_TokensFiles[0]->GetLineNumber();
++}
++
++const wxString& TokenizerPP::GetFilename()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetFilename();
++}
++
++unsigned int TokenizerPP::GetLineNumber()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetLineNumber();
++}
++
++unsigned int TokenizerPP::GetPeekedLineNumber()
++{
++    if (m_PeekedFromPocket)
++        return m_PocketLineNumber;
++
++    return m_TokensFiles[m_ActiveFileIdx]->GetPeekedLineNumber();
++}
++
++unsigned int TokenizerPP::GetCurrentIndex()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetCurrentIndex();
++}
++
++unsigned int TokenizerPP::GetLineCount()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetLineCount();
++}
++
++bool TokenizerPP::IsOK()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->IsOK();
++}
++
++bool TokenizerPP::SkipToOneOfChars(const char* chars, bool toLineEnd)
++{
++    return m_TokensFiles[m_ActiveFileIdx]->SkipToOneOfChars(chars, toLineEnd);
++}
++
++wxArrayString TokenizerPP::GetTokensToEOL(wxArrayString* arrStrLines)
++{
++    wxArrayString tokenArr;
++    while (m_PocketSize > 0)
++    {
++        // take token from the pocket
++        m_PocketSize -= 1;
++        tokenArr.Add(m_Pocket[m_PocketSize]);
++        m_Pocket.pop_back();
++        if (arrStrLines)
++            arrStrLines->Add(wxEmptyString);
++    }
++
++    wxArrayString* arrStrLinesEOL = NULL;
++    if (arrStrLines)
++        arrStrLinesEOL = new wxArrayString;
++    wxArrayString tokenToEOL = m_TokensFiles[m_ActiveFileIdx]->GetTokensToEOL(arrStrLinesEOL);
++    InterpretArrayString(tokenToEOL, tokenArr, arrStrLinesEOL, arrStrLines);
++    if (arrStrLinesEOL)
++        delete arrStrLinesEOL;
++
++    return tokenArr;
++}
++
++void TokenizerPP::InterpretArrayString(const wxArrayString& tokenArrIn, wxArrayString& tokenArrOut,
++                                       wxArrayString* arrStrLinesIn, wxArrayString* arrStrLinesOut)
++{
++    size_t arrSize = tokenArrIn.size();
++    for (size_t i=0; i<arrSize; ++i)
++    {
++        if (m_DefineTokens.count(tokenArrIn[i]) > 0)
++        {
++            // token was defined with #define
++            if (m_DefineTokens[tokenArrIn[i]].IsEmpty())
++            {
++                tokenArrOut.Add(tokenArrIn[i]); // no value is found. Add name of #define
++            }
++            else
++            {
++                 wxString value = m_DefineTokens[tokenArrIn[i]];
++                if (value.StartsWith(_T("(")))
++                {
++                    // it is defined function
++                    if (m_KnownFunctions.HasFunction(tokenArrIn[i]))
++                    {
++                        if ((i+1 < arrSize) && (tokenArrIn[i+1].StartsWith(_T("("))))
++                        {
++                            value = InterpretDefinedFunction(tokenArrIn[i], tokenArrIn[i+1]);
++                        }
++                    }
++                }
++                int pocketSize_old = m_PocketSize;
++                value = CheckSaveInPocket(value);
++                tokenArrOut.Add(value);
++                if (arrStrLinesOut)
++                    arrStrLinesOut->Add(arrStrLinesIn->Item(i));
++
++                // new values can be added into the pocket in function CheckSaveInPocket.
++                while (m_PocketSize > pocketSize_old)
++                {
++                    // take token from the pocket
++                    m_PocketSize -= 1;
++                    tokenArrOut.Add(m_Pocket[m_PocketSize]);
++                    m_Pocket.pop_back();
++                    if (arrStrLinesOut)
++                        arrStrLinesOut->Add(wxEmptyString);
++                }
++            }
++        }
++        else
++        {
++            tokenArrOut.Add(tokenArrIn[i]);
++            if (arrStrLinesOut)
++                arrStrLinesOut->Add(arrStrLinesIn->Item(i));
++        }
++    }
++}
++
++wxArrayString TokenizerPP::PeekTokensToEOL()
++{
++    wxArrayString tokenArr;
++    for (int i=m_PocketSize-1; i>=0; --i)
++    {
++        // take token from the pocket
++        tokenArr.Add(m_Pocket[i]);
++    }
++
++    wxArrayString tokenToEOL = m_TokensFiles[m_ActiveFileIdx]->PeekTokensToEOL();
++    InterpretArrayString(tokenToEOL, tokenArr, NULL, NULL);
++    return tokenArr;
++}
++
++wxString TokenizerPP::GetCurrentLine()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetCurrentLine();
++}
++
++wxString TokenizerPP::GetLineFortran()
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetLineFortran();
++}
++
++wxString TokenizerPP::GetLine(unsigned int nl)
++{
++    return m_TokensFiles[m_ActiveFileIdx]->GetLine(nl);
++}
++
++void TokenizerPP::MakeSaparateTokens(const wxString& line, wxArrayString tokenArr)
++{
++    Tokenizerf tokens;
++    tokens.InitFromBuffer(line+_T(" "), fsfFree);
++    while (true)
++    {
++        wxString token = tokens.GetToken();
++        if (token.IsEmpty())
++            break;
++
++        tokenArr.Add(token.Lower());
++    }
++}
++
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(nonexistent)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/tokenizerpp.h	(revision 299)
+@@ -0,0 +1,92 @@
++#ifndef TOKENIZERPP_H
++#define TOKENIZERPP_H
++
++#include <sdk.h>
++#ifndef CB_PRECOMP
++    #include <wx/string.h>
++#endif
++#include <vector>
++#include <map>
++#include <set>
++
++#include "tokenizerf.h"
++#include "preprocfunction.h"
++
++class ParserThreadF;
++
++
++/** \brief This class is a layer between Tokenizerf and ParserThreadF which interprets PreProcessor directives.
++ */
++class TokenizerPP
++{
++//    private:
++//        struct TokenPP {
++//            wxString m_DisplayName;
++//            wxString m_Value;
++//        };
++
++    public:
++        TokenizerPP(const wxString& filename = wxEmptyString, FortranSourceForm sourceForm = fsfFree);
++        ~TokenizerPP();
++
++        bool Init(const wxString& filename, FortranSourceForm sourceForm);
++		bool InitFromBuffer(const wxString& buffer, FortranSourceForm sourceForm);
++		wxString GetToken();
++		wxString GetTokenSameLine();
++		wxString GetTokenSameFortranLine();
++		wxString PeekToken();
++		wxString PeekTokenSameFortranLine();
++		bool IsInInclude() { return (m_ActiveFileIdx > 0); }
++		const wxString& GetParentFilename();
++        unsigned int GetParentLineNumber();
++		const wxString& GetFilename();
++		unsigned int GetLineNumber();
++		unsigned int GetPeekedLineNumber();
++		unsigned int GetCurrentIndex();
++		unsigned int GetLineCount();
++
++		bool IsOK();
++		bool SkipToOneOfChars(const char* chars, bool toLineEnd = false);
++		wxArrayString GetTokensToEOL(wxArrayString* arrStrLines = 0);
++		wxArrayString PeekTokensToEOL();
++		wxString GetCurrentLine();
++		wxString GetLineFortran();
++		wxString GetLine(unsigned int nl);
++
++		unsigned int GetLineStartIndex(unsigned int indexInLine) { return m_TokensFiles[m_ActiveFileIdx]->GetLineStartIndex(indexInLine); }
++		unsigned int GetLineEndIndex(unsigned int indexInLine) { return m_TokensFiles[m_ActiveFileIdx]->GetLineEndIndex(indexInLine); }
++		void SetDetailedParsing(bool detPars) { return m_TokensFiles[m_ActiveFileIdx]->SetDetailedParsing(detPars); }
++		void SetFilename(const wxString& filename) { return m_TokensFiles[m_ActiveFileIdx]->SetFilename(filename); }
++		void SetParent(ParserThreadF* parent);
++        void UngetToken() { return m_TokensFiles[m_ActiveFileIdx]->UngetToken(); }
++		bool SkipToEOL() { return m_TokensFiles[m_ActiveFileIdx]->SkipToEOL(); }
++
++    private:
++        bool HandlePPMacro(const wxString& token);
++        void HandlePPDefine();
++        void HandlePPUndefine();
++        void HandlePPIfdef(const wxString& inToken, bool skipElif=true);
++        void SkipPPIfdef(wxString& tokenAtEnd);
++        void HandleInclude();
++        wxString InterpretDefinedFunction(const wxString& funName, const wxString& paramsIn);
++        wxString ChangeWithDefinedValue(const wxString& token);
++        wxString ChangeDefinedWithValue(const wxString& token);
++        wxString CheckSaveInPocket(const wxString& token);
++        void InterpretArrayString(const wxArrayString& tokenArrIn, wxArrayString& tokenArrOut,
++                                       wxArrayString* arrStrLinesIn, wxArrayString* arrStrLinesOut);
++        void MakeSaparateTokens(const wxString& line, wxArrayString tokenArr);
++
++        ParserThreadF* m_pParent;
++        //std::map<wxString,TokenPP> m_DefineTokens;
++        std::map<wxString,wxString> m_DefineTokens;
++        std::vector<Tokenizerf*> m_TokensFiles;  // every file has own Tokenizerf
++        size_t m_ActiveFileIdx;
++        PreProcFunctionList m_KnownFunctions;
++        std::vector<wxString> m_Pocket;
++        int m_PocketSize;
++        bool m_PocketWasPeeked;
++        bool m_PeekedFromPocket;
++        unsigned int m_PocketLineNumber;
++};
++
++#endif // TOKENIZERPP_H
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspacebrowserf.cpp	(revision 299)
+@@ -288,10 +288,24 @@
+             int curLine = control->LineFromPosition(control->GetCurrentPos());
+             jumpStart.Init(ed->GetFilename(), curLine, false);
+         }
++        wxString filename;
++        int gotoLine;
++        if (!pToken->m_WasIncluded || pToken->m_TokenKind == tkModule)
++        {
++            filename = pToken->m_Filename;
++            gotoLine = pToken->m_LineStart;
++        }
++        else
++        {
++            // if token was included and not a module
++            filename = pToken->m_IncludeFilename;
++            gotoLine = pToken->m_IncludeLineStart;
++        }
++
+         EditorManager* edMan = Manager::Get()->GetEditorManager();
+-        if (cbEditor* ed = edMan->Open(pToken->m_Filename))
++        if (cbEditor* ed = edMan->Open(filename))
+         {
+-            ed->GotoLine(pToken->m_LineStart - 1);
++            ed->GotoLine(gotoLine - 1);
+             wxFocusEvent ev(wxEVT_SET_FOCUS);
+             ev.SetWindow(this);
+ #if wxCHECK_VERSION(3, 0, 0)
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp	(revision 298)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/workspaceparserthread.cpp	(revision 299)
+@@ -3,6 +3,8 @@
+ 
+ #include <sdk.h>
+ #ifndef CB_PRECOMP
++    #include <wx/stopwatch.h>
++
+     #include <logmanager.h>
+ #endif
+ 
+@@ -33,8 +35,12 @@
+ 
+ void WorkspaceParserThread::ParseFiles()
+ {
++    wxStopWatch sw;
++
+     TokensArrayF* pTokens = new TokensArrayF();
+     IncludeDB* pIncludeDB = new IncludeDB();
++    std::map<wxString,wxString>* aIncludeFiles = m_pNativeParser->GetAdditionalIncludeFiles();
++
+     wxArrayString* pWSFiles = m_pNativeParser->GetWSFiles();
+     ArrayOfFortranSourceForm* pWSFileForms = m_pNativeParser->GetWSFileForms();
+     wxArrayString* pWSProjFilenames = m_pNativeParser->GetWSFileProjFilenames();
+@@ -42,7 +48,7 @@
+     for (size_t i=0; i<pWSFiles->size(); i++)
+     {
+         ParserThreadF* thread = new ParserThreadF(pWSProjFilenames->Item(i), UnixFilename(pWSFiles->Item(i)), pTokens,
+-                                                  pWSFileForms->at(i), false, pIncludeDB);
++                                                  pWSFileForms->at(i), false, pIncludeDB, aIncludeFiles);
+         thread->Parse();
+         delete thread;
+     }
+@@ -53,4 +59,9 @@
+ 
+     wxCommandEvent event( wxEVT_COMMAND_ENTER, m_idWSPThreadEvent );
+     m_pNativeParser->AddPendingEvent(event);
++
++    wxString msg = _("Time to parse ");
++    msg << pWSFiles->size() << _(" files took ") << sw.Time() << _("ms");
++    std::cout << msg.ToStdString() << "\n";
++    Manager::Get()->GetLogManager()->Log(msg);
+ }

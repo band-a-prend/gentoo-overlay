@@ -1,0 +1,13 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 308)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/resources/settings.xrc	(revision 309)
+@@ -39,7 +39,7 @@
+ 												</object>
+ 												<object class="sizeritem">
+ 													<object class="wxCheckBox" name="chkShowHiddenEntities">
+-														<label>Show hidden entities</label>
++														<label>Show private entities</label>
+ 													</object>
+ 													<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+ 													<border>8</border>

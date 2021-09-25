@@ -1,0 +1,14 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 303)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/parserf.cpp	(revision 304)
+@@ -1313,6 +1313,9 @@
+             wxString smodName = token->m_Children.Item(i)->m_Name;
+             SubmoduleTokenF* submod = static_cast<SubmoduleTokenF*>(token->m_Children.Item(i));
+             wxString parentModName = submod->m_AncestorModuleName;
++            int icol = smodName.Find(':');
++            if (icol != wxNOT_FOUND)
++                smodName = smodName.Mid(icol+1);
+             smodName << _T("(") << parentModName << _T(")");
+             fileDeclaredSubmodules->insert(smodName);
+ 

@@ -1,0 +1,31 @@
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 311)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/constrhighlighter.cpp	(revision 312)
+@@ -2196,7 +2196,7 @@
+         return constStartPos;
+     int posWEnd = control->WordEndPosition(posWStart, true);
+     wxString cword = control->GetTextRange(posWStart,posWEnd).Lower();
+-    if (!cword.StartsWith(_T("end")))
++    if (!cword.StartsWith(_T("end")) && !cword.StartsWith(_T("else")))
+         return constStartPos;
+     else if (m_KeywordSet.count(cword) == 0)
+         return constStartPos;
+Index: codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp
+===================================================================
+--- codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 311)
++++ codeblocks-20.03/src/plugins/contrib/FortranProject/fortranproject.cpp	(revision 312)
+@@ -1109,8 +1109,12 @@
+                     int lineStart = control->LineFromPosition(starConstructPos);
+                     int indentStartCount = control->GetLineIndentation(lineStart);
+                     int indentEndCount = control->GetLineIndentation(m_CurrentLine-1);
+-                    if (indentStartCount != indentEndCount)
++                    int constructStartIndentation = starConstructPos - control->PositionFromLine(lineStart);
++
++                    if (indentStartCount != indentEndCount && constructStartIndentation == indentStartCount)
+                     {
++                        // If "constructStartIndentation != indentStartCount" means that there is name of construct.
++                        // Do not correct indentation in that case.
+                         control->BeginUndoAction();
+                         wxString spaceStr;
+                         spaceStr.Append(' ',indentStartCount);
