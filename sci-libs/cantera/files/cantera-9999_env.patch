@@ -1,48 +1,56 @@
 diff -Naur old/SConstruct new/SConstruct
---- old/SConstruct	2020-09-02 01:18:43.000000000 +0300
-+++ new/SConstruct	2020-09-21 01:27:06.000000000 +0300
-@@ -193,7 +193,7 @@
-     toolchain = ['default']
+--- old/SConstruct	2022-03-24 00:49:22.000000000 +0300
++++ new/SConstruct	2022-03-27 01:24:16.000000000 +0300
+@@ -178,6 +178,10 @@
  
- env = Environment(tools=toolchain+['textfile', 'subst', 'recursiveInstall', 'wix', 'gch'],
--                  ENV={'PATH': os.environ['PATH']},
+ config_options = [
+     Option(
++        "AR",
++        "The archiver to use.",
++        "${AR}"),
++    Option(
+         "CXX",
+         "The C++ compiler to use.",
+         "${CXX}"),
+@@ -740,7 +744,7 @@
+     toolchain = ["default"]
+ 
+ env = Environment(tools=toolchain+["textfile", "subst", "recursiveInstall", "wix", "gch"],
+-                  ENV={"PATH": os.environ["PATH"]},
 +                  ENV={'PATH': os.environ['PATH'], 'CCACHE_DIR': os.environ.get('CCACHE_DIR','')},
                    toolchain=toolchain,
                    **extraEnvArgs)
  
-@@ -726,10 +726,7 @@
- env['cantera_pure_version'] = '.'.join(str(x) for x in ctversion.version)
- env['cantera_short_version'] = '.'.join(str(x) for x in ctversion.version[:2])
+@@ -775,7 +779,7 @@
+ 
+ add_RegressionTest(env)
+ 
+-opts.AddVariables(*config.to_scons(["CC", "CXX"], env=env))
++opts.AddVariables(*config.to_scons(["AR", "CC", "CXX"], env=env))
+ opts.Update(env)
+ 
+ # Check if this is actually Apple's clang on macOS
+@@ -861,11 +865,7 @@
+ env['cantera_pure_version'] = re.match(r'(\d+\.\d+\.\d+)', env['cantera_version']).group(0)
+ env['cantera_short_version'] = re.match(r'(\d+\.\d+)', env['cantera_version']).group(0)
  
 -try:
--    env['git_commit'] = getCommandOutput('git', 'rev-parse', '--short', 'HEAD')
--except Exception:
--    env['git_commit'] = 'unknown'
-+env['git_commit'] = 'unknown'
+-    env["git_commit"] = get_command_output("git", "rev-parse", "--short", "HEAD")
+-    logger.info(f"Building Cantera from git commit '{env['git_commit']}'")
+-except (subprocess.CalledProcessError, FileNotFoundError):
+-    env["git_commit"] = "unknown"
++env["git_commit"] = "unknown"
  
  # Print values of all build options:
- print("Configuration variables read from 'cantera.conf' and command line:")
-diff -Naur old/interfaces/cython/SConscript new/interfaces/cython/SConscript
---- old/interfaces/cython/SConscript	2020-09-02 01:18:43.000000000 +0300
-+++ new/interfaces/cython/SConscript	2020-09-21 01:59:29.000000000 +0300
-@@ -108,8 +108,7 @@
-     elif localenv['libdirname'] != 'lib':
-         # 64-bit RHEL / Fedora etc. or e.g. x32 Gentoo profile
-         extra = localenv.subst(
--            ' --prefix=${{python_prefix}}'
--            ' --install-lib=${{python_prefix}}/${{libdirname}}/python{}/site-packages'.format(py_version))
-+            ' --prefix=${stage_dir}${prefix} --install-lib=${python_prefix}')
-     else:
-         extra = '--user'
-         localenv.AppendENVPath(
+ # the (updated) "cantera.conf" combines all options that were specified by the user
 diff -Naur old/test_problems/SConscript new/test_problems/SConscript
---- old/test_problems/SConscript	2020-09-02 01:18:43.000000000 +0300
-+++ new/test_problems/SConscript	2020-09-21 01:42:19.000000000 +0300
-@@ -222,7 +222,7 @@
- CompileAndTest('VPsilane_test')
+--- old/test_problems/SConscript	2022-03-24 00:49:22.000000000 +0300
++++ new/test_problems/SConscript	2022-03-27 00:03:27.000000000 +0300
+@@ -233,7 +233,7 @@
+      artifacts=['vcs_equilibrate_res.csv'])
  
  CompileAndTest('clib', 'clib_test', 'clib_test',
--               extensions=['^clib_test.c'], libs=['cantera_shared'])
+-               extensions=['^clib_test.c'], libs=localenv['cantera_shared_libs'])
 +               extensions=['^clib_test.c'])
  
  # C++ Samples

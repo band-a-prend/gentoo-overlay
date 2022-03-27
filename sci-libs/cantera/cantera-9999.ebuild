@@ -1,14 +1,14 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{7,8,9} )
+PYTHON_COMPAT=( python3_{8..10} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
 
-inherit desktop fortran-2 git-r3 python-single-r1 scons-utils toolchain-funcs
+inherit fortran-2 git-r3 python-single-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="https://www.cantera.org"
@@ -20,7 +20,7 @@ EGIT_SUBMODULES=()
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="+cti fortran pch +python test"
+IUSE="+cti fortran lapack +python test"
 RESTRICT="!test? ( test )"
 
 REQUIRED_USE="
@@ -30,14 +30,19 @@ REQUIRED_USE="
 
 RDEPEND="
 	${PYTHON_DEPS}
+	lapack? ( virtual/lapack )
+	cti? (
+		$(python_gen_cond_dep '
+			dev-python/ruamel-yaml[${PYTHON_USEDEP}]
+		')
+	)
 	python? (
 		$(python_gen_cond_dep '
-			dev-python/numpy[${PYTHON_MULTI_USEDEP}]
-			dev-python/ruamel-yaml[${PYTHON_MULTI_USEDEP}]
+			dev-python/numpy[${PYTHON_USEDEP}]
 		')
 	)
 	dev-cpp/yaml-cpp
-	<sci-libs/sundials-5.3.0:0=
+	<sci-libs/sundials-5.9.0:0=[lapack?]
 "
 
 DEPEND="
@@ -47,15 +52,17 @@ DEPEND="
 	dev-libs/libfmt
 	python? (
 		$(python_gen_cond_dep '
-			dev-python/cython[${PYTHON_MULTI_USEDEP}]
+			dev-python/cython[${PYTHON_USEDEP}]
+			dev-python/pip[${PYTHON_USEDEP}]
 		')
 	)
 	test? (
-		>=dev-cpp/gtest-1.8.0
+		>=dev-cpp/gtest-1.10.0
 		python? (
 			$(python_gen_cond_dep '
-				dev-python/h5py[${PYTHON_MULTI_USEDEP}]
-				dev-python/pandas[${PYTHON_MULTI_USEDEP}]
+				dev-python/h5py[${PYTHON_USEDEP}]
+				dev-python/pandas[${PYTHON_USEDEP}]
+				dev-python/pytest[${PYTHON_USEDEP}]
 			')
 		)
 	)
@@ -74,6 +81,7 @@ pkg_setup() {
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 src_configure() {
 	scons_vars=(
+		AR="$(tc-getAR)"
 		CC="$(tc-getCC)"
 		CXX="$(tc-getCXX)"
 		cc_flags="${CXXFLAGS}"
@@ -83,7 +91,7 @@ src_configure() {
 		FORTRANFLAGS="${FCFLAGS}"
 		optimize_flags="-Wno-inline"
 		renamed_shared_libraries="no"
-		use_pch=$(usex pch)
+		use_pch="no"
 		## In some cases other order can break the detection of right location of Boost: ##
 		system_fmt="y"
 		system_sundials="y"
@@ -92,6 +100,7 @@ src_configure() {
 		env_vars="all"
 		extra_inc_dirs="/usr/include/eigen3"
 	)
+	use lapack && scons_vars+=( blas_lapack_libs="lapack,blas" )
 	use test || scons_vars+=( googletest="none" )
 
 	scons_targets=(
@@ -115,18 +124,21 @@ src_test() {
 }
 
 src_install() {
-	escons install stage_dir="${D}" libdirname="$(get_libdir)" python_prefix="$(python_get_sitedir)"
+	escons install stage_dir="${D}" libdirname="$(get_libdir)"
 	if ! use cti ; then
 		rm -r "${D}/usr/share/man" || die "Can't remove man files."
 	else
 		# Run the byte-compile of modules
-		python_optimize "${D}/$(python_get_sitedir)/${PN}"
+		python_optimize "${D}$(python_get_sitedir)/${PN}"
 	fi
+
+	# User could remove this line if require static libs for development purpose
+	find "${ED}" -name '*.a' -delete || die
 }
 
 pkg_postinst() {
 	if use cti && ! use python ; then
-		elog "Cantera was build without 'python' use-flag therefore the CTI tool 'ck2cti'"
+		elog "Cantera was build without 'python' use-flag therefore the CTI tools 'ck2cti' and 'ck2yaml"
 		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
 	fi
 
