@@ -19,7 +19,7 @@ EGIT_SUBMODULES=()
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS=""
 IUSE="+cti fortran lapack +python test"
 RESTRICT="!test? ( test )"
 
@@ -57,18 +57,17 @@ DEPEND="
 		')
 	)
 	test? (
-		>=dev-cpp/gtest-1.10.0
+		>=dev-cpp/gtest-1.11.0
 		python? (
 			$(python_gen_cond_dep '
 				dev-python/h5py[${PYTHON_USEDEP}]
 				dev-python/pandas[${PYTHON_USEDEP}]
 				dev-python/pytest[${PYTHON_USEDEP}]
+				dev-python/scipy[${PYTHON_USEDEP}]
 			')
 		)
 	)
 "
-
-S="${WORKDIR}/${P}"
 
 PATCHES=( "${FILESDIR}/${PN}-9999_env.patch" )
 
