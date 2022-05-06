@@ -12,7 +12,7 @@ inherit fortran-2 python-single-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="https://www.cantera.org"
-SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV%_*}b1.tar.gz -> ${P}.tar.gz"
+SRC_URI="https://github.com/Cantera/${PN}/archive/v${PV%_*}b2.tar.gz -> ${P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
@@ -20,7 +20,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="+cti fortran lapack +python test"
 RESTRICT="!test? ( test )"
 
-S="${WORKDIR}/${PN}-${PV%_*}b1"
+S="${WORKDIR}/${PN}-${PV%_*}b2"
 
 REQUIRED_USE="
 	python? ( cti )
@@ -62,6 +62,7 @@ DEPEND="
 				dev-python/h5py[${PYTHON_USEDEP}]
 				dev-python/pandas[${PYTHON_USEDEP}]
 				dev-python/pytest[${PYTHON_USEDEP}]
+				dev-python/scipy[${PYTHON_USEDEP}]
 			')
 		)
 	)

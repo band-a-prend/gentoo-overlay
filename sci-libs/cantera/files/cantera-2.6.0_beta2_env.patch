@@ -1,6 +1,6 @@
 diff -Naur old/SConstruct new/SConstruct
---- old/SConstruct	2022-03-24 00:49:22.000000000 +0300
-+++ new/SConstruct	2022-03-27 01:24:16.000000000 +0300
+--- old/SConstruct
++++ new/SConstruct
 @@ -178,6 +178,10 @@
  
  config_options = [
@@ -44,8 +44,8 @@ diff -Naur old/SConstruct new/SConstruct
  # Print values of all build options:
  # the (updated) "cantera.conf" combines all options that were specified by the user
 diff -Naur old/test_problems/SConscript new/test_problems/SConscript
---- old/test_problems/SConscript	2022-03-24 00:49:22.000000000 +0300
-+++ new/test_problems/SConscript	2022-03-27 00:03:27.000000000 +0300
+--- old/test_problems/SConscript
++++ new/test_problems/SConscript
 @@ -233,7 +233,7 @@
       artifacts=['vcs_equilibrate_res.csv'])
  
