@@ -39,7 +39,8 @@ RDEPEND="
 		')
 	)
 	dev-cpp/yaml-cpp
-	<sci-libs/sundials-5.9.0:0=[lapack?]
+	!lapack? ( sci-libs/sundials:0= )
+	lapack? ( <sci-libs/sundials-5.3.0:0=[lapack?] )
 "
 
 DEPEND="
