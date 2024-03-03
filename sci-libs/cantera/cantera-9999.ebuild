@@ -1,9 +1,9 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{10..11} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
@@ -14,41 +14,38 @@ DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, a
 HOMEPAGE="https://www.cantera.org"
 
 SRC_URI=""
-EGIT_REPO_URI="https://github.com/Cantera/cantera.git"
+EGIT_REPO_URI="https://github.com/cantera/cantera.git"
 EGIT_SUBMODULES=()
 
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS=""
-IUSE="+cti fortran lapack +python test"
+IUSE="fortran hdf5 lapack +python test"
 RESTRICT="!test? ( test )"
 
 REQUIRED_USE="
-	python? ( cti )
 	${PYTHON_REQUIRED_USE}
 "
 
 RDEPEND="
 	${PYTHON_DEPS}
 	lapack? ( virtual/lapack )
-	cti? (
-		$(python_gen_cond_dep '
-			dev-python/ruamel-yaml[${PYTHON_USEDEP}]
-		')
-	)
 	python? (
 		$(python_gen_cond_dep '
 			dev-python/numpy[${PYTHON_USEDEP}]
+			dev-python/ruamel-yaml[${PYTHON_USEDEP}]
 		')
 	)
 	dev-cpp/yaml-cpp
-	<sci-libs/sundials-5.9.0:0=[lapack?]
+	hdf5? ( sci-libs/HighFive )
+	!lapack? ( sci-libs/sundials:0= )
+	lapack? ( >=sci-libs/sundials-6.5.0:0=[lapack?] )
 "
 
 DEPEND="
 	${RDEPEND}
 	dev-cpp/eigen:3
-	dev-libs/boost
+	dev-libs/boost:=
 	dev-libs/libfmt
 	python? (
 		$(python_gen_cond_dep '
@@ -69,7 +66,9 @@ DEPEND="
 	)
 "
 
-PATCHES=( "${FILESDIR}/${PN}-9999_env.patch" )
+PATCHES=(
+	"${FILESDIR}/${PN}-9999_env.patch"
+)
 
 pkg_setup() {
 	fortran-2_pkg_setup
@@ -84,7 +83,7 @@ src_configure() {
 		CC="$(tc-getCC)"
 		CXX="$(tc-getCXX)"
 		cc_flags="${CXXFLAGS}"
-		cxx_flags="-std=c++11"
+		cxx_flags="-std=c++17"
 		debug="no"
 		FORTRAN="$(tc-getFC)"
 		FORTRANFLAGS="${FCFLAGS}"
@@ -96,9 +95,14 @@ src_configure() {
 		system_sundials="y"
 		system_eigen="y"
 		system_yamlcpp="y"
+		hdf_support=$(usex hdf5 y n)
+		system_blas_lapack=$(usex lapack y n)
 		env_vars="all"
 		extra_inc_dirs="/usr/include/eigen3"
+		use_rpath_linkage="yes"
+		extra_lib_dirs="/usr/$(get_libdir)/${PN}"
 	)
+	use hdf5 && scons_vars+=( system_highfive="y" )
 	use lapack && scons_vars+=( blas_lapack_libs="lapack,blas" )
 	use test || scons_vars+=( googletest="none" )
 
@@ -106,9 +110,8 @@ src_configure() {
 		f90_interface=$(usex fortran y n)
 	)
 
-	if use cti ; then
-		local scons_python=$(usex python full minimal)
-		scons_targets+=( python_package="${scons_python}" python_cmd="${EPYTHON}" )
+	if use python ; then
+		scons_targets+=( python_package="full" python_cmd="${EPYTHON}" )
 	else
 		scons_targets+=( python_package="none" )
 	fi
@@ -124,7 +127,7 @@ src_test() {
 
 src_install() {
 	escons install stage_dir="${D}" libdirname="$(get_libdir)"
-	if ! use cti ; then
+	if ! use python ; then
 		rm -r "${D}/usr/share/man" || die "Can't remove man files."
 	else
 		# Run the byte-compile of modules
@@ -136,15 +139,6 @@ src_install() {
 }
 
 pkg_postinst() {
-	if use cti && ! use python ; then
-		elog "Cantera was build without 'python' use-flag therefore the CTI tools 'ck2cti' and 'ck2yaml"
-		elog "will convert Chemkin files to Cantera format without verification of kinetic mechanism."
-	fi
-
 	local post_msg=$(usex fortran "and Fortran " "")
 	elog "C++ ${post_msg}samples are installed to '/usr/share/${PN}/samples/' directory."
-
-	if use python ; then
-		elog "Python examples are installed to '$(python_get_sitedir)/${PN}/examples/' directories."
-	fi
 }
