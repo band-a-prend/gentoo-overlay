@@ -37,13 +37,13 @@ DEPEND="${RDEPEND}"
 
 PATCHES=(
 	"${FILESDIR}"/${P}-env.patch
-	"${FILESDIR}"/${P}-0001-FortranProject-autotools-build.patch
-	"${FILESDIR}"/${P}-0002-FortranProject-update-r271-r272.patch
-	"${FILESDIR}"/${P}-0003-FortranProject-update-r273.patch
-	"${FILESDIR}"/${P}-0004-FortranProject-update-r274.patch
-	"${FILESDIR}"/${P}-0005-FortranProject-update-r275.patch
-	"${FILESDIR}"/${P}-0006-FortranProject-update-r276.patch
-	"${FILESDIR}"/${P}-0007-FortranProject-update-r277.patch
+	"${FILESDIR}"/0001-FortranProject-autotools-build.patch
+	"${FILESDIR}"/0002-FortranProject-update-r271-r272.patch
+	"${FILESDIR}"/0003-FortranProject-update-r273.patch
+	"${FILESDIR}"/0004-FortranProject-update-r274.patch
+	"${FILESDIR}"/0005-FortranProject-update-r275.patch
+	"${FILESDIR}"/0006-FortranProject-update-r276.patch
+	"${FILESDIR}"/0007-FortranProject-update-r277.patch
 	)
 
 src_prepare() {
