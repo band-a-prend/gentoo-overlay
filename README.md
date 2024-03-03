@@ -32,7 +32,6 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 
 ---
 ### experimental packages of this overlay  
-* app-text/matisse - Markdown To Impressive Scientific Slides  
 * dep-python/dirsync - Advanced directory tree synchronisation tool  
 * dep-python/yattag - Python alternative to web template engines  
 * dev-util/codelite - A cross platform C/C++/PHP and Node.js IDE  
