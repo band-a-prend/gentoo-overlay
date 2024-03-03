@@ -16,7 +16,7 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 * [sci-libs/cantera](https://packages.gentoo.org/packages/sci-libs/cantera) - Object-oriented tool suite for chemical kinetics, thermodynamics, and transport  
 
 ### packages for Gentoo Guru overlay (::guru)  
-* [app-doc/ford](https://github.com/gentoo-mirror/guru/tree/master/app-doc/ford) - Automatic documentation generator for modern Fortran programs  
+* [app-text/ford](https://github.com/gentoo-mirror/guru/tree/master/app-text/ford) - Automatic documentation generator for modern Fortran programs  
 * [app-misc/doublecmd-bin](https://github.com/gentoo-mirror/guru/tree/master/app-misc/doublecmd-bin) - Free cross platform open source file manager with two panels side by side  
 * [dep-python/markdown-include](https://github.com/gentoo-mirror/guru/tree/master/dev-python/markdown-include) - Syntax which allows for inclusion of contents of other Markdown docs  
 * [dep-python/md-environ](https://github.com/gentoo-mirror/guru/tree/master/dev-python/md-environ) - Syntax which allows for inclusion of contents of other Markdown docs  

@@ -26,7 +26,7 @@ DEPEND="
 	')
 	doc? (
 		$(python_gen_any_dep '
-			app-doc/ford[${PYTHON_USEDEP}]
+			app-text/ford[${PYTHON_USEDEP}]
 		')
 	)
 "
