@@ -25,7 +25,7 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 * [dev-libs/fortran-stdlib](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/fortran-stdlib) - A community driven standard library for (modern) Fortran  
 * [dev-build/FoBiS](https://github.com/gentoo-mirror/guru/tree/master/dev-build/FoBiS) - A Fortran Building System for poor men  
 * [dev-util/eclipse-parallel-bin](https://github.com/gentoo-mirror/guru/tree/master/dev-util/eclipse-parallel-bin) - Eclipse IDE for Scientific Computing (C, C++, Fortran)  
-* [dev-util/fypp](https://github.com/gentoo-mirror/guru/tree/master/dev-util/fypp) - Python powered Fortran preprocessor  
+* [dev-build/fypp](https://github.com/gentoo-mirror/guru/tree/master/dev-build/fypp) - Python powered Fortran preprocessor  
 * [dev-vcs/lazygit](https://github.com/gentoo-mirror/guru/tree/master/dev-vcs/lazygit) - A simple terminal UI for git commands  
 * [media-gfx/WebPlotDigitizer-bin](https://github.com/gentoo-mirror/guru/tree/master/media-gfx/WebPlotDigitizer-bin) - Web based tool to extract data from plots, images, and maps  
 * [x11-libs/gtk-fortran](https://github.com/gentoo-mirror/guru/tree/master/x11-libs/gtk-fortran) - A GTK+ binding to build Graphical User Interfaces in Fortran  
