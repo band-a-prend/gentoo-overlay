@@ -32,7 +32,6 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 
 ---
 ### experimental packages of this overlay  
-* dep-python/yattag - Python alternative to web template engines  
 * dev-util/codelite - A cross platform C/C++/PHP and Node.js IDE  
 * dev-util/fortranproject - FortranProject plugin for Code::Blocks IDE (non-live "dev-util/codeblocks[fortran]::gentoo" has this plugin)
 * sci-libs/pyarma - PyArmadillo: linear algebra library for Python that is relied on Armadillo  
