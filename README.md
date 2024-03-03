@@ -23,7 +23,7 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 * [dep-python/sphinxcontrib-katex](https://github.com/gentoo-mirror/guru/tree/master/dev-python/sphinxcontrib-katex) - KaTeX Sphinx extension for rendering of math in HTML pages  
 * [dev-libs/StringiFor](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/StringiFor) - Strings Fortran Manipulator, yet another strings Fortran module  
 * [dev-libs/fortran-stdlib](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/fortran-stdlib) - A community driven standard library for (modern) Fortran  
-* [dev-util/FoBiS](https://github.com/gentoo-mirror/guru/tree/master/dev-util/FoBiS) - A Fortran Building System for poor men  
+* [dev-build/FoBiS](https://github.com/gentoo-mirror/guru/tree/master/dev-build/FoBiS) - A Fortran Building System for poor men  
 * [dev-util/eclipse-parallel-bin](https://github.com/gentoo-mirror/guru/tree/master/dev-util/eclipse-parallel-bin) - Eclipse IDE for Scientific Computing (C, C++, Fortran)  
 * [dev-util/fypp](https://github.com/gentoo-mirror/guru/tree/master/dev-util/fypp) - Python powered Fortran preprocessor  
 * [dev-vcs/lazygit](https://github.com/gentoo-mirror/guru/tree/master/dev-vcs/lazygit) - A simple terminal UI for git commands  
