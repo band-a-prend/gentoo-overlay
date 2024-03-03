@@ -1,25 +1,31 @@
 # Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
 inherit toolchain-funcs
 
 DESCRIPTION="Chess variant engine derived from Stockfish to support fairy chess variants"
 HOMEPAGE="https://github.com/ianfab/Fairy-Stockfish"
 
-MY_PV=$(ver_rs 1 _)
+MY_PV=$(ver_rs 1-2 _)
 
 SRC_URI="
-	https://github.com/ianfab/Fairy-Stockfish/archive/fairy_sf_${MY_PV}.tar.gz -> ${P}.tar.gz
-	test? ( https://api.github.com/repos/niklasf/python-chess/tarball/9b9aa13f9f36d08aadfabff872882f4ab1494e95 -> ${PN}-test-syzygy-${PV}.tar.gz )
+	https://github.com/ianfab/Fairy-Stockfish/archive/fairy_sf_${MY_PV}_xq.tar.gz -> ${P}.tar.gz
+	nnue? (
+		https://github.com/ianfab/Fairy-Stockfish/releases/download/fairy_sf_${MY_PV}_xq/janggi-85de3dae670a.nnue
+		https://github.com/ianfab/Fairy-Stockfish/releases/download/fairy_sf_${MY_PV}_xq/xiangqi-83f16c17fe26.nnue
+	)
 "
+
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="cpu_flags_arm_v7 cpu_flags_x86_avx2 cpu_flags_x86_popcnt cpu_flags_x86_sse debug
-	general-32 general-64 largeboards test"
+	general-32 general-64 largeboards nnue test"
 
+# Require largeboards for nnue support as it also built-in .nnue files for Xiangqi and Janggi
+REQUIRED_USE="nnue? ( largeboards )"
 RESTRICT="!test? ( test )"
 
 DEPEND="
@@ -28,13 +34,20 @@ DEPEND="
 "
 RDEPEND=""
 
-S="${WORKDIR}/Fairy-Stockfish-fairy_sf_${PV}/src"
+S="${WORKDIR}/Fairy-Stockfish-fairy_sf_${MY_PV}_xq/src"
+
+src_unpack() {
+	unpack ${P}.tar.gz
+	if use nnue ; then
+		cp "${DISTDIR}"/janggi-85de3dae670a.nnue "${S}/" || die
+		cp "${DISTDIR}"/xiangqi-83f16c17fe26.nnue "${S}/" || die
+	fi
+}
 
 src_prepare() {
 	default
 
 	local item
-	use test && { mv -T ../../niklasf-python-chess-9b9aa13 ../tests/syzygy || die; }
 	# Rename Stockfish to Fairy-Stockfish
 	sed -i -e 's:EXE = stockfish:EXE = fairy-stockfish:' Makefile || die
 		for item in ../tests/*.sh ; do
@@ -42,8 +55,8 @@ src_prepare() {
 		done
 	# protocol.sh test 'ucci.exp' fails for timeout 5 but pass with 15
 	sed -i -e 's:timeout 5:timeout 15:' ../tests/protocol.sh || die
-	# instrumented.sh syzygy test runs infinitly with USE="largeboards", drop it
-	use largeboards && { sed -i -e '112,141d' ../tests/instrumented.sh || die; }
+	# instrumented.sh syzygy test data tarball get differ size every time, drop it
+	sed -i -e '112,141d' ../tests/instrumented.sh || die
 
 	# prevent pre-stripping
 	sed -e 's:-strip $(BINDIR)/$(EXE)::' -i Makefile \
@@ -85,6 +98,7 @@ src_compile() {
 		all=yes \
 		debug=$(usex debug "yes" "no") \
 		largeboards=$(usex largeboards "yes" "no") \
+		nnue=$(usex nnue "yes" "no") \
 		optimize=no
 }
 
