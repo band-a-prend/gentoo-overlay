@@ -1,9 +1,9 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..11} )
+PYTHON_COMPAT=( python3_{10..12} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
@@ -29,17 +29,19 @@ REQUIRED_USE="
 
 RDEPEND="
 	${PYTHON_DEPS}
-	lapack? ( virtual/lapack )
+	dev-cpp/yaml-cpp
+	hdf5? ( sci-libs/HighFive )
+	!lapack? ( sci-libs/sundials:0= )
+	lapack? (
+		>=sci-libs/sundials-6.5.0:0=[lapack?]
+		virtual/lapack
+	)
 	python? (
 		$(python_gen_cond_dep '
 			dev-python/numpy[${PYTHON_USEDEP}]
 			dev-python/ruamel-yaml[${PYTHON_USEDEP}]
 		')
 	)
-	dev-cpp/yaml-cpp
-	hdf5? ( sci-libs/HighFive )
-	!lapack? ( sci-libs/sundials:0= )
-	lapack? ( >=sci-libs/sundials-6.5.0:0=[lapack?] )
 "
 
 DEPEND="
