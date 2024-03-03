@@ -1,15 +1,14 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
 FORTRAN_STANDARD="2003"
-PYTHON_COMPAT=( python3_{8..9} )
+PYTHON_COMPAT=( python3_{10..11} )
 
-inherit cmake fortran-2 git-r3 python-any-r1 toolchain-funcs
+inherit cmake fortran-2 git-r3 python-any-r1
 
 EGIT_REPO_URI="https://github.com/fortran-lang/stdlib.git"
-SRC_URI=""
 
 DESCRIPTION="A community driven standard library for (modern) Fortran"
 HOMEPAGE="https://stdlib.fortran-lang.org/"
@@ -29,15 +28,26 @@ DEPEND="
 			app-text/ford[${PYTHON_USEDEP}]
 		')
 	)
+	test? ( dev-util/fortran-test-drive )
 "
 
 pkg_setup() {
 	fortran-2_pkg_setup
 }
 
+src_prepare() {
+	default
+
+	# Remove Fortran compiler version from paths
+	sed -i -e "s:/\${CMAKE_Fortran_COMPILER_ID}-\${CMAKE_Fortran_COMPILER_VERSION}::" config/CMakeLists.txt || die
+
+	cmake_src_prepare
+}
+
 src_configure() {
 	local mycmakeargs+=(
 		-DBUILD_SHARED_LIBS=on
+		-DBUILD_TESTING=$(usex test)
 	)
 	cmake_src_configure
 }
@@ -49,6 +59,10 @@ src_compile() {
 		einfo "Build API documentation:"
 		${EPYTHON} ford API-doc-FORD-file.md || die
 	fi
+}
+
+src_test() {
+	LD_LIBRARY_PATH="${BUILD_DIR}/src:${BUILD_DIR}/src/tests/hash_functions" cmake_src_test
 }
 
 src_install() {
