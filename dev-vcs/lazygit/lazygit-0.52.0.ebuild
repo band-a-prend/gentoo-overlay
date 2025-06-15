@@ -1,4 +1,4 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -13,8 +13,6 @@ LICENSE="Apache-2.0 BSD ISC MIT Unlicense"
 SLOT="0"
 KEYWORDS="~amd64"
 
-S="${WORKDIR}/${P}"
-
 RDEPEND="dev-vcs/git"
 
 DOCS=( {CODE-OF-CONDUCT,CONTRIBUTING,README}.md docs )
@@ -22,6 +20,10 @@ DOCS=( {CODE-OF-CONDUCT,CONTRIBUTING,README}.md docs )
 src_compile() {
 	ego build -o bin/lazygit \
 		-ldflags "-X main.version=${PV}"
+}
+
+src_test() {
+	ego test ./... -short
 }
 
 src_install() {
