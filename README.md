@@ -12,13 +12,13 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 
 ### packages for Gentoo portage tree (::gentoo)  
 * [app-doc/cantera-docs](https://packages.gentoo.org/packages/app-doc/cantera-docs) - Documentation API reference for Cantera package libraries  
+* [dev-python/markdown-include](https://packages.gentoo.org/packages/dev-python/markdown-include) - Python-Markdown extension providing LaTeX-style 'include' function  
 * [dev-util/codeblocks](https://packages.gentoo.org/packages/dev-util/codeblocks) - The open source, cross platform, free C, C++ and Fortran IDE  
 * [sci-libs/cantera](https://packages.gentoo.org/packages/sci-libs/cantera) - Object-oriented tool suite for chemical kinetics, thermodynamics, and transport  
 
 ### packages for Gentoo Guru overlay (::guru)  
 * [app-text/ford](https://github.com/gentoo-mirror/guru/tree/master/app-text/ford) - Automatic documentation generator for modern Fortran programs  
 * [app-misc/doublecmd-bin](https://github.com/gentoo-mirror/guru/tree/master/app-misc/doublecmd-bin) - Free cross platform open source file manager with two panels side by side  
-* [dep-python/markdown-include](https://github.com/gentoo-mirror/guru/tree/master/dev-python/markdown-include) - Syntax which allows for inclusion of contents of other Markdown docs  
 * [dep-python/sphinxcontrib-katex](https://github.com/gentoo-mirror/guru/tree/master/dev-python/sphinxcontrib-katex) - KaTeX Sphinx extension for rendering of math in HTML pages  
 * [dev-libs/StringiFor](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/StringiFor) - Strings Fortran Manipulator, yet another strings Fortran module  
 * [dev-libs/fortran-stdlib](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/fortran-stdlib) - A community driven standard library for (modern) Fortran  
