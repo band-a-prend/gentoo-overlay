@@ -1,17 +1,16 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
 FORTRAN_STANDARD="2003"
-PYTHON_COMPAT=( python3_{10..11} )
+PYTHON_COMPAT=( python3_{11..13} )
 
 inherit cmake fortran-2 git-r3 python-any-r1
 
-EGIT_REPO_URI="https://github.com/fortran-lang/stdlib.git"
-
 DESCRIPTION="A community driven standard library for (modern) Fortran"
 HOMEPAGE="https://stdlib.fortran-lang.org/"
+EGIT_REPO_URI="https://github.com/fortran-lang/stdlib.git"
 
 LICENSE="MIT"
 SLOT="0"
@@ -28,7 +27,7 @@ DEPEND="
 			app-text/ford[${PYTHON_USEDEP}]
 		')
 	)
-	test? ( dev-util/fortran-test-drive )
+	test? ( ~dev-util/fortran-test-drive-0.4.0 )
 "
 
 pkg_setup() {
@@ -57,7 +56,7 @@ src_compile() {
 
 	if use doc ; then
 		einfo "Build API documentation:"
-		${EPYTHON} ford API-doc-FORD-file.md || die
+		ford API-doc-FORD-file.md || die
 	fi
 }
 
