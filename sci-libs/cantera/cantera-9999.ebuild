@@ -1,25 +1,23 @@
-# Copyright 1999-2024 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..12} )
+PYTHON_COMPAT=( python3_{11..13} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
 
-inherit fortran-2 git-r3 python-single-r1 scons-utils toolchain-funcs
+inherit flag-o-matic fortran-2 git-r3 python-single-r1 scons-utils toolchain-funcs
 
 DESCRIPTION="Object-oriented tool suite for chemical kinetics, thermodynamics, and transport"
 HOMEPAGE="https://www.cantera.org"
 
-SRC_URI=""
 EGIT_REPO_URI="https://github.com/cantera/cantera.git"
-EGIT_SUBMODULES=()
+EGIT_SUBMODULES=( data/example-data )
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS=""
 IUSE="fortran hdf5 lapack +python test"
 RESTRICT="!test? ( test )"
 
@@ -80,6 +78,10 @@ pkg_setup() {
 ## Full list of configuration options of Cantera is presented here:
 ## http://cantera.org/docs/sphinx/html/compiling/config-options.html
 src_configure() {
+	# -Werror=odr, -Werror=lto-type-mismatch
+	# https://github.com/Cantera/cantera/issues/1783
+	filter-lto
+
 	scons_vars=(
 		AR="$(tc-getAR)"
 		CC="$(tc-getCC)"
@@ -113,9 +115,9 @@ src_configure() {
 	)
 
 	if use python ; then
-		scons_targets+=( python_package="full" python_cmd="${EPYTHON}" )
+		scons_targets+=( python_package="y" python_cmd="${EPYTHON}" )
 	else
-		scons_targets+=( python_package="none" )
+		scons_targets+=( python_package="n" )
 	fi
 }
 
