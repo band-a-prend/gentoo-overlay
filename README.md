@@ -31,6 +31,7 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 ---
 ### experimental packages of this overlay  
 * dev-util/fortranproject - FortranProject plugin for Code::Blocks IDE (non-live "dev-util/codeblocks[fortran]::gentoo" has this plugin)
+* media-sound/aimp - [AIMP free audio player](https://www.aimp.ru/blogs/?p=1523) (Alpha version of AIMP6)
 * sci-mathematics/scilab-bin - Open source software for numerical computation  
 
 
