@@ -26,6 +26,7 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 * [dev-build/fypp](https://github.com/gentoo-mirror/guru/tree/master/dev-build/fypp) - Python powered Fortran preprocessor  
 * [dev-vcs/lazygit](https://github.com/gentoo-mirror/guru/tree/master/dev-vcs/lazygit) - A simple terminal UI for git commands  
 * [media-gfx/WebPlotDigitizer-bin](https://github.com/gentoo-mirror/guru/tree/master/media-gfx/WebPlotDigitizer-bin) - Web based tool to extract data from plots, images, and maps  
+* [media-sound/yandex-music](https://github.com/gentoo-mirror/guru/tree/master/media-sound/yandex-music) - Yandex Music streaming service  
 * [x11-libs/gtk-fortran](https://github.com/gentoo-mirror/guru/tree/master/x11-libs/gtk-fortran) - A GTK+ binding to build Graphical User Interfaces in Fortran  
 
 ---
