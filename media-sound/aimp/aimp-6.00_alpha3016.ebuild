@@ -85,9 +85,9 @@ src_install() {
 	insinto /usr
 	doins -r usr/*
 
-	make_wrapper ${PN} "/${PN}/${MY_PN}" "" "/${PN}" "/opt/bin/"
-	make_wrapper ${PN} "/${PN}/${MY_PN}ac" "" "/${PN}pac" "/opt/bin/"
-	make_wrapper ${PN} "/${PN}/${MY_PN}ate" "" "/${PN}pate" "/opt/bin/"
+	make_wrapper ${MY_PN} "/opt/${PN}/${MY_PN}" "" "/opt/${PN}" "/opt/bin/"
+	make_wrapper ${MY_PN}ac "/opt/${PN}/${MY_PN}ac" "" "/opt/${PN}" "/opt/bin/"
+	make_wrapper ${MY_PN}ate "/opt/${PN}/${MY_PN}ate" "" "/opt/${PN}" "/opt/bin/"
 
 	fowners root:root "/opt/${PN}/${MY_PN}"
 	fowners root:root "/opt/${PN}/${MY_PN}ac"
