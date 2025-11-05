@@ -74,6 +74,7 @@ src_unpack() {
 
 src_prepare() {
 	default
+	rm -rf "${S}"/usr/lib || die
 	mv -T "${S}/usr/share/doc/${PN}" "${S}/usr/share/doc/${PF}" || die
 	gunzip "usr/share/doc/${PF}/changelog.gz" || die "Failed to decompress docs"
 }
