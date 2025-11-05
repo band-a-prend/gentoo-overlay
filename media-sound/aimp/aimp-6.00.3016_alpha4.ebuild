@@ -37,7 +37,7 @@ RDEPEND="
 	sys-apps/util-linux
 	sys-devel/gcc
 	sys-libs/glibc
-	sys-libs/zlib
+	virtual/zlib
 	x11-libs/cairo
 	x11-libs/gdk-pixbuf
 	x11-libs/gtk+

@@ -45,7 +45,7 @@ RDEPEND="
 		app-text/hunspell:=
 		dev-libs/boost:=
 		media-libs/fontconfig
-		sys-libs/zlib
+		virtual/zlib:=
 	)
 "
 
