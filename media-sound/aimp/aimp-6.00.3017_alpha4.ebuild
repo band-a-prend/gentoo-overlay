@@ -6,6 +6,7 @@ EAPI="8"
 inherit wrapper rpm xdg
 
 BLOG_URL="https://www.aimp.ru/blogs/?p=1523&language=en#more-1523"
+YADISK_URL="https://disk.yandex.ru/d/yCpF1MnZyM6sLQ"
 MY_PN="AIMP"
 
 DESCRIPTION="AIMP - Free Audio Player"
@@ -33,6 +34,7 @@ RDEPEND="
 	media-libs/harfbuzz
 	media-libs/libjpeg-turbo
 	media-libs/libpng
+	media-sound/opus-tools
 	sys-apps/dbus
 	sys-apps/util-linux
 	sys-devel/gcc
@@ -59,9 +61,10 @@ RDEPEND="
 RESTRICT="bindist fetch strip"
 
 pkg_nofetch() {
-	einfo "Please download \"${SRC_URI}\" from 'nightly builds' link on"
-	einfo " 'Release Plan' section of ${BLOG_URL}"
-	einfo " and place it in your DISTDIR directory."
+	einfo "Please download \"${SRC_URI}\" from 'nightly builds' link on "
+	einfo "'Release Plan' - 'Alpha' section of ${BLOG_URL} "
+	einfo "or directrly from 'yandex disk' folder ${YADISK_URL} "
+	einfo "and place it in your DISTDIR directory."
 }
 
 pkg_setup() {
