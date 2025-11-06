@@ -20,19 +20,17 @@ If versions/revisions of package are presented in [Gentoo portage tree](https://
 * [app-text/ford](https://github.com/gentoo-mirror/guru/tree/master/app-text/ford) - Automatic documentation generator for modern Fortran programs  
 * [app-misc/doublecmd-bin](https://github.com/gentoo-mirror/guru/tree/master/app-misc/doublecmd-bin) - Free cross platform open source file manager with two panels side by side  
 * [dep-python/sphinxcontrib-katex](https://github.com/gentoo-mirror/guru/tree/master/dev-python/sphinxcontrib-katex) - KaTeX Sphinx extension for rendering of math in HTML pages  
-* [dev-libs/StringiFor](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/StringiFor) - Strings Fortran Manipulator, yet another strings Fortran module  
+* [dev-libs/stringifor](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/stringifor) - Strings Fortran Manipulator, yet another strings Fortran module  
 * [dev-libs/fortran-stdlib](https://github.com/gentoo-mirror/guru/tree/master/dev-libs/fortran-stdlib) - A community driven standard library for (modern) Fortran  
-* [dev-build/FoBiS](https://github.com/gentoo-mirror/guru/tree/master/dev-build/FoBiS) - A Fortran Building System for poor men  
+* [dev-build/fobis](https://github.com/gentoo-mirror/guru/tree/master/dev-build/fobis) - A Fortran Building System for poor men  
 * [dev-build/fypp](https://github.com/gentoo-mirror/guru/tree/master/dev-build/fypp) - Python powered Fortran preprocessor  
 * [dev-vcs/lazygit](https://github.com/gentoo-mirror/guru/tree/master/dev-vcs/lazygit) - A simple terminal UI for git commands  
 * [media-gfx/WebPlotDigitizer-bin](https://github.com/gentoo-mirror/guru/tree/master/media-gfx/WebPlotDigitizer-bin) - Web based tool to extract data from plots, images, and maps  
+* [media-sound/aimp](https://github.com/gentoo-mirror/guru/tree/master/media-sound/aimp) - AIMP free audio player (Alpha version of AIMP6)  
 * [media-sound/yandex-music](https://github.com/gentoo-mirror/guru/tree/master/media-sound/yandex-music) - Yandex Music streaming service  
 * [x11-libs/gtk-fortran](https://github.com/gentoo-mirror/guru/tree/master/x11-libs/gtk-fortran) - A GTK+ binding to build Graphical User Interfaces in Fortran  
 
 ---
 ### experimental packages of this overlay  
-* dev-util/fortranproject - FortranProject plugin for Code::Blocks IDE (non-live "dev-util/codeblocks[fortran]::gentoo" has this plugin)
-* media-sound/aimp - [AIMP free audio player](https://www.aimp.ru/blogs/?p=1523) (Alpha version of AIMP6)
+* dev-util/fortranproject - FortranProject plugin for Code::Blocks IDE (non-live "dev-util/codeblocks[fortran]::gentoo" has this plugin)  
 * sci-mathematics/scilab-bin - Open source software for numerical computation  
-
-
