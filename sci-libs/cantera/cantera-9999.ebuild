@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{11..13} )
+PYTHON_COMPAT=( python3_{11..14} )
 
 FORTRAN_NEEDED=fortran
 FORTRAN_STANDARD="77 90"
@@ -44,6 +44,7 @@ RDEPEND="
 
 DEPEND="
 	${RDEPEND}
+	>=app-text/doxygen-1.13.0[dot]
 	dev-cpp/eigen:3
 	dev-libs/boost:=
 	dev-libs/libfmt
@@ -76,7 +77,7 @@ pkg_setup() {
 }
 
 ## Full list of configuration options of Cantera is presented here:
-## http://cantera.org/docs/sphinx/html/compiling/config-options.html
+## https://cantera.org/dev/develop/compiling/config-options.html
 src_configure() {
 	# -Werror=odr, -Werror=lto-type-mismatch
 	# https://github.com/Cantera/cantera/issues/1783
@@ -87,7 +88,7 @@ src_configure() {
 		CC="$(tc-getCC)"
 		CXX="$(tc-getCXX)"
 		cc_flags="${CXXFLAGS}"
-		cxx_flags="-std=c++17"
+		cxx_flags="-std=c++20"
 		debug="no"
 		FORTRAN="$(tc-getFC)"
 		FORTRANFLAGS="${FCFLAGS}"

@@ -1,24 +1,12 @@
 diff -Naur a/SConstruct b/SConstruct
 --- a/SConstruct
 +++ b/SConstruct
-@@ -819,7 +819,7 @@
+@@ -850,7 +850,7 @@
      toolchain = ["default"]
  
- env = Environment(tools=toolchain+["textfile", "subst", "recursiveInstall", "wix", "gch"],
+ env = Environment(tools=toolchain+["textfile", "subst", "recursiveInstall", "UnitsInterfaceBuilder", "wix", "gch"],
 -                  ENV={"PATH": os.environ["PATH"]},
 +                  ENV={'PATH': os.environ['PATH'], 'CCACHE_DIR': os.environ.get('CCACHE_DIR','')},
                    toolchain=toolchain,
                    **extraEnvArgs)
  
-diff -Naur a/test_problems/SConscript b/test_problems/SConscript
---- a/test_problems/SConscript	2022-12-26 23:07:49.000000000 +0300
-+++ b/test_problems/SConscript	2022-12-26 23:08:14.000000000 +0300
-@@ -209,7 +209,7 @@
-      artifacts=['vcs_equilibrate_res.csv'])
- 
- CompileAndTest('clib-demo', 'clib_test', 'clib_test',
--               extensions=['^clib_test.c'], libs=localenv['cantera_shared_libs'])
-+               extensions=['^clib_test.c'])
- 
- # C++ Samples
- Test('cxx-bvp', 'cxx_samples', '#build/samples/cxx/bvp/blasius', None,
