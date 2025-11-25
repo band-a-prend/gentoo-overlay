@@ -27,7 +27,7 @@ REQUIRED_USE="
 RDEPEND="
 	${PYTHON_DEPS}
 	dev-cpp/yaml-cpp
-	hdf5? ( sci-libs/HighFive )
+	hdf5? ( sci-libs/highfive )
 	!lapack? ( sci-libs/sundials:0= )
 	lapack? (
 		>=sci-libs/sundials-6.5.0:0=[lapack?]
