@@ -1,18 +1,22 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
 FORTRAN_STANDARD=2003
-PYTHON_COMPAT=( python3_{10..11} )
+PYTHON_COMPAT=( python3_{11..14} )
 
 inherit  fortran-2 python-any-r1 toolchain-funcs
 
+MY_PN="StringiFor"
+# version tag.1.1.4 point to commit 82727d6 on 2025 Oct 7
+TAG_DATE="20251007"
+
 DESCRIPTION="StringiFor, Strings Fortran Manipulator, yet another strings Fortran module"
 HOMEPAGE="https://github.com/szaghi/StringiFor"
-SRC_URI="https://github.com/szaghi/StringiFor/releases/download/v${PV}/StringiFor.tar.gz -> ${P}.tar.gz"
+SRC_URI="https://github.com/szaghi/${MY_PN}/releases/download/v${PV}/${MY_PN}.tar.gz -> ${MY_PN}-${PV}_${TAG_DATE}.tar.gz"
 
-S="${WORKDIR}/${PN}"
+S="${WORKDIR}/${MY_PN}"
 
 # For FOSS projects: GPL-3
 # For closed source/commercial projects: BSD 2-Clause, BSD 3-Clause, MIT
@@ -21,18 +25,18 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 
 IUSE="static-libs test"
-RESTRICT="!test? ( test )"
+RESTRICT="mirror !test? ( test )"
 
 BDEPEND="
 	${PYTHON_DEPS}
 	$(python_gen_any_dep '
-		dev-build/FoBiS[${PYTHON_USEDEP}]
+		dev-build/fobis[${PYTHON_USEDEP}]
 	')
 "
 
 PATCHES=(
-	"${FILESDIR}/stringifor-1.1.1_fobos_soname.patch"
-	"${FILESDIR}/stringifor-1.1.3_fix_tests.patch"
+	"${FILESDIR}/${PN}-1.1.1_fobos_soname.patch"
+	"${FILESDIR}/${PN}-1.1.3_fix_tests.patch"
 )
 
 set_build_mode() {
@@ -64,7 +68,8 @@ src_prepare() {
 
 src_compile() {
 	${EPYTHON} FoBiS.py build -verbose -compiler custom -fc $(tc-getFC) ${BUILD_MODE_SHARED} || die
-	use static-libs && { ${EPYTHON} FoBiS.py build -verbose -compiler custom -fc $(tc-getFC) ${BUILD_MODE_STATIC} || die; }
+	use static-libs && { ${EPYTHON} FoBiS.py \
+		build -verbose -compiler custom -fc $(tc-getFC) ${BUILD_MODE_STATIC} || die; }
 }
 
 src_test() {
@@ -80,12 +85,12 @@ src_test() {
 }
 
 src_install() {
-	mv lib/mod lib/stringifor || die
-	doheader -r lib/stringifor/
+	mv lib/mod lib/${PN} || die
+	doheader -r lib/${PN}/
 
-	mv lib/libstringifor.so{,.1} || die
-	dosym libstringifor.so.1 /usr/$(get_libdir)/libstringifor.so
-	dolib.so lib/libstringifor.so.1
+	mv lib/lib${PN}.so{,.1} || die
+	dosym lib${PN}.so.1 /usr/$(get_libdir)/lib${PN}.so
+	dolib.so lib/lib${PN}.so.1
 
-	use static-libs && dolib.a lib/libstringifor.a
+	use static-libs && dolib.a lib/lib${PN}.a
 }
