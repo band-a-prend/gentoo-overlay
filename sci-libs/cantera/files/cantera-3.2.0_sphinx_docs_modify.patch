@@ -1,0 +1,235 @@
+diff '--color=auto' -Naur a/doc/doxygen/Doxyfile.in b/doc/doxygen/Doxyfile.in
+--- a/doc/doxygen/Doxyfile.in
++++ b/doc/doxygen/Doxyfile.in
+@@ -1749,7 +1749,7 @@
+ # The default value is: MathJax_2.
+ # This tag requires that the tag USE_MATHJAX is set to YES.
+ 
+-MATHJAX_VERSION        = MathJax_2
++MATHJAX_VERSION        = MathJax_3
+ 
+ # When MathJax is enabled you can set the default output format to be used for
+ # the MathJax output. For more details about the output format see MathJax
+@@ -1766,7 +1766,7 @@
+ # The default value is: HTML-CSS.
+ # This tag requires that the tag USE_MATHJAX is set to YES.
+ 
+-MATHJAX_FORMAT         = HTML-CSS
++MATHJAX_FORMAT         = chtml
+ 
+ # When MathJax is enabled you need to specify the location relative to the HTML
+ # output directory using the MATHJAX_RELPATH option. The destination directory
+@@ -1780,7 +1780,7 @@
+ # - in case of MathJax version 3: https://cdn.jsdelivr.net/npm/mathjax@3
+ # This tag requires that the tag USE_MATHJAX is set to YES.
+ 
+-MATHJAX_RELPATH        = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5
++MATHJAX_RELPATH        = ../_static/MathJax-3.2.2
+ 
+ # The MATHJAX_EXTENSIONS tag can be used to specify one or more MathJax
+ # extension names that should be enabled during MathJax rendering. For example
+diff '--color=auto' -Naur a/doc/doxygen/header.html b/doc/doxygen/header.html
+--- a/doc/doxygen/header.html
++++ b/doc/doxygen/header.html
+@@ -77,7 +77,7 @@
+     <li><a href="$relpath^../examples/index.html">Examples</a></li>
+     <li><a id="selected" href="$relpath^../reference/index.html">Reference</a></li>
+     <li><a href="$relpath^../develop/index.html">Develop</a></li>
+-    <li><a href="/community.html">Community</a></li>
++    <li><a href="https://cantera.org/community.html">Community (go to cantera.org)</a></li>
+   </ul>
+ </div>
+ <!--END TITLEAREA-->
+diff '--color=auto' -Naur a/doc/sphinx/conf.py b/doc/sphinx/conf.py
+--- a/doc/sphinx/conf.py
++++ b/doc/sphinx/conf.py
+@@ -210,10 +210,10 @@
+ }
+ 
+ intersphinx_mapping = {
+-    'python': ('https://docs.python.org/3', None),
+-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+-    'numpy': ('https://numpy.org/doc/stable/', None),
+-    'pint': ('https://pint.readthedocs.io/en/stable/', None),
++    'python': ('https://docs.python.org/3', 'ct_python-3.13.9_objects.inv'),
++    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', 'ct_pandas-2.3.3_pydata_objects.inv'),
++    'numpy': ('https://numpy.org/doc/stable/', 'ct_numpy-2.3.5_objects.inv'),
++    'pint': ('https://pint.readthedocs.io/en/stable/', 'ct_pint-0.25.1_objects.inv'),
+ }
+ 
+ myst_heading_anchors = 2
+@@ -235,6 +235,8 @@
+     }
+ }
+ 
++mathjax_path="MathJax-3.2.2/es5/tex-mml-chtml.js"
++
+ # Ensure that the primary domain is the Python domain
+ primary_domain = 'py'
+ 
+@@ -250,8 +252,8 @@
+ # The encoding of source files.
+ #source_encoding = 'utf-8-sig'
+ 
+-# The master toctree document.
+-master_doc = 'index'
++# The root document.
++root_doc = "index"
+ 
+ # General information about the project.
+ project = 'Cantera'
+@@ -323,14 +325,13 @@
+     "show_toc_level": 2,
+     "navbar_center": ["navbar-nav"],
+     "external_links": [
+-      {"name": "Community", "url": "/community.html"},
++      {"name": "Community (go to cantera.org)", "url": "https://cantera.org/community.html"},
+     ],
+     "header_links_before_dropdown": 6,
+     "navbar_align": "left",
+-    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
++    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+     "show_prev_next": False,
+     "logo": {
+-        "link": "/index.html",
+         "alt_text": "Cantera",
+     },
+     "primary_sidebar_end": ["numfocus"],
+diff '--color=auto' -Naur a/doc/sphinx/index.md b/doc/sphinx/index.md
+--- a/doc/sphinx/index.md
++++ b/doc/sphinx/index.md
+@@ -52,38 +52,38 @@
+ 
+ ::::{grid} 1 1 3 3
+ 
+-:::{grid-item-card} <a href="stable/userguide/index.html#introductory-tutorials">Tutorials</a>
++:::{grid-item-card} <a href="userguide/index.html#introductory-tutorials">Tutorials</a>
+ 
+ _Where do I get started?_ The tutorials linked below will get you started using Cantera
+ on your own machine.
+ 
+-{bdg-link-primary}`Python <stable/userguide/python-tutorial.html>`
+-{bdg-link-primary}`Convert Input Files <stable/userguide/ck2yaml-tutorial.html>`
++{bdg-link-primary}`Python <userguide/python-tutorial.html>`
++{bdg-link-primary}`Convert Input Files <userguide/ck2yaml-tutorial.html>`
+ 
+ :::
+ 
+-:::{grid-item-card} <a href="stable/examples/index.html">Examples</a>
++:::{grid-item-card} <a href="examples/index.html">Examples</a>
+ 
+ _What can Cantera do?_ We have a number of examples demonstrating the use of Cantera in
+ some of our interfaces.
+ 
+-{bdg-link-primary}`Python <stable/examples/python/index.html>`
+-{bdg-link-primary}`Matlab <stable/examples/matlab/index.html>`
+-{bdg-link-primary}`C++ <stable/examples/cxx/index.html>`
+-{bdg-link-primary}`C <stable/examples/clib/index.html>`
+-{bdg-link-primary}`.NET <stable/examples/dotnet/index.html>`
+-{bdg-link-primary}`Fortran <stable/examples/fortran/index.html>`
++{bdg-link-primary}`Python <examples/python/index.html>`
++{bdg-link-primary}`Matlab <examples/matlab/index.html>`
++{bdg-link-primary}`C++ <examples/cxx/index.html>`
++{bdg-link-primary}`C <examples/clib/index.html>`
++{bdg-link-primary}`.NET <examples/dotnet/index.html>`
++{bdg-link-primary}`Fortran <examples/fortran/index.html>`
+ :::
+ 
+-:::{grid-item-card} <a href="stable/install/index.html">Install</a>
++:::{grid-item-card} <a href="install/index.html">Install</a>
+ 
+ _How do I install Cantera?_ Instructions for installing pre-built Cantera binaries can
+ be found here.
+ 
+-{bdg-link-primary}`Conda <stable/install/conda.html>`
+-{bdg-link-primary}`Pip <stable/install/pip.html>`
+-{bdg-link-primary}`Ubuntu <stable/install/ubuntu.html>`
+-{bdg-link-primary}`Compile from source <stable/develop/index.html#compiling-cantera-from-source>`
++{bdg-link-primary}`Conda <install/conda.html>`
++{bdg-link-primary}`Pip <install/pip.html>`
++{bdg-link-primary}`Ubuntu <install/ubuntu.html>`
++{bdg-link-primary}`Compile from source <develop/index.html#compiling-cantera-from-source>`
+ 
+ :::
+ ::::
+@@ -93,29 +93,29 @@
+ 
+ ::::{grid} 1 1 3 3
+ 
+-:::{grid-item-card} <a href="stable/reference/index.html#science-reference">Science Reference</a>
++:::{grid-item-card} <a href="reference/index.html#science-reference">Science Reference</a>
+ 
+ _What equations does Cantera solve?_ Descriptions of the models implemented by Cantera,
+ including equations of state, energy and mass conservation, and chemical kinetics.
+ 
+-{bdg-link-primary}`Thermodynamics <stable/reference/thermo/index.html>`
+-{bdg-link-primary}`Kinetics <stable/reference/kinetics/index.html>`
+-{bdg-link-primary}`Transport <stable/reference/transport/index.html>`
+-{bdg-link-primary}`Reactors <stable/reference/reactors/index.html>`
+-{bdg-link-primary}`1D Flames <stable/reference/onedim/index.html>`
++{bdg-link-primary}`Thermodynamics <reference/thermo/index.html>`
++{bdg-link-primary}`Kinetics <reference/kinetics/index.html>`
++{bdg-link-primary}`Transport <reference/transport/index.html>`
++{bdg-link-primary}`Reactors <reference/reactors/index.html>`
++{bdg-link-primary}`1D Flames <reference/onedim/index.html>`
+ 
+ :::
+ 
+-:::{grid-item-card} <a href="stable/reference/index.html#programming-reference">Programming Reference</a>
++:::{grid-item-card} <a href="reference/index.html#programming-reference">Programming Reference</a>
+ 
+ _How do I use Cantera's capabilities_? Documentation for the classes and functions that
+ make up Cantera.
+ 
+-{bdg-link-primary}`Python <stable/python/index.html>`
+-{bdg-link-primary}`C++ <stable/cxx/index.html>`
+-{bdg-link-primary}`C <stable/cxx/d6/d51/CAPImain.html>`
+-{bdg-link-primary}`Matlab <stable/matlab/index.html>`
+-{bdg-link-primary}`YAML <stable/yaml/index.html>`
++{bdg-link-primary}`Python <python/index.html>`
++{bdg-link-primary}`C++ <cxx/index.html>`
++{bdg-link-primary}`C <cxx/d6/d51/CAPImain.html>`
++{bdg-link-primary}`Matlab <matlab/index.html>`
++{bdg-link-primary}`YAML <yaml/index.html>`
+ :::
+ 
+ :::{grid-item-card} <a href="https://mybinder.org/v2/gh/Cantera/cantera-jupyter/main">Try Cantera in Your Browser!</a>
+@@ -145,7 +145,7 @@
+ :::{grid-item}
+ :columns: 3
+ <a href="https://groups.google.com/g/cantera-users" rel="nofollow">
+-<img alt="Google Groups" class="align-center" src="/_static/img/Groups_Logo.png" style="width: 100px;">
++<img alt="Google Groups" class="align-center" src="_static/images/Groups_Logo.png" style="width: 100px;">
+ </a>
+ :::
+ ::::
+@@ -158,7 +158,7 @@
+ :columns: 3
+ 
+ <a href="https://github.com/Cantera/cantera" rel="nofollow">
+-<img alt="GitHub" class="align-center" src="/_static/img/Git_Logo.png" style="width: 100px;">
++<img alt="GitHub" class="align-center" src="_static/images/Git_Logo.png" style="width: 100px;">
+ </a>
+ :::
+ ::::
+@@ -173,7 +173,7 @@
+ 
+ If you have found Cantera to be useful to your research or company, please consider making a <a href="https://numfocus.org/donate-to-cantera" title="Donate to Cantera" rel="nofollow">donation</a> to support our efforts. All donations will be used exclusively to fund the development of Cantera's source code, documentation, or community.
+ 
+-```{image} /_static/img/SponsoredProject.png
++```{image} /_static/images/SponsoredProject.png
+ :alt: Powered by NumFOCUS
+ :target: https://numfocus.org
+ :width: 250px
+@@ -196,5 +196,10 @@
+ :maxdepth: 1
+ :hidden:
+ 
+-Community <community>
++install/index
++userguide/index
++examples/index
++reference/index
++develop/index
++
+ :::

@@ -1,0 +1,22 @@
+From 29137bc48584d8236314331913ea33b413297ffb Mon Sep 17 00:00:00 2001
+From: ThorstenZirwes <github@zirwes.org>
+Date: Tue, 25 Nov 2025 18:50:17 +0100
+Subject: [PATCH] [Doc] Fix continuity equation
+
+---
+ doc/sphinx/reference/onedim/governing-equations.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/sphinx/reference/onedim/governing-equations.md b/doc/sphinx/reference/onedim/governing-equations.md
+index b6a04be8345..f48237ccf23 100644
+--- a/doc/sphinx/reference/onedim/governing-equations.md
++++ b/doc/sphinx/reference/onedim/governing-equations.md
+@@ -11,7 +11,7 @@ in Section 7.2 of {cite:t}`kee2017` and are implemented by class {ct}`Flow1D`.
+ 
+ *Continuity*:
+ 
+-$$  \pxpy{u}{z} + 2 \rho V = 0  $$
++$$  \pxpy{(\rho u)}{z} + 2 \rho V = 0  $$
+ 
+ *Radial momentum*:
+ 
